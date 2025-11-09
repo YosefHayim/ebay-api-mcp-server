@@ -230,16 +230,94 @@ export async function executeTool(
         args.sku as string,
         args.inventoryItem as any,
       );
+
+    // Bulk Operations
+    case "ebay_bulk_create_or_replace_inventory_item":
+      return api.inventory.bulkCreateOrReplaceInventoryItem(args.requests as any);
+    case "ebay_bulk_get_inventory_item":
+      return api.inventory.bulkGetInventoryItem(args.requests as any);
+    case "ebay_bulk_update_price_quantity":
+      return api.inventory.bulkUpdatePriceQuantity(args.requests as any);
+
+    // Product Compatibility
+    case "ebay_get_product_compatibility":
+      return api.inventory.getProductCompatibility(args.sku as string);
+    case "ebay_create_or_replace_product_compatibility":
+      return api.inventory.createOrReplaceProductCompatibility(
+        args.sku as string,
+        args.compatibility as any,
+      );
+    case "ebay_delete_product_compatibility":
+      return api.inventory.deleteProductCompatibility(args.sku as string);
+
+    // Inventory Item Groups
+    case "ebay_get_inventory_item_group":
+      return api.inventory.getInventoryItemGroup(args.inventoryItemGroupKey as string);
+    case "ebay_create_or_replace_inventory_item_group":
+      return api.inventory.createOrReplaceInventoryItemGroup(
+        args.inventoryItemGroupKey as string,
+        args.inventoryItemGroup as any,
+      );
+    case "ebay_delete_inventory_item_group":
+      return api.inventory.deleteInventoryItemGroup(args.inventoryItemGroupKey as string);
+
+    // Location Management
+    case "ebay_get_inventory_locations":
+      return api.inventory.getInventoryLocations(
+        args.limit as number,
+        args.offset as number,
+      );
+    case "ebay_get_inventory_location":
+      return api.inventory.getInventoryLocation(args.merchantLocationKey as string);
+    case "ebay_create_or_replace_inventory_location":
+      return api.inventory.createOrReplaceInventoryLocation(
+        args.merchantLocationKey as string,
+        args.location as any,
+      );
+    case "ebay_delete_inventory_location":
+      return api.inventory.deleteInventoryLocation(args.merchantLocationKey as string);
+    case "ebay_disable_inventory_location":
+      return api.inventory.disableInventoryLocation(args.merchantLocationKey as string);
+    case "ebay_enable_inventory_location":
+      return api.inventory.enableInventoryLocation(args.merchantLocationKey as string);
+    case "ebay_update_location_details":
+      return api.inventory.updateLocationDetails(
+        args.merchantLocationKey as string,
+        args.locationDetails as any,
+      );
+
+    // Offer Management
     case "ebay_get_offers":
       return api.inventory.getOffers(
         args.sku as string,
         args.marketplaceId as string,
         args.limit as number,
       );
+    case "ebay_get_offer":
+      return api.inventory.getOffer(args.offerId as string);
     case "ebay_create_offer":
       return api.inventory.createOffer(args.offer as any);
+    case "ebay_update_offer":
+      return api.inventory.updateOffer(
+        args.offerId as string,
+        args.offer as any,
+      );
+    case "ebay_delete_offer":
+      return api.inventory.deleteOffer(args.offerId as string);
     case "ebay_publish_offer":
       return api.inventory.publishOffer(args.offerId as string);
+    case "ebay_withdraw_offer":
+      return api.inventory.withdrawOffer(args.offerId as string);
+    case "ebay_bulk_create_offer":
+      return api.inventory.bulkCreateOffer(args.requests as any);
+    case "ebay_bulk_publish_offer":
+      return api.inventory.bulkPublishOffer(args.requests as any);
+    case "ebay_get_listing_fees":
+      return api.inventory.getListingFees(args.offers as any);
+
+    // Listing Migration
+    case "ebay_bulk_migrate_listing":
+      return api.inventory.bulkMigrateListing(args.requests as any);
 
     // Order Management
     case "ebay_get_orders":
@@ -304,15 +382,111 @@ export async function executeTool(
       );
 
     // Metadata
+    case "ebay_get_automotive_parts_compatibility_policies":
+      return api.metadata.getAutomotivePartsCompatibilityPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
     case "ebay_get_category_policies":
       return api.metadata.getCategoryPolicies(
         args.marketplaceId as string,
         args.filter as string,
       );
+    case "ebay_get_extended_producer_responsibility_policies":
+      return api.metadata.getExtendedProducerResponsibilityPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_hazardous_materials_labels":
+      return api.metadata.getHazardousMaterialsLabels(
+        args.marketplaceId as string,
+      );
     case "ebay_get_item_condition_policies":
       return api.metadata.getItemConditionPolicies(
         args.marketplaceId as string,
         args.filter as string,
+      );
+    case "ebay_get_listing_structure_policies":
+      return api.metadata.getListingStructurePolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_negotiated_price_policies":
+      return api.metadata.getNegotiatedPricePolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_product_safety_labels":
+      return api.metadata.getProductSafetyLabels(
+        args.marketplaceId as string,
+      );
+    case "ebay_get_regulatory_policies":
+      return api.metadata.getRegulatoryPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_return_policies":
+      return api.metadata.getReturnPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_shipping_cost_type_policies":
+      return api.metadata.getShippingCostTypePolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_classified_ad_policies":
+      return api.metadata.getClassifiedAdPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_currencies":
+      return api.metadata.getCurrencies(
+        args.marketplaceId as string,
+      );
+    case "ebay_get_listing_type_policies":
+      return api.metadata.getListingTypePolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_motors_listing_policies":
+      return api.metadata.getMotorsListingPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_shipping_policies":
+      return api.metadata.getShippingPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_site_visibility_policies":
+      return api.metadata.getSiteVisibilityPolicies(
+        args.marketplaceId as string,
+        args.filter as string,
+      );
+    case "ebay_get_compatibilities_by_specification":
+      return api.metadata.getCompatibilitiesBySpecification(
+        args.specification as any,
+      );
+    case "ebay_get_compatibility_property_names":
+      return api.metadata.getCompatibilityPropertyNames(
+        args.data as any,
+      );
+    case "ebay_get_compatibility_property_values":
+      return api.metadata.getCompatibilityPropertyValues(
+        args.data as any,
+      );
+    case "ebay_get_multi_compatibility_property_values":
+      return api.metadata.getMultiCompatibilityPropertyValues(
+        args.data as any,
+      );
+    case "ebay_get_product_compatibilities":
+      return api.metadata.getProductCompatibilities(
+        args.data as any,
+      );
+    case "ebay_get_sales_tax_jurisdictions":
+      return api.metadata.getSalesTaxJurisdictions(
+        args.countryCode as string,
       );
 
     // Taxonomy

@@ -680,6 +680,371 @@ export const inventoryTools: ToolDefinition[] = [
       },
       required: ['offerId']
     }
+  },
+  // Bulk Operations
+  {
+    name: 'ebay_bulk_create_or_replace_inventory_item',
+    description: 'Bulk create or replace multiple inventory items',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk inventory item requests'
+        }
+      },
+      required: ['requests']
+    }
+  },
+  {
+    name: 'ebay_bulk_get_inventory_item',
+    description: 'Bulk get multiple inventory items',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk inventory item get requests with SKU list'
+        }
+      },
+      required: ['requests']
+    }
+  },
+  {
+    name: 'ebay_bulk_update_price_quantity',
+    description: 'Bulk update price and quantity for multiple offers',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk price and quantity update requests'
+        }
+      },
+      required: ['requests']
+    }
+  },
+  // Product Compatibility
+  {
+    name: 'ebay_get_product_compatibility',
+    description: 'Get product compatibility information for an inventory item',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sku: {
+          type: 'string',
+          description: 'The seller-defined SKU'
+        }
+      },
+      required: ['sku']
+    }
+  },
+  {
+    name: 'ebay_create_or_replace_product_compatibility',
+    description: 'Create or replace product compatibility for an inventory item',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sku: {
+          type: 'string',
+          description: 'The seller-defined SKU'
+        },
+        compatibility: {
+          type: 'object',
+          description: 'Product compatibility details'
+        }
+      },
+      required: ['sku', 'compatibility']
+    }
+  },
+  {
+    name: 'ebay_delete_product_compatibility',
+    description: 'Delete product compatibility for an inventory item',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sku: {
+          type: 'string',
+          description: 'The seller-defined SKU'
+        }
+      },
+      required: ['sku']
+    }
+  },
+  // Inventory Item Groups
+  {
+    name: 'ebay_get_inventory_item_group',
+    description: 'Get an inventory item group (variation group)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        inventoryItemGroupKey: {
+          type: 'string',
+          description: 'The inventory item group key'
+        }
+      },
+      required: ['inventoryItemGroupKey']
+    }
+  },
+  {
+    name: 'ebay_create_or_replace_inventory_item_group',
+    description: 'Create or replace an inventory item group',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        inventoryItemGroupKey: {
+          type: 'string',
+          description: 'The inventory item group key'
+        },
+        inventoryItemGroup: {
+          type: 'object',
+          description: 'Inventory item group details'
+        }
+      },
+      required: ['inventoryItemGroupKey', 'inventoryItemGroup']
+    }
+  },
+  {
+    name: 'ebay_delete_inventory_item_group',
+    description: 'Delete an inventory item group',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        inventoryItemGroupKey: {
+          type: 'string',
+          description: 'The inventory item group key'
+        }
+      },
+      required: ['inventoryItemGroupKey']
+    }
+  },
+  // Location Management
+  {
+    name: 'ebay_get_inventory_locations',
+    description: 'Get all inventory locations',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Number of locations to return'
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of locations to skip'
+        }
+      }
+    }
+  },
+  {
+    name: 'ebay_get_inventory_location',
+    description: 'Get a specific inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        }
+      },
+      required: ['merchantLocationKey']
+    }
+  },
+  {
+    name: 'ebay_create_or_replace_inventory_location',
+    description: 'Create or replace an inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        },
+        location: {
+          type: 'object',
+          description: 'Location details'
+        }
+      },
+      required: ['merchantLocationKey', 'location']
+    }
+  },
+  {
+    name: 'ebay_delete_inventory_location',
+    description: 'Delete an inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        }
+      },
+      required: ['merchantLocationKey']
+    }
+  },
+  {
+    name: 'ebay_disable_inventory_location',
+    description: 'Disable an inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        }
+      },
+      required: ['merchantLocationKey']
+    }
+  },
+  {
+    name: 'ebay_enable_inventory_location',
+    description: 'Enable an inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        }
+      },
+      required: ['merchantLocationKey']
+    }
+  },
+  {
+    name: 'ebay_update_location_details',
+    description: 'Update location details for an inventory location',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        merchantLocationKey: {
+          type: 'string',
+          description: 'The merchant location key'
+        },
+        locationDetails: {
+          type: 'object',
+          description: 'Location detail updates'
+        }
+      },
+      required: ['merchantLocationKey', 'locationDetails']
+    }
+  },
+  // Offer Management
+  {
+    name: 'ebay_get_offer',
+    description: 'Get a specific offer by ID',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        offerId: {
+          type: 'string',
+          description: 'The offer ID'
+        }
+      },
+      required: ['offerId']
+    }
+  },
+  {
+    name: 'ebay_update_offer',
+    description: 'Update an existing offer',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        offerId: {
+          type: 'string',
+          description: 'The offer ID'
+        },
+        offer: {
+          type: 'object',
+          description: 'Updated offer details'
+        }
+      },
+      required: ['offerId', 'offer']
+    }
+  },
+  {
+    name: 'ebay_delete_offer',
+    description: 'Delete an offer',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        offerId: {
+          type: 'string',
+          description: 'The offer ID to delete'
+        }
+      },
+      required: ['offerId']
+    }
+  },
+  {
+    name: 'ebay_withdraw_offer',
+    description: 'Withdraw a published offer',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        offerId: {
+          type: 'string',
+          description: 'The offer ID to withdraw'
+        }
+      },
+      required: ['offerId']
+    }
+  },
+  {
+    name: 'ebay_bulk_create_offer',
+    description: 'Bulk create multiple offers',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk offer creation requests'
+        }
+      },
+      required: ['requests']
+    }
+  },
+  {
+    name: 'ebay_bulk_publish_offer',
+    description: 'Bulk publish multiple offers',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk offer publish requests'
+        }
+      },
+      required: ['requests']
+    }
+  },
+  {
+    name: 'ebay_get_listing_fees',
+    description: 'Get listing fees for offers before publishing',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        offers: {
+          type: 'object',
+          description: 'Offers to calculate listing fees for'
+        }
+      },
+      required: ['offers']
+    }
+  },
+  // Listing Migration
+  {
+    name: 'ebay_bulk_migrate_listing',
+    description: 'Bulk migrate listings to the inventory model',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        requests: {
+          type: 'object',
+          description: 'Bulk listing migration requests'
+        }
+      },
+      required: ['requests']
+    }
   }
 ];
 
@@ -889,6 +1254,24 @@ export const analyticsTools: ToolDefinition[] = [
 
 export const metadataTools: ToolDefinition[] = [
   {
+    name: 'ebay_get_automotive_parts_compatibility_policies',
+    description: 'Get automotive parts compatibility policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
     name: 'ebay_get_category_policies',
     description: 'Get category policies for a marketplace',
     inputSchema: {
@@ -901,6 +1284,38 @@ export const metadataTools: ToolDefinition[] = [
         filter: {
           type: 'string',
           description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_extended_producer_responsibility_policies',
+    description: 'Get extended producer responsibility policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_hazardous_materials_labels',
+    description: 'Get hazardous materials labels for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
         }
       },
       required: ['marketplaceId']
@@ -922,6 +1337,298 @@ export const metadataTools: ToolDefinition[] = [
         }
       },
       required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_listing_structure_policies',
+    description: 'Get listing structure policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_negotiated_price_policies',
+    description: 'Get negotiated price policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_product_safety_labels',
+    description: 'Get product safety labels for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_regulatory_policies',
+    description: 'Get regulatory policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_return_policies',
+    description: 'Get return policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_shipping_cost_type_policies',
+    description: 'Get shipping cost type policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_classified_ad_policies',
+    description: 'Get classified ad policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_currencies',
+    description: 'Get currencies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_listing_type_policies',
+    description: 'Get listing type policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_motors_listing_policies',
+    description: 'Get motors listing policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_shipping_policies',
+    description: 'Get shipping policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_site_visibility_policies',
+    description: 'Get site visibility policies for a marketplace',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        marketplaceId: {
+          type: 'string',
+          description: 'Marketplace ID'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter criteria'
+        }
+      },
+      required: ['marketplaceId']
+    }
+  },
+  {
+    name: 'ebay_get_compatibilities_by_specification',
+    description: 'Get compatibilities by specification',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        specification: {
+          type: 'object',
+          description: 'Compatibility specification object'
+        }
+      },
+      required: ['specification']
+    }
+  },
+  {
+    name: 'ebay_get_compatibility_property_names',
+    description: 'Get compatibility property names',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Request data for getting compatibility property names'
+        }
+      },
+      required: ['data']
+    }
+  },
+  {
+    name: 'ebay_get_compatibility_property_values',
+    description: 'Get compatibility property values',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Request data for getting compatibility property values'
+        }
+      },
+      required: ['data']
+    }
+  },
+  {
+    name: 'ebay_get_multi_compatibility_property_values',
+    description: 'Get multiple compatibility property values',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Request data for getting multi compatibility property values'
+        }
+      },
+      required: ['data']
+    }
+  },
+  {
+    name: 'ebay_get_product_compatibilities',
+    description: 'Get product compatibilities',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Request data for getting product compatibilities'
+        }
+      },
+      required: ['data']
+    }
+  },
+  {
+    name: 'ebay_get_sales_tax_jurisdictions',
+    description: 'Get sales tax jurisdictions for a country',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        countryCode: {
+          type: 'string',
+          description: 'Country code (e.g., US)'
+        }
+      },
+      required: ['countryCode']
     }
   }
 ];
