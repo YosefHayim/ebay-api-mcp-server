@@ -1,0 +1,41 @@
+{
+  "name": "ebay-api-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for eBay Sell APIs - provides access to eBay seller functionality through Model Context Protocol",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "ebay-mcp": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsx src/index.ts",
+    "start": "node build/index.js",
+    "clean": "rm -rf build",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "ebay",
+    "ebay-api",
+    "model-context-protocol",
+    "ai-tools"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
