@@ -1,87 +1,137 @@
 import { EbayApiClient } from '../client.js';
 
 /**
- * Metadata API - Category and listing metadata
+ * Metadata API - Marketplace policies and configurations
  * Based on: docs/sell-apps/listing-metadata/sell_metadata_v1_oas3.json
  */
 export class MetadataApi {
-  private readonly basePath = '/commerce/taxonomy/v1';
+  private readonly basePath = '/sell/metadata/v1';
 
   constructor(private client: EbayApiClient) {}
 
   /**
-   * Get the default category tree ID for a marketplace
+   * Get automotive parts compatibility policies for a marketplace
    */
-  async getDefaultCategoryTreeId(marketplaceId: string) {
+  async getAutomotivePartsCompatibilityPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
     return this.client.get(
-      `${this.basePath}/get_default_category_tree_id`,
-      { marketplace_id: marketplaceId }
+      `${this.basePath}/marketplace/${marketplaceId}/get_automotive_parts_compatibility_policies`,
+      params
     );
   }
 
   /**
-   * Get category tree
+   * Get category policies for a marketplace
    */
-  async getCategoryTree(categoryTreeId: string) {
-    return this.client.get(`${this.basePath}/category_tree/${categoryTreeId}`);
-  }
-
-  /**
-   * Get category subtree
-   */
-  async getCategorySubtree(categoryTreeId: string, categoryId: string) {
+  async getCategoryPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
     return this.client.get(
-      `${this.basePath}/category_tree/${categoryTreeId}/get_category_subtree`,
-      { category_id: categoryId }
+      `${this.basePath}/marketplace/${marketplaceId}/get_category_policies`,
+      params
     );
   }
 
   /**
-   * Get category suggestions
+   * Get extended producer responsibility policies
    */
-  async getCategorySuggestions(categoryTreeId: string, query: string) {
+  async getExtendedProducerResponsibilityPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
     return this.client.get(
-      `${this.basePath}/category_tree/${categoryTreeId}/get_category_suggestions`,
-      { q: query }
+      `${this.basePath}/marketplace/${marketplaceId}/get_extended_producer_responsibility_policies`,
+      params
     );
   }
 
   /**
-   * Get item aspects for category
+   * Get hazardous materials labels
    */
-  async getItemAspectsForCategory(categoryTreeId: string, categoryId: string) {
+  async getHazardousMaterialsLabels(marketplaceId: string) {
     return this.client.get(
-      `${this.basePath}/category_tree/${categoryTreeId}/get_item_aspects_for_category/${categoryId}`
+      `${this.basePath}/marketplace/${marketplaceId}/get_hazardous_materials_labels`
     );
   }
 
   /**
-   * Get compatibility properties
+   * Get item condition policies for a marketplace
    */
-  async getCompatibilityProperties(
-    categoryTreeId: string,
-    categoryId: string
-  ) {
+  async getItemConditionPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
     return this.client.get(
-      `${this.basePath}/category_tree/${categoryTreeId}/get_compatibility_properties`,
-      { category_id: categoryId }
+      `${this.basePath}/marketplace/${marketplaceId}/get_item_condition_policies`,
+      params
     );
   }
 
   /**
-   * Get compatibility property values
+   * Get listing structure policies
    */
-  async getCompatibilityPropertyValues(
-    categoryTreeId: string,
-    categoryId: string,
-    compatibilityProperty: string
-  ) {
+  async getListingStructurePolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
     return this.client.get(
-      `${this.basePath}/category_tree/${categoryTreeId}/get_compatibility_property_values`,
-      {
-        category_id: categoryId,
-        compatibility_property: compatibilityProperty
-      }
+      `${this.basePath}/marketplace/${marketplaceId}/get_listing_structure_policies`,
+      params
+    );
+  }
+
+  /**
+   * Get negotiated price policies
+   */
+  async getNegotiatedPricePolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
+    return this.client.get(
+      `${this.basePath}/marketplace/${marketplaceId}/get_negotiated_price_policies`,
+      params
+    );
+  }
+
+  /**
+   * Get product safety labels
+   */
+  async getProductSafetyLabels(marketplaceId: string) {
+    return this.client.get(
+      `${this.basePath}/marketplace/${marketplaceId}/get_product_safety_labels`
+    );
+  }
+
+  /**
+   * Get regulatory policies
+   */
+  async getRegulatoryPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
+    return this.client.get(
+      `${this.basePath}/marketplace/${marketplaceId}/get_regulatory_policies`,
+      params
+    );
+  }
+
+  /**
+   * Get return policies for a marketplace
+   */
+  async getReturnPolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
+    return this.client.get(
+      `${this.basePath}/marketplace/${marketplaceId}/get_return_policies`,
+      params
+    );
+  }
+
+  /**
+   * Get shipping cost type policies
+   */
+  async getShippingCostTypePolicies(marketplaceId: string, filter?: string) {
+    const params: Record<string, string> = {};
+    if (filter) params.filter = filter;
+    return this.client.get(
+      `${this.basePath}/marketplace/${marketplaceId}/get_shipping_cost_type_policies`,
+      params
     );
   }
 }

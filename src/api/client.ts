@@ -1,7 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { EbayConfig, EbayApiError } from '../types/ebay.js';
-import { EbayOAuthClient } from '../auth/oauth.js';
-import { getBaseUrl } from '../config/environment.js';
+import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import { EbayOAuthClient } from "../auth/oauth.js";
+import { getBaseUrl } from "../config/environment.js";
+import type { EbayApiError, EbayConfig } from "../types/ebay.js";
 
 /**
  * Base client for making eBay API requests
@@ -19,9 +19,9 @@ export class EbayApiClient {
       baseURL: this.baseUrl,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
     });
 
     // Add request interceptor to inject auth token
@@ -31,7 +31,7 @@ export class EbayApiClient {
         config.headers.Authorization = `Bearer ${token}`;
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Add response interceptor for error handling
@@ -40,20 +40,24 @@ export class EbayApiClient {
       (error) => {
         if (axios.isAxiosError(error) && error.response?.data) {
           const ebayError: EbayApiError = error.response.data;
-          const errorMessage = ebayError.errors?.[0]?.longMessage ||
+          const errorMessage =
+            ebayError.errors?.[0]?.longMessage ||
             ebayError.errors?.[0]?.message ||
             error.message;
           throw new Error(`eBay API Error: ${errorMessage}`);
         }
         throw error;
-      }
+      },
     );
   }
 
   /**
    * Make a GET request to eBay API
    */
-  async get<T = any>(endpoint: string, params?: Record<string, any>): Promise<T> {
+  async get<T = any>(
+    endpoint: string,
+    params?: Record<string, any>,
+  ): Promise<T> {
     const response = await this.httpClient.get<T>(endpoint, { params });
     return response.data;
   }
@@ -61,7 +65,11 @@ export class EbayApiClient {
   /**
    * Make a POST request to eBay API
    */
-  async post<T = any>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T = any>(
+    endpoint: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.httpClient.post<T>(endpoint, data, config);
     return response.data;
   }

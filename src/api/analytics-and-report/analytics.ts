@@ -18,7 +18,7 @@ export class AnalyticsApi {
     metric: string,
     sort?: string
   ) {
-    const params: any = {
+    const params: Record<string, string> = {
       dimension,
       filter,
       metric
@@ -28,28 +28,38 @@ export class AnalyticsApi {
   }
 
   /**
-   * Get seller standards profile
+   * Find all seller standards profiles
+   * Endpoint: GET /seller_standards_profile
    */
-  async getSellerStandardsProfile(program?: string, cycle?: string) {
-    const params: any = {};
-    if (program) params.program = program;
-    if (cycle) params.cycle = cycle;
-    return this.client.get(`${this.basePath}/seller_standards_profile`, params);
+  async findSellerStandardsProfiles() {
+    return this.client.get(`${this.basePath}/seller_standards_profile`);
+  }
+
+  /**
+   * Get a specific seller standards profile
+   * Endpoint: GET /seller_standards_profile/{program}/{cycle}
+   */
+  async getSellerStandardsProfile(program: string, cycle: string) {
+    return this.client.get(
+      `${this.basePath}/seller_standards_profile/${program}/${cycle}`
+    );
   }
 
   /**
    * Get customer service metrics
+   * Endpoint: GET /customer_service_metric/{customer_service_metric_type}/{evaluation_type}
    */
   async getCustomerServiceMetric(
     customerServiceMetricType: string,
-    evaluationMarketplaceId: string,
-    evaluationType: string
+    evaluationType: string,
+    evaluationMarketplaceId: string
   ) {
     const params = {
-      customer_service_metric_type: customerServiceMetricType,
-      evaluation_marketplace_id: evaluationMarketplaceId,
-      evaluation_type: evaluationType
+      evaluation_marketplace_id: evaluationMarketplaceId
     };
-    return this.client.get(`${this.basePath}/customer_service_metric`, params);
+    return this.client.get(
+      `${this.basePath}/customer_service_metric/${customerServiceMetricType}/${evaluationType}`,
+      params
+    );
   }
 }

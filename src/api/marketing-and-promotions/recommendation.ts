@@ -10,31 +10,32 @@ export class RecommendationApi {
   constructor(private client: EbayApiClient) {}
 
   /**
-   * Get listing recommendations
+   * Find listing recommendations
+   * Endpoint: POST /find
    */
-  async getListingRecommendations(
+  async findListingRecommendations(
+    requestBody?: { listingIds?: string[] },
     filter?: string,
     limit?: number,
-    offset?: number
+    offset?: number,
+    marketplaceId?: string
   ) {
     const params: Record<string, string | number> = {};
     if (filter) params.filter = filter;
     if (limit) params.limit = limit;
     if (offset) params.offset = offset;
-    return this.client.get(`${this.basePath}/find`, params);
-  }
 
-  /**
-   * Get item recommendations (e.g., recommended aspects)
-   */
-  async getItemRecommendations(listingIds: string[], xEbayCMarketplaceId: string) {
+    const headers: Record<string, string> = {};
+    if (marketplaceId) {
+      headers['X-EBAY-C-MARKETPLACE-ID'] = marketplaceId;
+    }
+
     return this.client.post(
-      `${this.basePath}/item_recommendation`,
-      { listingIds },
+      `${this.basePath}/find`,
+      requestBody || {},
       {
-        headers: {
-          'X-EBAY-C-MARKETPLACE-ID': xEbayCMarketplaceId
-        }
+        params,
+        headers
       }
     );
   }
