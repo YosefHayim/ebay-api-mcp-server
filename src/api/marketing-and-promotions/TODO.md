@@ -52,35 +52,35 @@ The following endpoints are defined in the OpenAPI specification but are not yet
 - `GET /ad_report` - **IMPLEMENTED**
 - `GET /ad_report_metadata` - **IMPLEMENTED**
 - `GET /ad_report_metadata/{report_type}` - **IMPLEMENTED**
-- `POST /ad_report_task`
-- `GET /ad_report_task`
-- `GET /ad_report_task/{report_task_id}`
-- `GET /item_promotion/{promotion_id}`
-- `DELETE /item_promotion/{promotion_id}`
-- `POST /item_promotion/{promotion_id}/pause`
-- `POST /item_promotion/{promotion_id}/resume`
-- `PUT /item_promotion/{promotion_id}`
-- `GET /promotion_report`
-- `GET /promotion_summary_report`
-- `GET /ad_campaign/{campaign_id}/targeting`
-- `POST /ad_campaign/{campaign_id}/targeting`
-- `PUT /ad_campaign/{campaign_id}/targeting`
-- `GET /ad_campaign/{campaign_id}/negative_keyword`
-- `POST /ad_campaign/{campaign_id}/negative_keyword`
-- `POST /ad_campaign/{campaign_id}/bulk_create_negative_keywords`
-- `POST /ad_campaign/{campaign_id}/bulk_delete_negative_keywords`
-- `POST /ad_campaign/{campaign_id}/bulk_update_negative_keywords`
-- `GET /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}`
-- `DELETE /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}`
-- `PUT /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}`
-- `GET /ad_group/{ad_group_id}/negative_keyword`
-- `POST /ad_group/{ad_group_id}/negative_keyword`
-- `POST /ad_group/{ad_group_id}/bulk_create_negative_keywords`
-- `POST /ad_group/{ad_group_id}/bulk_delete_negative_keywords`
-- `POST /ad_group/{ad_group_id}/bulk_update_negative_keywords`
-- `GET /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}`
-- `DELETE /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}`
-- `PUT /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}`
+- `POST /ad_report_task` - **IMPLEMENTED**
+- `GET /ad_report_task` - **IMPLEMENTED**
+- `GET /ad_report_task/{report_task_id}` - **IMPLEMENTED**
+- `GET /item_promotion/{promotion_id}` - **IMPLEMENTED**
+- `DELETE /item_promotion/{promotion_id}` - **IMPLEMENTED**
+- `POST /item_promotion/{promotion_id}/pause` - **IMPLEMENTED**
+- `POST /item_promotion/{promotion_id}/resume` - **IMPLEMENTED**
+- `PUT /item_promotion/{promotion_id}` - **IMPLEMENTED**
+- `GET /promotion_report` - **IMPLEMENTED**
+- `GET /promotion_summary_report` - **IMPLEMENTED**
+- `GET /ad_campaign/{campaign_id}/targeting` - **IMPLEMENTED**
+- `POST /ad_campaign/{campaign_id}/targeting` - **IMPLEMENTED**
+- `PUT /ad_campaign/{campaign_id}/targeting` - **IMPLEMENTED**
+- `GET /ad_campaign/{campaign_id}/negative_keyword` - **IMPLEMENTED**
+- `POST /ad_campaign/{campaign_id}/negative_keyword` - **IMPLEMENTED**
+- `POST /ad_campaign/{campaign_id}/bulk_create_negative_keywords` - **IMPLEMENTED**
+- `POST /ad_campaign/{campaign_id}/bulk_delete_negative_keywords` - **IMPLEMENTED**
+- `POST /ad_campaign/{campaign_id}/bulk_update_negative_keywords` - **IMPLEMENTED**
+- `GET /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
+- `DELETE /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
+- `PUT /ad_campaign/{campaign_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
+- `GET /ad_group/{ad_group_id}/negative_keyword` - **IMPLEMENTED**
+- `POST /ad_group/{ad_group_id}/negative_keyword` - **IMPLEMENTED**
+- `POST /ad_group/{ad_group_id}/bulk_create_negative_keywords` - **IMPLEMENTED**
+- `POST /ad_group/{ad_group_id}/bulk_delete_negative_keywords` - **IMPLEMENTED**
+- `POST /ad_group/{ad_group_id}/bulk_update_negative_keywords` - **IMPLEMENTED**
+- `GET /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
+- `DELETE /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
+- `PUT /ad_group/{ad_group_id}/negative_keyword/{negative_keyword_id}` - **IMPLEMENTED**
 
 ### Recommendation
 - `POST /find` - **IMPLEMENTED**

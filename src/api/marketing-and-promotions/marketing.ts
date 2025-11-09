@@ -16,11 +16,16 @@ import type {
   CreateAdsByInventoryReferenceRequest,
   CreateCampaignRequest,
   CreateKeywordRequest,
+  CreateNegativeKeywordRequest,
+  CreateReportTask,
   ItemPromotion,
+  ItemPromotionRequest,
   SuggestKeywordsRequest,
+  TargetingRequest,
   UpdateAdGroupBidsRequest,
   UpdateAdGroupKeywordsRequest,
   UpdateBidPercentageRequest,
+  UpdateBidRequest,
   UpdateCampaignIdentificationRequest,
 } from "../../types/ebay/sell/marketing-and-promotions/marketing-api-types.js";
 import type {
@@ -45,11 +50,22 @@ import type {
   Campaign,
   CampaignPagedCollectionResponse,
   CreateKeywordResponse,
+  ItemPromotionResponse,
   ItemPromotionsPagedCollection,
   Keyword,
   KeywordPagedCollection,
+  NegativeKeyword,
+  NegativeKeywordPagedCollection,
+  PromotionsReportPagedCollection,
+  Report,
+  ReportMetadata,
+  ReportMetadatas,
+  ReportTask,
+  ReportTaskPagedCollection,
   SuggestedBids,
   SuggestedKeywords,
+  SummaryReportResponse,
+  TargetingResponse,
 } from "../../types/ebay/sell/marketing-and-promotions/marketing-response-types.js";
 import type { EbayApiClient } from "../client.js";
 
@@ -692,6 +708,374 @@ export class MarketingApi {
   ): Promise<ReportMetadata> {
     return this.client.get<ReportMetadata>(
       `${this.basePath}/ad_report_metadata/${reportType}`,
+    );
+  }
+
+  /**
+   * Create a report task
+   */
+  async createReportTask(body: CreateReportTask): Promise<void> {
+    return this.client.post<void>(`${this.basePath}/ad_report_task`, body);
+  }
+
+  /**
+   * Get report tasks
+   */
+  async getReportTasks(
+    reportTaskStatuses?: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<ReportTaskPagedCollection> {
+    const params: Record<string, string | number> = {};
+    if (reportTaskStatuses) params.report_task_statuses = reportTaskStatuses;
+    if (limit) params.limit = limit;
+    if (offset) params.offset = offset;
+    return this.client.get<ReportTaskPagedCollection>(
+      `${this.basePath}/ad_report_task`,
+      params,
+    );
+  }
+
+  /**
+   * Get a report task
+   */
+  async getReportTask(reportTaskId: string): Promise<ReportTask> {
+    return this.client.get<ReportTask>(
+      `${this.basePath}/ad_report_task/${reportTaskId}`,
+    );
+  }
+
+  /**
+   * Get an item promotion
+   */
+  async getItemPromotion(promotionId: string): Promise<ItemPromotionResponse> {
+    return this.client.get<ItemPromotionResponse>(
+      `${this.basePath}/item_promotion/${promotionId}`,
+    );
+  }
+
+  /**
+   * Delete an item promotion
+   */
+  async deleteItemPromotion(promotionId: string): Promise<void> {
+    return this.client.delete<void>(
+      `${this.basePath}/item_promotion/${promotionId}`,
+    );
+  }
+
+  /**
+   * Pause an item promotion
+   */
+  async pauseItemPromotion(promotionId: string): Promise<void> {
+    return this.client.post<void>(
+      `${this.basePath}/item_promotion/${promotionId}/pause`,
+      {},
+    );
+  }
+
+  /**
+   * Resume an item promotion
+   */
+  async resumeItemPromotion(promotionId: string): Promise<void> {
+    return this.client.post<void>(
+      `${this.basePath}/item_promotion/${promotionId}/resume`,
+      {},
+    );
+  }
+
+  /**
+   * Update an item promotion
+   */
+  async updateItemPromotion(
+    promotionId: string,
+    body: ItemPromotionRequest,
+  ): Promise<BaseResponse> {
+    return this.client.put<BaseResponse>(
+      `${this.basePath}/item_promotion/${promotionId}`,
+      body,
+    );
+  }
+
+  /**
+   * Get a promotion report
+   */
+  async getPromotionReport(
+    marketplaceId: string,
+    promotionStatus?: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<PromotionsReportPagedCollection> {
+    const params: Record<string, string | number> = {
+      marketplace_id: marketplaceId,
+    };
+    if (promotionStatus) params.promotion_status = promotionStatus;
+    if (limit) params.limit = limit;
+    if (offset) params.offset = offset;
+    return this.client.get<PromotionsReportPagedCollection>(
+      `${this.basePath}/promotion_report`,
+      params,
+    );
+  }
+
+  /**
+   * Get a promotion summary report
+   */
+  async getPromotionSummaryReport(
+    marketplaceId: string,
+  ): Promise<SummaryReportResponse> {
+    const params = { marketplace_id: marketplaceId };
+    return this.client.get<SummaryReportResponse>(
+      `${this.basePath}/promotion_summary_report`,
+      params,
+    );
+  }
+
+  /**
+   * Get targeting for a campaign
+   */
+  async getTargeting(campaignId: string): Promise<TargetingResponse> {
+    return this.client.get<TargetingResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/targeting`,
+    );
+  }
+
+  /**
+   * Create targeting for a campaign
+   */
+  async createTargeting(
+    campaignId: string,
+    body: TargetingRequest,
+  ): Promise<void> {
+    return this.client.post<void>(
+      `${this.basePath}/ad_campaign/${campaignId}/targeting`,
+      body,
+    );
+  }
+
+  /**
+   * Update targeting for a campaign
+   */
+  async updateTargeting(
+    campaignId: string,
+    body: TargetingRequest,
+  ): Promise<void> {
+    return this.client.put<void>(
+      `${this.basePath}/ad_campaign/${campaignId}/targeting`,
+      body,
+    );
+  }
+
+  /**
+   * Get negative keywords for a campaign
+   */
+  async getNegativeKeywords(
+    campaignId: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<NegativeKeywordPagedCollection> {
+    const params: Record<string, string | number> = {};
+    if (limit) params.limit = limit;
+    if (offset) params.offset = offset;
+    return this.client.get<NegativeKeywordPagedCollection>(
+      `${this.basePath}/ad_campaign/${campaignId}/negative_keyword`,
+      params,
+    );
+  }
+
+  /**
+   * Create a negative keyword for a campaign
+   */
+  async createNegativeKeyword(
+    campaignId: string,
+    body: CreateNegativeKeywordRequest,
+  ): Promise<BaseResponse> {
+    return this.client.post<BaseResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/negative_keyword`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk create negative keywords for a campaign
+   */
+  async bulkCreateNegativeKeywords(
+    campaignId: string,
+    body: BulkCreateNegativeKeywordRequest,
+  ): Promise<BulkCreateNegativeKeywordResponse> {
+    return this.client.post<BulkCreateNegativeKeywordResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/bulk_create_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk delete negative keywords for a campaign
+   */
+  async bulkDeleteNegativeKeywords(
+    campaignId: string,
+    body: BulkDeleteNegativeKeywordRequest,
+  ): Promise<BulkDeleteNegativeKeywordResponse> {
+    return this.client.post<BulkDeleteNegativeKeywordResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/bulk_delete_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk update negative keywords for a campaign
+   */
+  async bulkUpdateNegativeKeywords(
+    campaignId: string,
+    body: BulkUpdateNegativeKeywordRequest,
+  ): Promise<BulkUpdateNegativeKeywordResponse> {
+    return this.client.post<BulkUpdateNegativeKeywordResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/bulk_update_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Get a negative keyword for a campaign
+   */
+  async getNegativeKeyword(
+    campaignId: string,
+    negativeKeywordId: string,
+  ): Promise<NegativeKeyword> {
+    return this.client.get<NegativeKeyword>(
+      `${this.basePath}/ad_campaign/${campaignId}/negative_keyword/${negativeKeywordId}`,
+    );
+  }
+
+  /**
+   * Delete a negative keyword for a campaign
+   */
+  async deleteNegativeKeyword(
+    campaignId: string,
+    negativeKeywordId: string,
+  ): Promise<void> {
+    return this.client.delete<void>(
+      `${this.basePath}/ad_campaign/${campaignId}/negative_keyword/${negativeKeywordId}`,
+    );
+  }
+
+  /**
+   * Update a negative keyword for a campaign
+   */
+  async updateNegativeKeyword(
+    campaignId: string,
+    negativeKeywordId: string,
+    body: NegativeKeywordRequest,
+  ): Promise<BaseResponse> {
+    return this.client.put<BaseResponse>(
+      `${this.basePath}/ad_campaign/${campaignId}/negative_keyword/${negativeKeywordId}`,
+      body,
+    );
+  }
+
+  /**
+   * Get negative keywords for an ad group
+   */
+  async getNegativeKeywordsForAdGroup(
+    adGroupId: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<NegativeKeywordPagedCollection> {
+    const params: Record<string, string | number> = {};
+    if (limit) params.limit = limit;
+    if (offset) params.offset = offset;
+    return this.client.get<NegativeKeywordPagedCollection>(
+      `${this.basePath}/ad_group/${adGroupId}/negative_keyword`,
+      params,
+    );
+  }
+
+  /**
+   * Create a negative keyword for an ad group
+   */
+  async createNegativeKeywordForAdGroup(
+    adGroupId: string,
+    body: CreateNegativeKeywordRequest,
+  ): Promise<BaseResponse> {
+    return this.client.post<BaseResponse>(
+      `${this.basePath}/ad_group/${adGroupId}/negative_keyword`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk create negative keywords for an ad group
+   */
+  async bulkCreateNegativeKeywordsForAdGroup(
+    adGroupId: string,
+    body: BulkCreateNegativeKeywordRequest,
+  ): Promise<BulkCreateNegativeKeywordResponse> {
+    return this.client.post<BulkCreateNegativeKeywordResponse>(
+      `${this.basePath}/ad_group/${adGroupId}/bulk_create_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk delete negative keywords for an ad group
+   */
+  async bulkDeleteNegativeKeywordsForAdGroup(
+    adGroupId: string,
+    body: BulkDeleteNegativeKeywordRequest,
+  ): Promise<BulkDeleteNegativeKeywordResponse> {
+    return this.client.post<BulkDeleteNegativeKeywordResponse>(
+      `${this.basePath}/ad_group/${adGroupId}/bulk_delete_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Bulk update negative keywords for an ad group
+   */
+  async bulkUpdateNegativeKeywordsForAdGroup(
+    adGroupId: string,
+    body: BulkUpdateNegativeKeywordRequest,
+  ): Promise<BulkUpdateNegativeKeywordResponse> {
+    return this.client.post<BulkUpdateNegativeKeywordResponse>(
+      `${this.basePath}/ad_group/${adGroupId}/bulk_update_negative_keywords`,
+      body,
+    );
+  }
+
+  /**
+   * Get a negative keyword for an ad group
+   */
+  async getNegativeKeywordForAdGroup(
+    adGroupId: string,
+    negativeKeywordId: string,
+  ): Promise<NegativeKeyword> {
+    return this.client.get<NegativeKeyword>(
+      `${this.basePath}/ad_group/${adGroupId}/negative_keyword/${negativeKeywordId}`,
+    );
+  }
+
+  /**
+   * Delete a negative keyword for an ad group
+   */
+  async deleteNegativeKeywordForAdGroup(
+    adGroupId: string,
+    negativeKeywordId: string,
+  ): Promise<void> {
+    return this.client.delete<void>(
+      `${this.basePath}/ad_group/${adGroupId}/negative_keyword/${negativeKeywordId}`,
+    );
+  }
+
+  /**
+   * Update a negative keyword for an ad group
+   */
+  async updateNegativeKeywordForAdGroup(
+    adGroupId: string,
+    negativeKeywordId: string,
+    body: NegativeKeywordRequest,
+  ): Promise<BaseResponse> {
+    return this.client.put<BaseResponse>(
+      `${this.basePath}/ad_group/${adGroupId}/negative_keyword/${negativeKeywordId}`,
+      body,
     );
   }
 }
