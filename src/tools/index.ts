@@ -342,7 +342,6 @@ export async function executeTool(
       );
     case "ebay_send_offer_to_interested_buyers":
       return api.negotiation.sendOfferToInterestedBuyers(
-        args.offerId as string,
         args.offerData as Record<string, unknown>,
       );
 
