@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { EbaySellerApi } from "./api/index.js";
 import { getEbayConfig } from "./config/environment.js";
 import { executeTool, getToolDefinitions } from "./tools/index.js";
@@ -11,11 +12,11 @@ import { executeTool, getToolDefinitions } from "./tools/index.js";
  * Provides access to eBay Sell APIs through Model Context Protocol
  */
 class EbayMcpServer {
-  private server: McpServer;
+  private server: Server;
   private api: EbaySellerApi;
 
   constructor() {
-    this.server = new McpServer(
+    this.server = new Server(
       {
         name: "ebay-api-mcp-server",
         version: "0.1.0",
@@ -43,44 +44,49 @@ class EbayMcpServer {
   }
 
   private setupHandlers(): void {
-    // Register all tools dynamically from tool definitions
     const tools = getToolDefinitions();
 
-    for (const tool of tools) {
-      this.server.registerTool(
-        tool.name,
-        {
+    // Handle tools/list request
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      return {
+        tools: tools.map((tool) => ({
+          name: tool.name,
           description: tool.description,
-          inputSchema: tool.inputSchema as any,
-        },
-        async (args: Record<string, unknown>) => {
-          try {
-            const result = await executeTool(this.api, tool.name, args || {});
-            return {
-              content: [
-                {
-                  type: "text" as const,
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : "Unknown error";
+          inputSchema: tool.inputSchema,
+        })),
+      };
+    });
 
-            return {
-              content: [
-                {
-                  type: "text" as const,
-                  text: JSON.stringify({ error: errorMessage }, null, 2),
-                },
-              ],
-              isError: true,
-            };
-          }
-        }
-      );
-    }
+    // Handle tools/call request
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const toolName = request.params.name;
+      const toolArgs = request.params.arguments || {};
+
+      try {
+        const result = await executeTool(this.api, toolName, toolArgs);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({ error: errorMessage }, null, 2),
+            },
+          ],
+          isError: true,
+        };
+      }
+    });
   }
 
   private setupErrorHandling(): void {

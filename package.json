@@ -42,10 +42,10 @@
 		"url": "https://github.com/user/ebay-api-mcp-server/issues"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.0.4",
+		"@modelcontextprotocol/sdk": "1.0.4",
 		"axios": "^1.7.9",
 		"dotenv": "^16.4.7",
-		"zod": "^4.1.12"
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.2",
