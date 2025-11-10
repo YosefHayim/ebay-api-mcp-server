@@ -905,21 +905,21 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_compatibility_property_values',
     description: 'Get compatibility property values',
     inputSchema: {
-      data: z.record(z.unknown()).describe('Request data for getting compatibility property values')
+      data: compatibilityDataSchema.describe('Request data for getting compatibility property values')
     }
   },
   {
     name: 'ebay_get_multi_compatibility_property_values',
     description: 'Get multiple compatibility property values',
     inputSchema: {
-      data: z.record(z.unknown()).describe('Request data for getting multi compatibility property values')
+      data: compatibilityDataSchema.describe('Request data for getting multi compatibility property values')
     }
   },
   {
     name: 'ebay_get_product_compatibilities',
     description: 'Get product compatibilities',
     inputSchema: {
-      data: z.record(z.unknown()).describe('Request data for getting product compatibilities')
+      data: compatibilityDataSchema.describe('Request data for getting product compatibilities')
     }
   },
   {
@@ -980,7 +980,7 @@ export const communicationTools: ToolDefinition[] = [
     description: 'Send offer to interested buyers',
     inputSchema: {
       offerId: z.string().describe('The offer ID'),
-      offerData: z.record(z.unknown()).describe('Offer details to send to buyers')
+      offerData: offerToBuyersSchema.describe('Offer details to send to buyers')
     }
   },
   // Message API
@@ -1038,14 +1038,14 @@ export const communicationTools: ToolDefinition[] = [
     name: 'ebay_update_notification_config',
     description: 'Update notification configuration',
     inputSchema: {
-      config: z.record(z.unknown()).describe('Notification configuration settings')
+      config: notificationConfigSchema.describe('Notification configuration settings')
     }
   },
   {
     name: 'ebay_create_notification_destination',
     description: 'Create a notification destination',
     inputSchema: {
-      destination: z.record(z.unknown()).describe('Destination configuration')
+      destination: notificationDestinationSchema.describe('Destination configuration')
     }
   },
   // Feedback API
@@ -1060,7 +1060,7 @@ export const communicationTools: ToolDefinition[] = [
     name: 'ebay_leave_feedback_for_buyer',
     description: 'Leave feedback for a buyer',
     inputSchema: {
-      feedbackData: z.record(z.unknown()).describe('Feedback details including rating and comment')
+      feedbackData: feedbackDataSchema.describe('Feedback details including rating and comment')
     }
   },
   {
@@ -1106,7 +1106,7 @@ export const otherApiTools: ToolDefinition[] = [
     name: 'ebay_report_infringement',
     description: 'Report intellectual property infringement',
     inputSchema: {
-      infringementData: z.record(z.unknown()).describe('Infringement report details')
+      infringementData: infringementDataSchema.describe('Infringement report details')
     }
   },
   {
@@ -1134,7 +1134,7 @@ export const otherApiTools: ToolDefinition[] = [
     name: 'ebay_create_shipping_quote',
     description: 'Create a shipping quote for international shipping',
     inputSchema: {
-      shippingQuoteRequest: z.record(z.unknown()).describe('Shipping quote request details')
+      shippingQuoteRequest: shippingQuoteRequestSchema.describe('Shipping quote request details')
     }
   },
   {
