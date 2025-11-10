@@ -66,7 +66,7 @@ export const accountTools: ToolDefinition[] = [
   },
   {
     name: 'ebay_get_fulfillment_policies',
-    description: 'Get fulfillment policies for the seller',
+    description: 'Get fulfillment policies for the seller.\n\nRequired OAuth Scope: sell.account.readonly or sell.account\nMinimum Scope: https://api.ebay.com/oauth/api_scope/sell.account.readonly',
     inputSchema: {
       marketplaceId: z.string().optional().describe('eBay marketplace ID (e.g., EBAY_US)')
     }
@@ -88,7 +88,7 @@ export const accountTools: ToolDefinition[] = [
   // Fulfillment Policy CRUD
   {
     name: 'ebay_create_fulfillment_policy',
-    description: 'Create a new fulfillment policy',
+    description: 'Create a new fulfillment policy.\n\nRequired OAuth Scope: sell.account\nMinimum Scope: https://api.ebay.com/oauth/api_scope/sell.account',
     inputSchema: {
       policy: z.record(z.unknown()).describe('Fulfillment policy details')
     }

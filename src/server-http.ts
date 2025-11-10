@@ -17,7 +17,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { EbaySellerApi } from "./api/index.js";
-import { getEbayConfig, getDefaultScopes } from "./config/environment.js";
+import { getEbayConfig, getDefaultScopes, validateEnvironmentConfig } from "./config/environment.js";
 import { getToolDefinitions, executeTool } from "./tools/index.js";
 import { TokenVerifier } from "./auth/token-verifier.js";
 import { createBearerAuthMiddleware } from "./auth/oauth-middleware.js";
@@ -314,6 +314,29 @@ async function main() {
   try {
     console.log("🚀 Starting eBay API MCP Server (HTTP + OAuth)...");
     console.log();
+
+    // Validate environment configuration
+    const validation = validateEnvironmentConfig();
+
+    // Display warnings
+    if (validation.warnings.length > 0) {
+      console.log("⚠️  Environment Configuration Warnings:");
+      validation.warnings.forEach(warning => {
+        console.log(`  • ${warning}`);
+      });
+      console.log();
+    }
+
+    // Display errors and exit if configuration is invalid
+    if (!validation.isValid) {
+      console.error("❌ Environment Configuration Errors:");
+      validation.errors.forEach(error => {
+        console.error(`  • ${error}`);
+      });
+      console.error("\nPlease fix the configuration errors and restart the server.\n");
+      process.exit(1);
+    }
+
     console.log("Configuration:");
     console.log(`  Host: ${CONFIG.host}`);
     console.log(`  Port: ${CONFIG.port}`);

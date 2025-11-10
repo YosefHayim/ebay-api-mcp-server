@@ -111,6 +111,74 @@ export function validateScopes(
   return { warnings, validScopes: requestedValidScopes };
 }
 
+/**
+ * Validate environment configuration on startup
+ */
+export function validateEnvironmentConfig(): {
+  isValid: boolean;
+  warnings: string[];
+  errors: string[];
+} {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+
+  // Check required environment variables
+  if (!process.env.EBAY_CLIENT_ID) {
+    errors.push("EBAY_CLIENT_ID is not set. OAuth will not work.");
+  }
+
+  if (!process.env.EBAY_CLIENT_SECRET) {
+    errors.push("EBAY_CLIENT_SECRET is not set. OAuth will not work.");
+  }
+
+  // Validate EBAY_ENVIRONMENT
+  const environment = process.env.EBAY_ENVIRONMENT;
+  if (environment && environment !== "production" && environment !== "sandbox") {
+    errors.push(
+      `EBAY_ENVIRONMENT must be either "production" or "sandbox", got: "${environment}"`
+    );
+  }
+
+  // Check if environment is set
+  if (!environment) {
+    warnings.push(
+      'EBAY_ENVIRONMENT not set. Defaulting to "sandbox". Set EBAY_ENVIRONMENT=production for production use.'
+    );
+  }
+
+  // Check if redirect URI is set (needed for OAuth user flow)
+  if (!process.env.EBAY_REDIRECT_URI) {
+    warnings.push(
+      "EBAY_REDIRECT_URI is not set. User OAuth flow will not work. Set this to enable user token generation."
+    );
+  }
+
+  // Validate that scope files exist
+  try {
+    getProductionScopes();
+  } catch (error) {
+    errors.push(
+      `Failed to load production scopes: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+
+  try {
+    getSandboxScopes();
+  } catch (error) {
+    errors.push(
+      `Failed to load sandbox scopes: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+
+  const isValid = errors.length === 0;
+
+  return {
+    isValid,
+    warnings,
+    errors,
+  };
+}
+
 export function getEbayConfig(): EbayConfig {
   const clientId = process.env.EBAY_CLIENT_ID;
   const clientSecret = process.env.EBAY_CLIENT_SECRET;

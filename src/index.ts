@@ -3,7 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { EbaySellerApi } from "./api/index.js";
-import { getEbayConfig } from "./config/environment.js";
+import { getEbayConfig, validateEnvironmentConfig } from "./config/environment.js";
 import { getToolDefinitions, executeTool } from "./tools/index.js";
 
 
@@ -19,7 +19,9 @@ class EbayMcpServer {
     this.server = new McpServer(
       {
         name: "ebay-api-mcp-server",
-        version: "0.1.0",
+        version: "1.0.0",
+        title: 'eBay API MCP Server',
+
       },
       {
         capabilities: {
@@ -92,6 +94,28 @@ class EbayMcpServer {
   }
 
   async run(): Promise<void> {
+    // Validate environment configuration
+    const validation = validateEnvironmentConfig();
+
+    // Display warnings
+    if (validation.warnings.length > 0) {
+      console.error("\n⚠️  Environment Configuration Warnings:");
+      validation.warnings.forEach(warning => {
+        console.error(`  • ${warning}`);
+      });
+      console.error("");
+    }
+
+    // Display errors and exit if configuration is invalid
+    if (!validation.isValid) {
+      console.error("\n❌ Environment Configuration Errors:");
+      validation.errors.forEach(error => {
+        console.error(`  • ${error}`);
+      });
+      console.error("\nPlease fix the configuration errors and restart the server.\n");
+      process.exit(1);
+    }
+
     // Initialize API (load tokens from storage)
     await this.initialize();
 
