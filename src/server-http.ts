@@ -17,7 +17,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { EbaySellerApi } from "./api/index.js";
-import { getEbayConfig } from "./config/environment.js";
+import { getEbayConfig, getDefaultScopes } from "./config/environment.js";
 import { getToolDefinitions, executeTool } from "./tools/index.js";
 import { TokenVerifier } from "./auth/token-verifier.js";
 import { createBearerAuthMiddleware } from "./auth/oauth-middleware.js";
@@ -103,6 +103,9 @@ async function createApp(): Promise<express.Application> {
   // Server URL
   const serverUrl = `http://${CONFIG.host}:${CONFIG.port}`;
 
+  // Get eBay configuration for metadata
+  const ebayConfig = getEbayConfig();
+
   // Add OAuth metadata endpoints
   const metadataRouter = createMetadataRouter({
     resourceServerUrl: serverUrl,
@@ -110,6 +113,8 @@ async function createApp(): Promise<express.Application> {
     scopesSupported: CONFIG.oauth.requiredScopes,
     resourceDocumentation: "https://github.com/your-repo/ebay-api-mcp-server",
     resourceName: "eBay API MCP Server",
+    ebayEnvironment: ebayConfig.environment,
+    ebayScopes: getDefaultScopes(ebayConfig.environment),
   });
 
   app.use(metadataRouter);

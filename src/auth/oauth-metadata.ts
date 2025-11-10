@@ -35,6 +35,18 @@ export interface MetadataConfig {
    * Resource name for display purposes
    */
   resourceName?: string;
+
+  /**
+   * eBay environment (production or sandbox) - optional
+   * Used to indicate which eBay environment the server is configured for
+   */
+  ebayEnvironment?: "production" | "sandbox";
+
+  /**
+   * eBay-specific OAuth scopes - optional
+   * Separate from MCP OAuth scopes, indicates what eBay API access is available
+   */
+  ebayScopes?: string[];
 }
 
 /**
@@ -66,14 +78,28 @@ export function createMetadataRouter(config: MetadataConfig): Router {
 
   // Optional: Server info endpoint for debugging
   router.get("/.well-known/mcp-server-info", (req, res) => {
-    res.json({
+    const serverInfo: Record<string, unknown> = {
       name: config.resourceName || "MCP Resource Server",
       version: "1.0.0",
       resource_url: config.resourceServerUrl,
       authorization_required: true,
       scopes_supported: config.scopesSupported,
       documentation: config.resourceDocumentation,
-    });
+    };
+
+    // Add eBay-specific information if provided
+    if (config.ebayEnvironment) {
+      serverInfo.ebay = {
+        environment: config.ebayEnvironment,
+        base_url: config.ebayEnvironment === "production"
+          ? "https://api.ebay.com"
+          : "https://api.sandbox.ebay.com",
+        scopes: config.ebayScopes || [],
+        note: "MCP OAuth scopes (scopes_supported) are separate from eBay API OAuth scopes (ebay.scopes)",
+      };
+    }
+
+    res.json(serverInfo);
   });
 
   return router;

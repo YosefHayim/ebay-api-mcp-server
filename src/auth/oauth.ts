@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthUrl } from "../config/environment.js";
+import { getAuthUrl, getDefaultScopes, validateScopes } from "../config/environment.js";
 import type {
   EbayAuthToken,
   EbayConfig,
@@ -25,6 +25,18 @@ export class EbayOAuthClient {
   async initialize(): Promise<void> {
     if (await TokenStorage.hasTokens()) {
       this.userTokens = await TokenStorage.loadTokens();
+
+      // Validate stored token scopes against current environment
+      if (this.userTokens?.scope) {
+        const tokenScopes = this.userTokens.scope.split(' ');
+        const validation = validateScopes(tokenScopes, this.config.environment);
+
+        if (validation.warnings.length > 0) {
+          console.warn('⚠️  Token scope validation warnings:');
+          validation.warnings.forEach(warning => console.warn(`  - ${warning}`));
+          console.warn('  Token will still be used, but some scopes may not work in this environment.');
+        }
+      }
     }
   }
 
@@ -281,12 +293,28 @@ export class EbayOAuthClient {
   /**
    * Get current token info for debugging
    */
-  getTokenInfo(): { hasUserToken: boolean; hasClientToken: boolean } {
-    return {
+  getTokenInfo(): { hasUserToken: boolean; hasClientToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } {
+    const info: { hasUserToken: boolean; hasClientToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } = {
       hasUserToken:
         this.userTokens !== null &&
         !TokenStorage.isAccessTokenExpired(this.userTokens),
       hasClientToken: this.token !== null && Date.now() < this.tokenExpiry,
     };
+
+    // Add scope comparison info if user tokens are available
+    if (this.userTokens?.scope) {
+      const tokenScopes = this.userTokens.scope.split(' ');
+      const environmentScopes = getDefaultScopes(this.config.environment);
+      const tokenScopeSet = new Set(tokenScopes);
+      const missingScopes = environmentScopes.filter(scope => !tokenScopeSet.has(scope));
+
+      info.scopeInfo = {
+        tokenScopes,
+        environmentScopes,
+        missingScopes,
+      };
+    }
+
+    return info;
   }
 }
