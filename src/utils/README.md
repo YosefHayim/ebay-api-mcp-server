@@ -196,8 +196,8 @@ The following is a list of Zod schemas that need to be created. The list is base
 - [ ] `fulfillment.ts`
 
 ### Other
-- [ ] `compliance.ts`
-- [ ] `edelivery.ts`
-- [ ] `identity.ts`
-- [ ] `translation.ts`
-- [ ] `vero.ts`
+- [x] `compliance.ts`
+- [x] `edelivery.ts`
+- [x] `identity.ts`
+- [x] `translation.ts`
+- [x] `vero.ts`
