@@ -1,4 +1,35 @@
 import { z } from 'zod';
+import {
+  fulfillmentPolicySchema,
+  paymentPolicySchema,
+  returnPolicySchema,
+  customPolicySchema,
+  salesTaxBaseSchema,
+  programRequestSchema,
+  inventoryItemSchema,
+  offerSchema,
+  productCompatibilitySchema,
+  inventoryItemGroupSchema,
+  locationSchema,
+  shippingFulfillmentSchema,
+  refundDataSchema,
+  bulkInventoryItemRequestSchema,
+  bulkPriceQuantityRequestSchema,
+  bulkOfferRequestSchema,
+  bulkPublishRequestSchema,
+  listingFeesRequestSchema,
+  bulkMigrateRequestSchema,
+  compatibilitySpecificationSchema,
+  compatibilityDataSchema,
+  offerToBuyersSchema,
+  messageDataSchema,
+  feedbackDataSchema,
+  notificationConfigSchema,
+  notificationDestinationSchema,
+  infringementDataSchema,
+  shippingQuoteRequestSchema,
+  bulkSalesTaxRequestSchema
+} from './schemas.js';
 
 export type ToolDefinition = {
   name: string;
@@ -90,7 +121,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_create_fulfillment_policy',
     description: 'Create a new fulfillment policy.\n\nRequired OAuth Scope: sell.account\nMinimum Scope: https://api.ebay.com/oauth/api_scope/sell.account',
     inputSchema: {
-      policy: z.record(z.unknown()).describe('Fulfillment policy details')
+      policy: fulfillmentPolicySchema.describe('Fulfillment policy details')
     }
   },
   {
@@ -113,7 +144,7 @@ export const accountTools: ToolDefinition[] = [
     description: 'Update an existing fulfillment policy',
     inputSchema: {
       fulfillmentPolicyId: z.string().describe('The fulfillment policy ID'),
-      policy: z.record(z.unknown()).describe('Updated fulfillment policy details')
+      policy: fulfillmentPolicySchema.describe('Updated fulfillment policy details')
     }
   },
   {
@@ -128,7 +159,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_create_payment_policy',
     description: 'Create a new payment policy',
     inputSchema: {
-      policy: z.record(z.unknown()).describe('Payment policy details')
+      policy: paymentPolicySchema.describe('Payment policy details')
     }
   },
   {
@@ -151,7 +182,7 @@ export const accountTools: ToolDefinition[] = [
     description: 'Update an existing payment policy',
     inputSchema: {
       paymentPolicyId: z.string().describe('The payment policy ID'),
-      policy: z.record(z.unknown()).describe('Updated payment policy details')
+      policy: paymentPolicySchema.describe('Updated payment policy details')
     }
   },
   {
@@ -166,7 +197,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_create_return_policy',
     description: 'Create a new return policy',
     inputSchema: {
-      policy: z.record(z.unknown()).describe('Return policy details')
+      policy: returnPolicySchema.describe('Return policy details')
     }
   },
   {
@@ -189,7 +220,7 @@ export const accountTools: ToolDefinition[] = [
     description: 'Update an existing return policy',
     inputSchema: {
       returnPolicyId: z.string().describe('The return policy ID'),
-      policy: z.record(z.unknown()).describe('Updated return policy details')
+      policy: returnPolicySchema.describe('Updated return policy details')
     }
   },
   {
@@ -204,7 +235,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_create_custom_policy',
     description: 'Create a new custom policy',
     inputSchema: {
-      policy: z.record(z.unknown()).describe('Custom policy details')
+      policy: customPolicySchema.describe('Custom policy details')
     }
   },
   {
@@ -219,7 +250,7 @@ export const accountTools: ToolDefinition[] = [
     description: 'Update an existing custom policy',
     inputSchema: {
       customPolicyId: z.string().describe('The custom policy ID'),
-      policy: z.record(z.unknown()).describe('Updated custom policy details')
+      policy: customPolicySchema.describe('Updated custom policy details')
     }
   },
   {
@@ -262,14 +293,14 @@ export const accountTools: ToolDefinition[] = [
     inputSchema: {
       countryCode: z.string().describe('Two-letter ISO 3166 country code'),
       jurisdictionId: z.string().describe('Tax jurisdiction ID'),
-      salesTaxBase: z.record(z.unknown()).describe('Sales tax details')
+      salesTaxBase: salesTaxBaseSchema.describe('Sales tax details')
     }
   },
   {
     name: 'ebay_bulk_create_or_replace_sales_tax',
     description: 'Bulk create or replace sales tax tables',
     inputSchema: {
-      requests: z.array(z.unknown()).describe('Array of sales tax requests')
+      requests: bulkSalesTaxRequestSchema.describe('Array of sales tax requests')
     }
   },
   {
@@ -306,14 +337,14 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_opt_in_to_program',
     description: 'Opt-in to a seller program',
     inputSchema: {
-      request: z.record(z.unknown()).describe('Program opt-in request')
+      request: programRequestSchema.describe('Program opt-in request')
     }
   },
   {
     name: 'ebay_opt_out_of_program',
     description: 'Opt-out of a seller program',
     inputSchema: {
-      request: z.record(z.unknown()).describe('Program opt-out request')
+      request: programRequestSchema.describe('Program opt-out request')
     }
   },
   {
@@ -344,7 +375,7 @@ export const inventoryTools: ToolDefinition[] = [
     description: 'Create or replace an inventory item.\n\nRequired OAuth Scope: sell.inventory\nMinimum Scope: https://api.ebay.com/oauth/api_scope/sell.inventory',
     inputSchema: {
       sku: z.string().describe('The seller-defined SKU'),
-      inventoryItem: z.record(z.unknown()).describe('Inventory item details')
+      inventoryItem: inventoryItemSchema.describe('Inventory item details')
     }
   },
   {
@@ -360,7 +391,7 @@ export const inventoryTools: ToolDefinition[] = [
     name: 'ebay_create_offer',
     description: 'Create a new offer for an inventory item',
     inputSchema: {
-      offer: z.record(z.unknown()).describe('Offer details including SKU, marketplace, pricing, and policies')
+      offer: offerSchema.describe('Offer details including SKU, marketplace, pricing, and policies')
     }
   },
   {
@@ -375,21 +406,25 @@ export const inventoryTools: ToolDefinition[] = [
     name: 'ebay_bulk_create_or_replace_inventory_item',
     description: 'Bulk create or replace multiple inventory items',
     inputSchema: {
-      requests: z.record(z.unknown()).describe('Bulk inventory item requests')
+      requests: bulkInventoryItemRequestSchema.describe('Bulk inventory item requests')
     }
   },
   {
     name: 'ebay_bulk_get_inventory_item',
     description: 'Bulk get multiple inventory items',
     inputSchema: {
-      requests: z.record(z.unknown()).describe('Bulk inventory item get requests with SKU list')
+      requests: z.object({
+        requests: z.array(z.object({
+          sku: z.string()
+        }).passthrough())
+      }).passthrough().describe('Bulk inventory item get requests with SKU list')
     }
   },
   {
     name: 'ebay_bulk_update_price_quantity',
     description: 'Bulk update price and quantity for multiple offers',
     inputSchema: {
-      requests: z.record(z.unknown()).describe('Bulk price and quantity update requests')
+      requests: bulkPriceQuantityRequestSchema.describe('Bulk price and quantity update requests')
     }
   },
   // Product Compatibility
