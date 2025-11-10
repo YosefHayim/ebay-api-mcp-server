@@ -1160,6 +1160,51 @@ export const fulfillmentTools: ToolDefinition[] = [
       },
       required: ['orderId', 'fulfillment']
     }
+  },
+  {
+    name: 'ebay_issue_refund',
+    description: 'Issue a full or partial refund for an eBay order. Use this to refund buyers for orders, including specifying the refund amount and reason.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        orderId: {
+          type: 'string',
+          description: 'The unique eBay order ID to refund'
+        },
+        refundData: {
+          type: 'object',
+          description: 'Refund details including amount, reason, and optional comment. Required fields: reasonForRefund (e.g., "BUYER_CANCEL", "OUT_OF_STOCK", "FOUND_CHEAPER_PRICE"), refundItems (array of line item IDs and refund amounts)',
+          properties: {
+            reasonForRefund: {
+              type: 'string',
+              description: 'Reason code: BUYER_CANCEL, OUT_OF_STOCK, FOUND_CHEAPER_PRICE, INCORRECT_PRICE, ITEM_DAMAGED, ITEM_DEFECTIVE, LOST_IN_TRANSIT, MUTUALLY_AGREED, SELLER_CANCEL'
+            },
+            comment: {
+              type: 'string',
+              description: 'Optional comment to buyer about the refund'
+            },
+            refundItems: {
+              type: 'array',
+              description: 'Array of items to refund with line item IDs and amounts',
+              items: {
+                type: 'object',
+                properties: {
+                  lineItemId: { type: 'string' },
+                  refundAmount: {
+                    type: 'object',
+                    properties: {
+                      value: { type: 'string' },
+                      currency: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      required: ['orderId', 'refundData']
+    }
   }
 ];
 
@@ -1183,6 +1228,122 @@ export const marketingTools: ToolDefinition[] = [
           description: 'Number of campaigns to return'
         }
       }
+    }
+  },
+  {
+    name: 'ebay_get_campaign',
+    description: 'Get details of a specific marketing campaign by ID',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The unique campaign ID'
+        }
+      },
+      required: ['campaignId']
+    }
+  },
+  {
+    name: 'ebay_pause_campaign',
+    description: 'Pause a running marketing campaign. Use this to temporarily stop a campaign without ending it.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The unique campaign ID to pause'
+        }
+      },
+      required: ['campaignId']
+    }
+  },
+  {
+    name: 'ebay_resume_campaign',
+    description: 'Resume a paused marketing campaign. Use this to restart a campaign that was previously paused.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The unique campaign ID to resume'
+        }
+      },
+      required: ['campaignId']
+    }
+  },
+  {
+    name: 'ebay_end_campaign',
+    description: 'Permanently end a marketing campaign. Note: Ended campaigns cannot be restarted.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The unique campaign ID to end'
+        }
+      },
+      required: ['campaignId']
+    }
+  },
+  {
+    name: 'ebay_update_campaign_identification',
+    description: 'Update a campaign\'s name or other identification details. Note: eBay does not support directly updating campaign budget or duration - you must clone the campaign with new settings.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The unique campaign ID'
+        },
+        updateData: {
+          type: 'object',
+          description: 'Campaign identification data to update (e.g., campaign name)',
+          properties: {
+            campaignName: {
+              type: 'string',
+              description: 'New campaign name'
+            }
+          }
+        }
+      },
+      required: ['campaignId', 'updateData']
+    }
+  },
+  {
+    name: 'ebay_clone_campaign',
+    description: 'Clone an existing campaign with new settings. Use this to create a campaign with modified budget or duration, as eBay does not support direct budget/duration updates.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: {
+          type: 'string',
+          description: 'The campaign ID to clone'
+        },
+        cloneData: {
+          type: 'object',
+          description: 'New campaign settings including name, budget, start/end dates',
+          properties: {
+            campaignName: {
+              type: 'string',
+              description: 'Name for the new cloned campaign'
+            },
+            fundingStrategy: {
+              type: 'object',
+              description: 'Budget settings for the campaign'
+            },
+            startDate: {
+              type: 'string',
+              description: 'Campaign start date (ISO 8601 format)'
+            },
+            endDate: {
+              type: 'string',
+              description: 'Campaign end date (ISO 8601 format)'
+            }
+          }
+        }
+      },
+      required: ['campaignId', 'cloneData']
     }
   },
   {
@@ -1820,14 +1981,51 @@ export const communicationTools: ToolDefinition[] = [
     }
   },
   {
+    name: 'ebay_send_message',
+    description: 'Send a direct message to a buyer regarding a specific transaction or inquiry. Use this to communicate about orders, answer questions, resolve issues, or provide updates.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        messageData: {
+          type: 'object',
+          description: 'Message details including recipient, subject, and content',
+          properties: {
+            conversation_id: {
+              type: 'string',
+              description: 'Optional conversation ID to reply to an existing thread'
+            },
+            order_id: {
+              type: 'string',
+              description: 'Optional order ID to associate message with a transaction'
+            },
+            buyer_username: {
+              type: 'string',
+              description: 'eBay username of the buyer'
+            },
+            subject: {
+              type: 'string',
+              description: 'Message subject line'
+            },
+            message_content: {
+              type: 'string',
+              description: 'The message text to send to the buyer'
+            }
+          },
+          required: ['message_content']
+        }
+      },
+      required: ['messageData']
+    }
+  },
+  {
     name: 'ebay_reply_to_message',
-    description: 'Reply to a buyer message',
+    description: 'Reply to a buyer message in an existing conversation thread',
     inputSchema: {
       type: 'object',
       properties: {
         messageId: {
           type: 'string',
-          description: 'The message ID to reply to'
+          description: 'The conversation/message ID to reply to'
         },
         messageContent: {
           type: 'string',

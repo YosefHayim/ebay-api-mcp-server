@@ -445,6 +445,11 @@ export async function executeTool(
         args.orderId as string,
         args.fulfillment as any,
       );
+    case "ebay_issue_refund":
+      return api.fulfillment.issueRefund(
+        args.orderId as string,
+        args.refundData as any,
+      );
 
     // Marketing
     case "ebay_get_campaigns":
@@ -452,6 +457,24 @@ export async function executeTool(
         args.campaignStatus as string,
         args.marketplaceId as string,
         args.limit as number,
+      );
+    case "ebay_get_campaign":
+      return api.marketing.getCampaign(args.campaignId as string);
+    case "ebay_pause_campaign":
+      return api.marketing.pauseCampaign(args.campaignId as string);
+    case "ebay_resume_campaign":
+      return api.marketing.resumeCampaign(args.campaignId as string);
+    case "ebay_end_campaign":
+      return api.marketing.endCampaign(args.campaignId as string);
+    case "ebay_update_campaign_identification":
+      return api.marketing.updateCampaignIdentification(
+        args.campaignId as string,
+        args.updateData as any,
+      );
+    case "ebay_clone_campaign":
+      return api.marketing.cloneCampaign(
+        args.campaignId as string,
+        args.cloneData as any,
       );
     case "ebay_get_promotions":
       return api.marketing.getPromotions(
@@ -626,6 +649,8 @@ export async function executeTool(
       );
     case "ebay_get_message":
       return api.message.getMessage(args.messageId as string);
+    case "ebay_send_message":
+      return api.message.sendMessage(args.messageData as Record<string, unknown>);
     case "ebay_reply_to_message":
       return api.message.replyToMessage(
         args.messageId as string,

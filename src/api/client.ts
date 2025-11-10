@@ -1,7 +1,41 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from "axios";
 import { EbayOAuthClient } from "../auth/oauth.js";
 import { getBaseUrl } from "../config/environment.js";
 import type { EbayApiError, EbayConfig } from "../types/ebay.js";
+
+/**
+ * Rate limit tracking
+ */
+class RateLimitTracker {
+  private requestTimestamps: number[] = [];
+  private readonly windowMs = 60000; // 1 minute window
+  private readonly maxRequests = 5000; // Conservative limit
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    // Remove timestamps older than window
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs
+    );
+    return this.requestTimestamps.length < this.maxRequests;
+  }
+
+  recordRequest(): void {
+    this.requestTimestamps.push(Date.now());
+  }
+
+  getStats(): { current: number; max: number; windowMs: number } {
+    const now = Date.now();
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs
+    );
+    return {
+      current: this.requestTimestamps.length,
+      max: this.maxRequests,
+      windowMs: this.windowMs,
+    };
+  }
+}
 
 /**
  * Base client for making eBay API requests
@@ -10,10 +44,12 @@ export class EbayApiClient {
   private httpClient: AxiosInstance;
   private authClient: EbayOAuthClient;
   private baseUrl: string;
+  private rateLimitTracker: RateLimitTracker;
 
   constructor(config: EbayConfig) {
     this.authClient = new EbayOAuthClient(config);
     this.baseUrl = getBaseUrl(config.environment);
+    this.rateLimitTracker = new RateLimitTracker();
 
     this.httpClient = axios.create({
       baseURL: this.baseUrl,
@@ -24,28 +60,84 @@ export class EbayApiClient {
       },
     });
 
-    // Add request interceptor to inject auth token
+    // Add request interceptor to inject auth token and check rate limits
     this.httpClient.interceptors.request.use(
       async (config) => {
+        // Check rate limit before making request
+        if (!this.rateLimitTracker.canMakeRequest()) {
+          const stats = this.rateLimitTracker.getStats();
+          throw new Error(
+            `Rate limit exceeded: ${stats.current}/${stats.max} requests in ${stats.windowMs}ms window. Please wait before making more requests.`
+          );
+        }
+
         const token = await this.authClient.getAccessToken();
         config.headers.Authorization = `Bearer ${token}`;
+
+        // Record the request
+        this.rateLimitTracker.recordRequest();
+
         return config;
       },
       (error) => Promise.reject(error),
     );
 
-    // Add response interceptor for error handling
+    // Add response interceptor for error handling and retry logic
     this.httpClient.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (axios.isAxiosError(error) && error.response?.data) {
-          const ebayError: EbayApiError = error.response.data;
+      (response) => {
+        // Extract rate limit info from headers if available
+        const remaining = response.headers['x-ebay-c-ratelimit-remaining'];
+        const limit = response.headers['x-ebay-c-ratelimit-limit'];
+
+        if (remaining && limit) {
+          console.error(`eBay Rate Limit: ${remaining}/${limit} remaining`);
+        }
+
+        return response;
+      },
+      async (error: AxiosError) => {
+        const axiosError = error as AxiosError;
+
+        // Handle rate limit errors (429)
+        if (axiosError.response?.status === 429) {
+          const retryAfter = axiosError.response.headers['retry-after'];
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
+
+          throw new Error(
+            `eBay API rate limit exceeded. Retry after ${waitTime / 1000} seconds. ` +
+            `Consider reducing request frequency or upgrading to user tokens for higher limits.`
+          );
+        }
+
+        // Handle server errors with retry suggestion (500, 502, 503, 504)
+        if (axiosError.response?.status && axiosError.response.status >= 500) {
+          const config = axiosError.config;
+          const retryCount = (config as any).__retryCount || 0;
+
+          if (retryCount < 3) {
+            (config as any).__retryCount = retryCount + 1;
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+
+            console.error(
+              `eBay API server error (${axiosError.response.status}). ` +
+              `Retrying in ${delay}ms (attempt ${retryCount + 1}/3)...`
+            );
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return this.httpClient.request(config!);
+          }
+        }
+
+        // Handle eBay-specific errors
+        if (axios.isAxiosError(axiosError) && axiosError.response?.data) {
+          const ebayError = axiosError.response.data as EbayApiError;
           const errorMessage =
             ebayError.errors?.[0]?.longMessage ||
             ebayError.errors?.[0]?.message ||
-            error.message;
+            axiosError.message;
           throw new Error(`eBay API Error: ${errorMessage}`);
         }
+
         throw error;
       },
     );
@@ -145,5 +237,12 @@ export class EbayApiClient {
    */
   getOAuthClient(): EbayOAuthClient {
     return this.authClient;
+  }
+
+  /**
+   * Get rate limit statistics
+   */
+  getRateLimitStats() {
+    return this.rateLimitTracker.getStats();
   }
 }
