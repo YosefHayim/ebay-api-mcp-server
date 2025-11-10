@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types";
 import { EbaySellerApi } from "./api/index.js";
 import { getEbayConfig } from "./config/environment.js";
-import { executeTool, getToolDefinitions } from "./tools/index.js";
+import { executeTool, getToolDefinitions } from "./tools/index";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 
 /**
  * eBay API MCP Server
  * Provides access to eBay Sell APIs through Model Context Protocol
  */
 class EbayMcpServer {
-  private server: Server;
+  private server: McpServer;
   private api: EbaySellerApi;
 
   constructor() {
-    this.server = new Server(
+    this.server = new McpServer(
       {
         name: "ebay-api-mcp-server",
         version: "0.1.0",

@@ -51,7 +51,8 @@
 		"@types/node": "^22.10.2",
 		"openapi-typescript": "^7.10.1",
 		"tsx": "^4.19.2",
-		"typescript": "^5.7.2"
+		"types": "link:/node",
+		"typescript": "^5.9.3"
 	},
 	"engines": {
 		"node": ">=18.0.0"
