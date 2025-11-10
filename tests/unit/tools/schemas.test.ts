@@ -10,7 +10,7 @@ import {
   returnPolicySchema,
   inventoryItemSchema,
   offerSchema,
-  inventoryLocationSchema,
+  locationSchema as inventoryLocationSchema,
 } from "../../../src/tools/schemas.js";
 
 describe("Schema Validation", () => {
@@ -159,6 +159,7 @@ describe("Schema Validation", () => {
           shippingOptions: [
             {
               costType: "FLAT_RATE",
+              optionType: "DOMESTIC",
               shippingServices: [
                 {
                   shippingCost: { currency: "USD", value: "5.99" },
@@ -255,7 +256,7 @@ describe("Schema Validation", () => {
         expect(result.success).toBe(true);
       });
 
-      it("should require availability", () => {
+      it("should allow missing availability (all fields optional)", () => {
         const missingAvailability = {
           condition: "NEW",
           product: {
@@ -265,7 +266,7 @@ describe("Schema Validation", () => {
         };
 
         const result = inventoryItemSchema.safeParse(missingAvailability);
-        expect(result.success).toBe(false);
+        expect(result.success).toBe(true);
       });
 
       it("should accept different conditions", () => {
@@ -350,14 +351,14 @@ describe("Schema Validation", () => {
         expect(result.success).toBe(true);
       });
 
-      it("should require location object", () => {
+      it("should allow missing location object (all fields optional)", () => {
         const missingLocation = {
           name: "Test Location",
           merchantLocationStatus: "ENABLED",
         };
 
         const result = inventoryLocationSchema.safeParse(missingLocation);
-        expect(result.success).toBe(false);
+        expect(result.success).toBe(true);
       });
     });
   });
