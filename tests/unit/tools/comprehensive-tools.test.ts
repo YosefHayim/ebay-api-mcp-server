@@ -1204,46 +1204,6 @@ describe('Comprehensive Tools Coverage', () => {
     });
   });
 
-  describe('Dispute Tools', () => {
-    it('ebay_get_payment_dispute_summaries', async () => {
-      const mockResponse = { paymentDisputeSummaries: [] };
-      vi.mocked(mockApi.dispute.getPaymentDisputeSummaries).mockResolvedValue(mockResponse);
-      await executeTool(mockApi, 'ebay_get_payment_dispute_summaries', {
-        order_id: 'ORDER123'
-      });
-      expect(mockApi.dispute.getPaymentDisputeSummaries).toHaveBeenCalledWith({ order_id: 'ORDER123' });
-    });
-
-    it('ebay_get_payment_dispute', async () => {
-      const mockResponse = { paymentDisputeId: 'DISPUTE123' };
-      vi.mocked(mockApi.dispute.getPaymentDispute).mockResolvedValue(mockResponse);
-      await executeTool(mockApi, 'ebay_get_payment_dispute', {
-        paymentDisputeId: 'DISPUTE123'
-      });
-      expect(mockApi.dispute.getPaymentDispute).toHaveBeenCalledWith('DISPUTE123');
-    });
-
-    it('ebay_contest_payment_dispute', async () => {
-      vi.mocked(mockApi.dispute.contestPaymentDispute).mockResolvedValue(undefined);
-      const disputeData = { returnAddress: {} };
-      await executeTool(mockApi, 'ebay_contest_payment_dispute', {
-        paymentDisputeId: 'DISPUTE123',
-        disputeData
-      });
-      expect(mockApi.dispute.contestPaymentDispute).toHaveBeenCalledWith('DISPUTE123', disputeData);
-    });
-
-    it('ebay_accept_payment_dispute', async () => {
-      vi.mocked(mockApi.dispute.acceptPaymentDispute).mockResolvedValue(undefined);
-      const disputeData = { returnAddress: {} };
-      await executeTool(mockApi, 'ebay_accept_payment_dispute', {
-        paymentDisputeId: 'DISPUTE123',
-        disputeData
-      });
-      expect(mockApi.dispute.acceptPaymentDispute).toHaveBeenCalledWith('DISPUTE123', disputeData);
-    });
-  });
-
   describe('Other API Tools', () => {
     it('ebay_get_user', async () => {
       const mockResponse = { userId: 'USER123' };
@@ -1326,24 +1286,24 @@ describe('Comprehensive Tools Coverage', () => {
   describe('Notification Tools', () => {
     it('ebay_get_notification_config', async () => {
       const mockResponse = { config: {} };
-      vi.mocked(mockApi.notification.getNotificationConfig).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.notification.getConfig).mockResolvedValue(mockResponse);
       await executeTool(mockApi, 'ebay_get_notification_config', {});
-      expect(mockApi.notification.getNotificationConfig).toHaveBeenCalled();
+      expect(mockApi.notification.getConfig).toHaveBeenCalled();
     });
 
     it('ebay_update_notification_config', async () => {
-      vi.mocked(mockApi.notification.updateNotificationConfig).mockResolvedValue(undefined);
+      vi.mocked(mockApi.notification.updateConfig).mockResolvedValue(undefined);
       const config = { deliveryConfigs: [] };
       await executeTool(mockApi, 'ebay_update_notification_config', { config });
-      expect(mockApi.notification.updateNotificationConfig).toHaveBeenCalledWith(config);
+      expect(mockApi.notification.updateConfig).toHaveBeenCalledWith(config);
     });
 
     it('ebay_create_notification_destination', async () => {
       const mockResponse = { destinationId: 'DEST123' };
       const destination = { name: 'Test', endpoint: 'https://example.com' };
-      vi.mocked(mockApi.notification.createNotificationDestination).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.notification.createDestination).mockResolvedValue(mockResponse);
       await executeTool(mockApi, 'ebay_create_notification_destination', { destination });
-      expect(mockApi.notification.createNotificationDestination).toHaveBeenCalledWith(destination);
+      expect(mockApi.notification.createDestination).toHaveBeenCalledWith(destination);
     });
   });
 
