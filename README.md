@@ -73,13 +73,25 @@
 
 ## 📦 Installation
 
-### Option 1: NPM (Recommended)
+This project supports both **npm** and **pnpm** package managers. Choose the one you prefer.
+
+### Option 1: Global Installation
+
+#### Using npm (Recommended for most users)
 
 ```bash
 npm install -g ebay-api-mcp-server
 ```
 
+#### Using pnpm
+
+```bash
+pnpm add -g ebay-api-mcp-server
+```
+
 ### Option 2: From Source
+
+#### Using npm
 
 ```bash
 # Clone repository
@@ -92,6 +104,25 @@ npm install
 # Build project
 npm run build
 ```
+
+#### Using pnpm
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/ebay-api-mcp-server.git
+cd ebay-api-mcp-server
+
+# Install dependencies
+pnpm install
+
+# Build project
+pnpm run build
+```
+
+**Note:** All npm commands in this documentation can be replaced with pnpm commands:
+- `npm install` → `pnpm install`
+- `npm run <script>` → `pnpm run <script>` or `pnpm <script>`
+- `npm test` → `pnpm test`
 
 ---
 
@@ -119,6 +150,7 @@ EBAY_ENVIRONMENT=sandbox  # or 'production'
 
 #### STDIO Mode (Local Desktop)
 
+**Using npm:**
 ```bash
 # Development with hot reload
 npm run dev
@@ -127,8 +159,18 @@ npm run dev
 npm start
 ```
 
+**Using pnpm:**
+```bash
+# Development with hot reload
+pnpm dev
+
+# Production
+pnpm start
+```
+
 #### HTTP Mode (Remote Multi-User)
 
+**Using npm:**
 ```bash
 # Development
 npm run dev:http
@@ -136,6 +178,16 @@ npm run dev:http
 # Production
 npm run build
 npm run start:http
+```
+
+**Using pnpm:**
+```bash
+# Development
+pnpm dev:http
+
+# Production
+pnpm build
+pnpm start:http
 ```
 
 📚 **For detailed OAuth setup**, see [OAUTH-SETUP.md](./OAUTH-SETUP.md)

@@ -15,10 +15,10 @@ jobs:
       pull-requests: write # Needed to create PRs
 
     steps:
-      - name: Checkout main branch
+      - name: Checkout dev branch
         uses: actions/checkout@v4
         with:
-          ref: main # Checkout the main branch
+          ref: dev # Checkout the dev branch
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -70,8 +70,8 @@ jobs:
           # Push changes to the new branch
           git push origin "$BRANCH_NAME"
 
-          # Create a Pull Request to main branch
-          gh pr create --base main --head "$BRANCH_NAME" --title "Weekly Dependency Updates" --body "Automated dependency updates for the week of $(date +%Y-%m-%d)." --label "dependencies"
+          # Create a Pull Request to dev branch
+          gh pr create --base dev --head "$BRANCH_NAME" --title "chore: weekly dependency updates" --body "Automated dependency updates for the week of $(date +%Y-%m-%d)."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for gh cli and pushing to repo
           CI: true

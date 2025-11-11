@@ -6,7 +6,6 @@ yarn.lock
 build/
 dist/
 *.tsbuildinfo
-*.js
 
 # Environment variables
 .env

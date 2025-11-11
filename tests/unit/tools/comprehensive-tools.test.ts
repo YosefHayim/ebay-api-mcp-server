@@ -524,11 +524,8 @@ describe('Comprehensive Tools Coverage', () => {
       expect(mockApi.inventory.createOrReplaceInventoryItem).toHaveBeenCalledWith('SKU123', inventoryItem);
     });
 
-    it('ebay_delete_inventory_item', async () => {
-      vi.mocked(mockApi.inventory.deleteInventoryItem).mockResolvedValue(undefined);
-      await executeTool(mockApi, 'ebay_delete_inventory_item', { sku: 'SKU123' });
-      expect(mockApi.inventory.deleteInventoryItem).toHaveBeenCalledWith('SKU123');
-    });
+    // Note: There is no ebay_delete_inventory_item tool - inventory items are managed via create/update
+    // Deleted items should be removed from offers instead
 
     it('ebay_bulk_create_or_replace_inventory_item', async () => {
       const mockResponse = { responses: [] };
@@ -847,7 +844,7 @@ describe('Comprehensive Tools Coverage', () => {
       const mockResponse = { promotions: [] };
       vi.mocked(mockApi.marketing.getPromotions).mockResolvedValue(mockResponse);
       await executeTool(mockApi, 'ebay_get_promotions', { marketplaceId: 'EBAY_US' });
-      expect(mockApi.marketing.getPromotions).toHaveBeenCalledWith(undefined, 'EBAY_US');
+      expect(mockApi.marketing.getPromotions).toHaveBeenCalledWith('EBAY_US', undefined);
     });
   });
 
@@ -861,32 +858,41 @@ describe('Comprehensive Tools Coverage', () => {
 
     it('ebay_send_offer_to_interested_buyers', async () => {
       vi.mocked(mockApi.negotiation.sendOfferToInterestedBuyers).mockResolvedValue(undefined);
-      const offerData = { message: 'Test' };
-      await executeTool(mockApi, 'ebay_send_offer_to_interested_buyers', {
-        offerId: 'OFFER123',
-        offerData
-      });
-      expect(mockApi.negotiation.sendOfferToInterestedBuyers).toHaveBeenCalledWith('OFFER123', offerData);
+      const offerRequest = { message: 'Test' };
+      await executeTool(mockApi, 'ebay_send_offer_to_interested_buyers', offerRequest);
+      expect(mockApi.negotiation.sendOfferToInterestedBuyers).toHaveBeenCalledWith(offerRequest);
     });
 
     it('ebay_search_messages', async () => {
       const mockResponse = { messages: [] };
       vi.mocked(mockApi.message.searchMessages).mockResolvedValue(mockResponse);
-      await executeTool(mockApi, 'ebay_search_messages', { filter: 'test' });
-      expect(mockApi.message.searchMessages).toHaveBeenCalledWith('test', undefined, undefined);
+      await executeTool(mockApi, 'ebay_search_messages', {
+        conversation_type: 'FROM_MEMBERS'
+      });
+      expect(mockApi.message.searchMessages).toHaveBeenCalledWith(
+        { conversation_type: 'FROM_MEMBERS' },
+        undefined,
+        undefined
+      );
     });
 
     it('ebay_get_message', async () => {
       const mockResponse = { messageId: 'MSG123' };
       vi.mocked(mockApi.message.getMessage).mockResolvedValue(mockResponse);
-      await executeTool(mockApi, 'ebay_get_message', { messageId: 'MSG123' });
-      expect(mockApi.message.getMessage).toHaveBeenCalledWith('MSG123');
+      await executeTool(mockApi, 'ebay_get_message', {
+        conversation_id: 'CONV123',
+        conversation_type: 'FROM_MEMBERS'
+      });
+      expect(mockApi.message.getMessage).toHaveBeenCalledWith('CONV123');
     });
 
     it('ebay_send_message', async () => {
       vi.mocked(mockApi.message.sendMessage).mockResolvedValue(undefined);
-      const messageData = { messageText: 'Hello' };
-      await executeTool(mockApi, 'ebay_send_message', { messageData });
+      const messageData = {
+        message_text: 'Hello',
+        other_party_username: 'buyer123'
+      };
+      await executeTool(mockApi, 'ebay_send_message', messageData);
       expect(mockApi.message.sendMessage).toHaveBeenCalledWith(messageData);
     });
 
@@ -897,6 +903,472 @@ describe('Comprehensive Tools Coverage', () => {
         messageContent: 'Reply'
       });
       expect(mockApi.message.replyToMessage).toHaveBeenCalledWith('MSG123', 'Reply');
+    });
+  });
+
+  describe('Recommendation Tools', () => {
+    it('ebay_find_listing_recommendations', async () => {
+      const mockResponse = { listingRecommendations: [] };
+      vi.mocked(mockApi.recommendation.findListingRecommendations).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_find_listing_recommendations', {
+        listingIds: ['LISTING123'],
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.recommendation.findListingRecommendations).toHaveBeenCalledWith(
+        { listingIds: ['LISTING123'] },
+        undefined,
+        undefined,
+        undefined,
+        'EBAY_US'
+      );
+    });
+  });
+
+  describe('Analytics Tools', () => {
+    it('ebay_get_traffic_report', async () => {
+      const mockResponse = { records: [] };
+      vi.mocked(mockApi.analytics.getTrafficReport).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_traffic_report', {
+        dimension: 'LISTING',
+        filter: 'test',
+        metric: 'CLICK_THROUGH_RATE'
+      });
+      expect(mockApi.analytics.getTrafficReport).toHaveBeenCalledWith('LISTING', 'test', 'CLICK_THROUGH_RATE', undefined);
+    });
+
+    it('ebay_find_seller_standards_profiles', async () => {
+      const mockResponse = { standards: [] };
+      vi.mocked(mockApi.analytics.findSellerStandardsProfiles).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_find_seller_standards_profiles', {});
+      expect(mockApi.analytics.findSellerStandardsProfiles).toHaveBeenCalled();
+    });
+
+    it('ebay_get_seller_standards_profile', async () => {
+      const mockResponse = { status: 'GOOD' };
+      vi.mocked(mockApi.analytics.getSellerStandardsProfile).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_seller_standards_profile', {
+        program: 'CUSTOMER_SERVICE',
+        cycle: 'CURRENT'
+      });
+      expect(mockApi.analytics.getSellerStandardsProfile).toHaveBeenCalledWith('CUSTOMER_SERVICE', 'CURRENT');
+    });
+
+    it('ebay_get_customer_service_metric', async () => {
+      const mockResponse = { metrics: [] };
+      vi.mocked(mockApi.analytics.getCustomerServiceMetric).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_customer_service_metric', {
+        customerServiceMetricType: 'INQUIRY_RESPONSE',
+        evaluationType: 'CURRENT',
+        evaluationMarketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.analytics.getCustomerServiceMetric).toHaveBeenCalledWith(
+        'INQUIRY_RESPONSE',
+        'CURRENT',
+        'EBAY_US'
+      );
+    });
+  });
+
+  describe('Metadata Tools', () => {
+    it('ebay_get_automotive_parts_compatibility_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getAutomotivePartsCompatibilityPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_automotive_parts_compatibility_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getAutomotivePartsCompatibilityPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_category_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getCategoryPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_category_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getCategoryPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_extended_producer_responsibility_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getExtendedProducerResponsibilityPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_extended_producer_responsibility_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getExtendedProducerResponsibilityPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_hazardous_materials_labels', async () => {
+      const mockResponse = { labels: [] };
+      vi.mocked(mockApi.metadata.getHazardousMaterialsLabels).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_hazardous_materials_labels', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getHazardousMaterialsLabels).toHaveBeenCalledWith('EBAY_US');
+    });
+
+    it('ebay_get_item_condition_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getItemConditionPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_item_condition_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getItemConditionPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_listing_structure_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getListingStructurePolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_listing_structure_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getListingStructurePolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_negotiated_price_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getNegotiatedPricePolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_negotiated_price_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getNegotiatedPricePolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_product_safety_labels', async () => {
+      const mockResponse = { labels: [] };
+      vi.mocked(mockApi.metadata.getProductSafetyLabels).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_product_safety_labels', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getProductSafetyLabels).toHaveBeenCalledWith('EBAY_US');
+    });
+
+    it('ebay_get_regulatory_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getRegulatoryPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_regulatory_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getRegulatoryPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_shipping_cost_type_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getShippingCostTypePolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_shipping_cost_type_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getShippingCostTypePolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_classified_ad_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getClassifiedAdPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_classified_ad_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getClassifiedAdPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_currencies', async () => {
+      const mockResponse = { currencies: [] };
+      vi.mocked(mockApi.metadata.getCurrencies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_currencies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getCurrencies).toHaveBeenCalledWith('EBAY_US');
+    });
+
+    it('ebay_get_listing_type_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getListingTypePolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_listing_type_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getListingTypePolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_motors_listing_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getMotorsListingPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_motors_listing_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getMotorsListingPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_shipping_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getShippingPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_shipping_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getShippingPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_site_visibility_policies', async () => {
+      const mockResponse = { policies: [] };
+      vi.mocked(mockApi.metadata.getSiteVisibilityPolicies).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_site_visibility_policies', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.metadata.getSiteVisibilityPolicies).toHaveBeenCalledWith('EBAY_US', undefined);
+    });
+
+    it('ebay_get_compatibilities_by_specification', async () => {
+      const mockResponse = { compatibilities: [] };
+      const specification = { categoryId: '123' };
+      vi.mocked(mockApi.metadata.getCompatibilitiesBySpecification).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_compatibilities_by_specification', { specification });
+      expect(mockApi.metadata.getCompatibilitiesBySpecification).toHaveBeenCalledWith(specification);
+    });
+
+    it('ebay_get_compatibility_property_names', async () => {
+      const mockResponse = { names: [] };
+      const data = { categoryTreeId: '0' };
+      vi.mocked(mockApi.metadata.getCompatibilityPropertyNames).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_compatibility_property_names', { data });
+      expect(mockApi.metadata.getCompatibilityPropertyNames).toHaveBeenCalledWith(data);
+    });
+
+    it('ebay_get_compatibility_property_values', async () => {
+      const mockResponse = { values: [] };
+      const data = { categoryTreeId: '0' };
+      vi.mocked(mockApi.metadata.getCompatibilityPropertyValues).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_compatibility_property_values', { data });
+      expect(mockApi.metadata.getCompatibilityPropertyValues).toHaveBeenCalledWith(data);
+    });
+
+    it('ebay_get_multi_compatibility_property_values', async () => {
+      const mockResponse = { values: [] };
+      const data = { categoryTreeId: '0' };
+      vi.mocked(mockApi.metadata.getMultiCompatibilityPropertyValues).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_multi_compatibility_property_values', { data });
+      expect(mockApi.metadata.getMultiCompatibilityPropertyValues).toHaveBeenCalledWith(data);
+    });
+
+    it('ebay_get_product_compatibilities', async () => {
+      const mockResponse = { compatibilities: [] };
+      const data = { categoryTreeId: '0' };
+      vi.mocked(mockApi.metadata.getProductCompatibilities).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_product_compatibilities', { data });
+      expect(mockApi.metadata.getProductCompatibilities).toHaveBeenCalledWith(data);
+    });
+
+    it('ebay_get_sales_tax_jurisdictions', async () => {
+      const mockResponse = { jurisdictions: [] };
+      vi.mocked(mockApi.metadata.getSalesTaxJurisdictions).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_sales_tax_jurisdictions', {
+        countryCode: 'US'
+      });
+      expect(mockApi.metadata.getSalesTaxJurisdictions).toHaveBeenCalledWith('US');
+    });
+  });
+
+  describe('Taxonomy Tools', () => {
+    it('ebay_get_default_category_tree_id', async () => {
+      const mockResponse = { categoryTreeId: '0' };
+      vi.mocked(mockApi.taxonomy.getDefaultCategoryTreeId).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_default_category_tree_id', {
+        marketplaceId: 'EBAY_US'
+      });
+      expect(mockApi.taxonomy.getDefaultCategoryTreeId).toHaveBeenCalledWith('EBAY_US');
+    });
+
+    it('ebay_get_category_tree', async () => {
+      const mockResponse = { rootCategoryNode: {} };
+      vi.mocked(mockApi.taxonomy.getCategoryTree).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_category_tree', {
+        categoryTreeId: '0'
+      });
+      expect(mockApi.taxonomy.getCategoryTree).toHaveBeenCalledWith('0');
+    });
+
+    it('ebay_get_category_suggestions', async () => {
+      const mockResponse = { categorySuggestions: [] };
+      vi.mocked(mockApi.taxonomy.getCategorySuggestions).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_category_suggestions', {
+        categoryTreeId: '0',
+        query: 'iPhone'
+      });
+      expect(mockApi.taxonomy.getCategorySuggestions).toHaveBeenCalledWith('0', 'iPhone');
+    });
+
+    it('ebay_get_item_aspects_for_category', async () => {
+      const mockResponse = { aspects: [] };
+      vi.mocked(mockApi.taxonomy.getItemAspectsForCategory).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_item_aspects_for_category', {
+        categoryTreeId: '0',
+        categoryId: '123'
+      });
+      expect(mockApi.taxonomy.getItemAspectsForCategory).toHaveBeenCalledWith('0', '123');
+    });
+  });
+
+  describe('Dispute Tools', () => {
+    it('ebay_get_payment_dispute_summaries', async () => {
+      const mockResponse = { paymentDisputeSummaries: [] };
+      vi.mocked(mockApi.dispute.getPaymentDisputeSummaries).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_payment_dispute_summaries', {
+        order_id: 'ORDER123'
+      });
+      expect(mockApi.dispute.getPaymentDisputeSummaries).toHaveBeenCalledWith({ order_id: 'ORDER123' });
+    });
+
+    it('ebay_get_payment_dispute', async () => {
+      const mockResponse = { paymentDisputeId: 'DISPUTE123' };
+      vi.mocked(mockApi.dispute.getPaymentDispute).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_payment_dispute', {
+        paymentDisputeId: 'DISPUTE123'
+      });
+      expect(mockApi.dispute.getPaymentDispute).toHaveBeenCalledWith('DISPUTE123');
+    });
+
+    it('ebay_contest_payment_dispute', async () => {
+      vi.mocked(mockApi.dispute.contestPaymentDispute).mockResolvedValue(undefined);
+      const disputeData = { returnAddress: {} };
+      await executeTool(mockApi, 'ebay_contest_payment_dispute', {
+        paymentDisputeId: 'DISPUTE123',
+        disputeData
+      });
+      expect(mockApi.dispute.contestPaymentDispute).toHaveBeenCalledWith('DISPUTE123', disputeData);
+    });
+
+    it('ebay_accept_payment_dispute', async () => {
+      vi.mocked(mockApi.dispute.acceptPaymentDispute).mockResolvedValue(undefined);
+      const disputeData = { returnAddress: {} };
+      await executeTool(mockApi, 'ebay_accept_payment_dispute', {
+        paymentDisputeId: 'DISPUTE123',
+        disputeData
+      });
+      expect(mockApi.dispute.acceptPaymentDispute).toHaveBeenCalledWith('DISPUTE123', disputeData);
+    });
+  });
+
+  describe('Other API Tools', () => {
+    it('ebay_get_user', async () => {
+      const mockResponse = { userId: 'USER123' };
+      vi.mocked(mockApi.identity.getUser).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_user', {});
+      expect(mockApi.identity.getUser).toHaveBeenCalled();
+    });
+
+    it('ebay_get_listing_violations', async () => {
+      const mockResponse = { listingViolations: [] };
+      vi.mocked(mockApi.compliance.getListingViolations).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_listing_violations', {
+        complianceType: 'PRODUCT_ADOPTION'
+      });
+      expect(mockApi.compliance.getListingViolations).toHaveBeenCalledWith('PRODUCT_ADOPTION', undefined, undefined);
+    });
+
+    it('ebay_get_listing_violations_summary', async () => {
+      const mockResponse = { violationSummaries: [] };
+      vi.mocked(mockApi.compliance.getListingViolationsSummary).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_listing_violations_summary', {
+        complianceType: 'PRODUCT_ADOPTION'
+      });
+      expect(mockApi.compliance.getListingViolationsSummary).toHaveBeenCalledWith('PRODUCT_ADOPTION');
+    });
+
+    it('ebay_suppress_violation', async () => {
+      vi.mocked(mockApi.compliance.suppressViolation).mockResolvedValue(undefined);
+      await executeTool(mockApi, 'ebay_suppress_violation', {
+        listingViolationId: 'VIOLATION123'
+      });
+      expect(mockApi.compliance.suppressViolation).toHaveBeenCalledWith('VIOLATION123');
+    });
+
+    it('ebay_report_infringement', async () => {
+      const mockResponse = { reportId: 'REPORT123' };
+      const infringementData = { itemId: 'ITEM123' };
+      vi.mocked(mockApi.vero.reportInfringement).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_report_infringement', { infringementData });
+      expect(mockApi.vero.reportInfringement).toHaveBeenCalledWith(infringementData);
+    });
+
+    it('ebay_get_reported_items', async () => {
+      const mockResponse = { items: [] };
+      vi.mocked(mockApi.vero.getReportedItems).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_reported_items', { filter: 'test' });
+      expect(mockApi.vero.getReportedItems).toHaveBeenCalledWith('test', undefined, undefined);
+    });
+
+    it('ebay_translate', async () => {
+      const mockResponse = { translations: [] };
+      vi.mocked(mockApi.translation.translate).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_translate', {
+        from: 'en',
+        to: 'es',
+        translationContext: 'ITEM_TITLE',
+        text: ['Hello']
+      });
+      expect(mockApi.translation.translate).toHaveBeenCalledWith('en', 'es', 'ITEM_TITLE', ['Hello']);
+    });
+
+    it('ebay_create_shipping_quote', async () => {
+      const mockResponse = { quoteId: 'QUOTE123' };
+      const shippingQuoteRequest = { packageDetails: {} };
+      vi.mocked(mockApi.edelivery.createShippingQuote).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_create_shipping_quote', { shippingQuoteRequest });
+      expect(mockApi.edelivery.createShippingQuote).toHaveBeenCalledWith(shippingQuoteRequest);
+    });
+
+    it('ebay_get_shipping_quote', async () => {
+      const mockResponse = { quoteId: 'QUOTE123' };
+      vi.mocked(mockApi.edelivery.getShippingQuote).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_shipping_quote', {
+        shippingQuoteId: 'QUOTE123'
+      });
+      expect(mockApi.edelivery.getShippingQuote).toHaveBeenCalledWith('QUOTE123');
+    });
+  });
+
+  describe('Notification Tools', () => {
+    it('ebay_get_notification_config', async () => {
+      const mockResponse = { config: {} };
+      vi.mocked(mockApi.notification.getNotificationConfig).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_notification_config', {});
+      expect(mockApi.notification.getNotificationConfig).toHaveBeenCalled();
+    });
+
+    it('ebay_update_notification_config', async () => {
+      vi.mocked(mockApi.notification.updateNotificationConfig).mockResolvedValue(undefined);
+      const config = { deliveryConfigs: [] };
+      await executeTool(mockApi, 'ebay_update_notification_config', { config });
+      expect(mockApi.notification.updateNotificationConfig).toHaveBeenCalledWith(config);
+    });
+
+    it('ebay_create_notification_destination', async () => {
+      const mockResponse = { destinationId: 'DEST123' };
+      const destination = { name: 'Test', endpoint: 'https://example.com' };
+      vi.mocked(mockApi.notification.createNotificationDestination).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_create_notification_destination', { destination });
+      expect(mockApi.notification.createNotificationDestination).toHaveBeenCalledWith(destination);
+    });
+  });
+
+  describe('Feedback Tools', () => {
+    it('ebay_get_feedback', async () => {
+      const mockResponse = { feedbackId: 'FEEDBACK123' };
+      vi.mocked(mockApi.feedback.getFeedback).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_feedback', {
+        transactionId: 'TRANS123'
+      });
+      expect(mockApi.feedback.getFeedback).toHaveBeenCalledWith('TRANS123');
+    });
+
+    it('ebay_leave_feedback_for_buyer', async () => {
+      vi.mocked(mockApi.feedback.leaveFeedbackForBuyer).mockResolvedValue(undefined);
+      const feedbackData = { orderLineItemId: 'ITEM123', rating: 'POSITIVE' };
+      await executeTool(mockApi, 'ebay_leave_feedback_for_buyer', { feedbackData });
+      expect(mockApi.feedback.leaveFeedbackForBuyer).toHaveBeenCalledWith(feedbackData);
+    });
+
+    it('ebay_get_feedback_summary', async () => {
+      const mockResponse = { feedbackScore: 100 };
+      vi.mocked(mockApi.feedback.getFeedbackSummary).mockResolvedValue(mockResponse);
+      await executeTool(mockApi, 'ebay_get_feedback_summary', {});
+      expect(mockApi.feedback.getFeedbackSummary).toHaveBeenCalled();
     });
   });
 });
