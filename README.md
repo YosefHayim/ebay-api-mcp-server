@@ -1,39 +1,77 @@
-# Last Modified: Monday, November 10, 2025
-
 # eBay API MCP Server
 
-Model Context Protocol (MCP) server for eBay Sell APIs. Provides AI assistants with access to eBay's seller functionality including inventory management, order fulfillment, marketing campaigns, and account configuration.
+[![npm version](https://img.shields.io/npm/v/ebay-api-mcp-server.svg)](https://www.npmjs.com/package/ebay-api-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 
-## Features
+> **A comprehensive Model Context Protocol (MCP) server for eBay Sell APIs**
+> Enables AI assistants to manage eBay seller operations including inventory, orders, marketing, and analytics.
 
-This MCP server provides comprehensive access to eBay Sell APIs:
+---
 
-- **Account Management**: Configure seller policies, payment/return/fulfillment policies
-- **Inventory Management**: Create and manage inventory items and offers
-- **Order Management**: Process orders, create shipping fulfillments, issue refunds
-- **Marketing**: Manage marketing campaigns and promotions
-- **Analytics**: Access sales and traffic reports, seller standards profiles
-- **OAuth 2.1 Authorization**: Secure multi-user deployments with industry-standard OAuth
-- **And more**: See the "Available Tools" section below for a complete list.
+## 📋 Table of Contents
 
-## Transport Modes
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Usage](#usage)
+  - [STDIO Mode (Local)](#stdio-mode-local)
+  - [HTTP Mode with OAuth](#http-mode-with-oauth)
+  - [Authentication](#authentication)
+- [Available Tools](#available-tools)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Resources](#resources)
+- [License](#license)
 
-This server supports two operation modes:
+---
 
-1. **STDIO Transport** (default): For local desktop applications like Claude Desktop
-2. **HTTP Transport with OAuth 2.1**: For remote, multi-user deployments with secure authorization
+## ✨ Features
 
-📚 **For OAuth setup instructions**, see [OAUTH-SETUP.md](./OAUTH-SETUP.md)
+### Core Capabilities
 
-## Prerequisites
+- **🏪 Account Management** - Configure seller policies, payment/return/fulfillment settings, tax configuration
+- **📦 Inventory Management** - Create and manage inventory items, offers, product compatibility, locations
+- **📬 Order Management** - Process orders, create shipping fulfillments, issue refunds, handle disputes
+- **📈 Marketing & Promotions** - Manage campaigns, promotions, and listing recommendations
+- **📊 Analytics & Reporting** - Access sales reports, traffic data, seller standards, customer service metrics
+- **💬 Communication** - Handle buyer messages, negotiations, feedback, and notifications
+- **🔍 Metadata & Taxonomy** - Browse eBay categories, get policy information, compatibility data
 
-- **Node.js 18 or higher**
-- **eBay Developer account** with API credentials from the [eBay Developer Portal](https://developer.ebay.com/my/keys)
-- **(Optional) OAuth Authorization Server** for HTTP mode with authorization (e.g., Keycloak, Auth0, Okta)
+### Transport Modes
 
-## Installation
+- **STDIO Transport** (default) - For local desktop applications like Claude Desktop
+- **HTTP Transport with OAuth 2.1** - For remote, multi-user deployments with secure authorization
 
-### Option 1: NPM Package (Recommended)
+### Technical Features
+
+- ✅ **170+ MCP Tools** - Comprehensive coverage of eBay Sell APIs
+- ✅ **OAuth 2.0 Integration** - Automatic token refresh and management
+- ✅ **Type-Safe** - Full TypeScript implementation with OpenAPI-generated schemas
+- ✅ **Dual Authentication** - User tokens (high limits) or client credentials (fallback)
+- ✅ **Environment Support** - Sandbox and production configurations
+- ✅ **Scope Validation** - Automatic validation of OAuth scopes per environment
+- ✅ **Token Persistence** - File-based storage with automatic refresh
+
+---
+
+## 📋 Prerequisites
+
+- **Node.js** 18.0.0 or higher
+- **eBay Developer Account** with API credentials ([Get credentials](https://developer.ebay.com/my/keys))
+- **OAuth Authorization Server** (optional, for HTTP mode) - Keycloak, Auth0, Okta, etc.
+
+---
+
+## 📦 Installation
+
+### Option 1: NPM (Recommended)
 
 ```bash
 npm install -g ebay-api-mcp-server
@@ -42,28 +80,32 @@ npm install -g ebay-api-mcp-server
 ### Option 2: From Source
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/yourusername/ebay-api-mcp-server.git
 cd ebay-api-mcp-server
 
 # Install dependencies
 npm install
 
-# Build the project
+# Build project
 npm run build
 ```
 
-## Quick Start
+---
+
+## 🚀 Quick Start
 
 ### 1. Get eBay API Credentials
 
-1. Create an eBay Developer account at [developer.ebay.com](https://developer.ebay.com/)
-2. Create an application to get your Client ID and Client Secret
-3. Choose between Sandbox (testing) or Production environment
+1. Visit [eBay Developer Portal](https://developer.ebay.com/)
+2. Create an application to obtain:
+   - Client ID
+   - Client Secret
+3. Choose environment: **Sandbox** (testing) or **Production**
 
-### 2. Configuration
+### 2. Configure Environment
 
-Create a `.env` file with your eBay API credentials:
+Create a `.env` file in the project root:
 
 ```env
 EBAY_CLIENT_ID=your_client_id_here
@@ -71,69 +113,126 @@ EBAY_CLIENT_SECRET=your_client_secret_here
 EBAY_ENVIRONMENT=sandbox  # or 'production'
 ```
 
-### Manual Token Configuration
-
-For development and testing, you can also configure the server by manually creating a `.ebay-mcp-tokens.json` file in your home directory. This allows the server to use your OAuth tokens without requiring you to use the `ebay_set_user_tokens` tool.
-
-You can use the `create_token_template_file` tool to generate a template file in the root of the project. Simply copy this file to your home directory and fill in the values.
-
-For detailed instructions, see the [Manual Token Configuration guide](./docs/auth/manual-token-config.md).
-
 ### 3. Run the Server
 
 #### STDIO Mode (Local Desktop)
 
 ```bash
-# Development mode with hot reload
+# Development with hot reload
 npm run dev
 
-# Production mode
+# Production
 npm start
 ```
 
-The server will output "eBay API MCP Server running on stdio" to indicate it's ready.
-
-### 4. Quick Start Example
-
-Once the server is running, you can use it through any MCP-compatible AI assistant (like Claude Desktop). Here's a typical workflow:
-
-**Example 1: List Your Inventory**
-```
-AI: Use ebay_get_inventory_items to retrieve all inventory items
-Server Response: Returns array of inventory items with SKU, quantity, pricing
-```
-
-**Example 2: Create a New Listing**
-```
-AI: 1. Use ebay_create_inventory_item with SKU "WIDGET-001" and product details
-    2. Use ebay_create_offer with pricing and policy IDs
-    3. Use ebay_publish_offer to make it live on eBay
-Server Response: Returns offer ID and listing URL
-```
-
-**Example 3: Process an Order**
-```
-AI: 1. Use ebay_get_orders to retrieve pending orders
-    2. Use ebay_create_shipping_fulfillment with tracking number
-Server Response: Returns fulfillment ID and shipping confirmation
-```
-
-For detailed usage of specific tools, see the "Available Tools" section below.
-
-#### HTTP Mode with OAuth (Remote Multi-User)
-
-See [OAUTH-SETUP.md](./OAUTH-SETUP.md) for detailed OAuth configuration instructions.
+#### HTTP Mode (Remote Multi-User)
 
 ```bash
-# Development mode
+# Development
 npm run dev:http
 
-# Production mode
+# Production
 npm run build
 npm run start:http
 ```
 
-**Quick OAuth Test with Keycloak:**
+📚 **For detailed OAuth setup**, see [OAUTH-SETUP.md](./OAUTH-SETUP.md)
+
+### 4. Verify Installation
+
+The server will output:
+```
+eBay API MCP Server running on stdio
+```
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `EBAY_CLIENT_ID` | ✅ | - | Your eBay application Client ID |
+| `EBAY_CLIENT_SECRET` | ✅ | - | Your eBay application Client Secret |
+| `EBAY_ENVIRONMENT` | ✅ | `sandbox` | API environment: `sandbox` or `production` |
+| `EBAY_REDIRECT_URI` | ❌ | - | OAuth redirect URI (for user authorization flow) |
+| `MCP_HOST` | ❌ | `localhost` | HTTP server host (HTTP mode only) |
+| `MCP_PORT` | ❌ | `3000` | HTTP server port (HTTP mode only) |
+| `OAUTH_ENABLED` | ❌ | `true` | Enable OAuth authorization (HTTP mode only) |
+| `OAUTH_AUTH_SERVER_URL` | ❌ | - | Authorization server URL (HTTP mode with OAuth) |
+| `OAUTH_CLIENT_ID` | ❌ | - | MCP server's OAuth client ID (HTTP mode with OAuth) |
+| `OAUTH_CLIENT_SECRET` | ❌ | - | MCP server's OAuth client secret (HTTP mode with OAuth) |
+
+### Manual Token Configuration
+
+For development, you can manually configure tokens without using the `ebay_set_user_tokens` tool:
+
+1. Use the `create_token_template_file` tool to generate a template
+2. Copy `.ebay-mcp-tokens.json` to your home directory
+3. Fill in your OAuth token values
+
+📚 **See [Manual Token Configuration Guide](./docs/auth/manual-token-config.md)** for details.
+
+---
+
+## 📖 Usage
+
+### STDIO Mode (Local)
+
+#### With Claude Desktop
+
+1. Locate your Claude Desktop config file:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+
+2. Add server configuration:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-api-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_client_id",
+        "EBAY_CLIENT_SECRET": "your_client_secret",
+        "EBAY_ENVIRONMENT": "sandbox"
+      }
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop
+
+#### With Gemini CLI
+
+1. Create or edit `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-api-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_client_id",
+        "EBAY_CLIENT_SECRET": "your_client_secret",
+        "EBAY_ENVIRONMENT": "sandbox"
+      }
+    }
+  }
+}
+```
+
+2. Restart Gemini CLI or run `/mcp refresh`
+
+### HTTP Mode with OAuth
+
+See [OAUTH-SETUP.md](./OAUTH-SETUP.md) for comprehensive OAuth configuration instructions.
+
+**Quick Test with Keycloak:**
 
 ```bash
 # Terminal 1: Start Keycloak
@@ -142,28 +241,247 @@ docker run -p 127.0.0.1:8080:8080 \
   -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
   quay.io/keycloak/keycloak start-dev
 
-# Terminal 2: Configure .env and start server
+# Terminal 2: Configure and start MCP server
 cp .env.example .env
-# Edit .env with your eBay and OAuth credentials
+# Edit .env with eBay and OAuth credentials
 npm run dev:http
 ```
 
-## Core Concepts
+### Authentication
 
-### What is MCP (Model Context Protocol)?
+#### User Tokens (Recommended)
 
-MCP is a standardized protocol that allows AI assistants to interact with external tools and services. This server implements MCP to give AI assistants access to eBay's seller APIs.
+**Benefits:**
+- ✅ Higher rate limits (10,000-50,000 requests/day)
+- ✅ Full access to all seller operations
+- ✅ Automatic token refresh (valid ~18 months)
 
-### Key Components
+**Setup:**
 
-1. **MCP Server** - This application acts as a bridge between AI assistants and eBay APIs
-2. **Tools** - Individual functions exposed to AI assistants (e.g., `ebay_get_orders`, `ebay_create_offer`)
-3. **OAuth Authentication** - Secure token-based authentication for accessing eBay APIs
-4. **Transport Modes** - Two ways to run the server:
-   - **STDIO** (default): For local desktop use with apps like Claude Desktop
-   - **HTTP with OAuth 2.1**: For remote, multi-user deployments
+1. Generate OAuth URL:
+   ```
+   Use tool: ebay_get_oauth_url
+   ```
 
-### How It Works
+2. User authorizes in browser
+
+3. Set tokens:
+   ```
+   Use tool: ebay_set_user_tokens
+   Parameters:
+     - accessToken: [token from OAuth flow]
+     - refreshToken: [refresh token from OAuth flow]
+   ```
+
+#### Client Credentials (Fallback)
+
+**Limitations:**
+- ⚠️ Lower rate limits (1,000 requests/day)
+- ⚠️ Limited to app-level operations
+- ✅ Automatic (no user authorization needed)
+
+Used automatically when user tokens are unavailable.
+
+#### OAuth Scopes
+
+**Important:** Production and Sandbox environments support different OAuth scopes.
+
+- **Production**: 27 unique scopes
+- **Sandbox**: 35 unique scopes (includes Buy API, extended Identity scopes)
+- **Common**: 21 scopes available in both
+
+**Automatic Validation:**
+- ✅ Validates scopes when generating OAuth URLs
+- ✅ Warns about environment-incompatible scopes
+- ✅ Environment-specific defaults loaded automatically
+
+📚 **See [OAuth Scope Differences](./docs/auth/scope-differences.md)** for detailed scope information.
+
+---
+
+## 🛠️ Available Tools
+
+### Authentication & Management
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_oauth_url` | Generate OAuth authorization URL for user consent |
+| `ebay_set_user_tokens` | Store user access and refresh tokens |
+| `ebay_get_token_status` | Check current authentication status |
+| `ebay_clear_tokens` | Clear all stored tokens |
+| `create_token_template_file` | Generate token configuration template |
+
+### Account Management (28 tools)
+
+<details>
+<summary><b>View Account Tools</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_custom_policies` | Retrieve custom policies |
+| `ebay_get_fulfillment_policies` | Get fulfillment policies |
+| `ebay_create_fulfillment_policy` | Create new fulfillment policy |
+| `ebay_update_fulfillment_policy` | Update fulfillment policy |
+| `ebay_delete_fulfillment_policy` | Delete fulfillment policy |
+| `ebay_get_payment_policies` | Get payment policies |
+| `ebay_create_payment_policy` | Create new payment policy |
+| `ebay_update_payment_policy` | Update payment policy |
+| `ebay_delete_payment_policy` | Delete payment policy |
+| `ebay_get_return_policies` | Get return policies |
+| `ebay_create_return_policy` | Create new return policy |
+| `ebay_update_return_policy` | Update return policy |
+| `ebay_delete_return_policy` | Delete return policy |
+| `ebay_get_kyc` | Get KYC (Know Your Customer) status |
+| `ebay_opt_in_to_payments_program` | Opt into payments program |
+| `ebay_get_payments_program_status` | Check payments program status |
+| `ebay_get_rate_tables` | Retrieve rate tables |
+| `ebay_create_or_replace_sales_tax` | Configure sales tax |
+| `ebay_bulk_create_or_replace_sales_tax` | Bulk configure sales tax |
+| `ebay_delete_sales_tax` | Delete sales tax configuration |
+| `ebay_get_sales_tax` | Get sales tax for jurisdiction |
+| `ebay_get_sales_taxes` | Get all sales tax configurations |
+| `ebay_get_subscription` | Get subscription information |
+| `ebay_opt_in_to_program` | Opt into seller program |
+| `ebay_opt_out_of_program` | Opt out of seller program |
+| `ebay_get_opted_in_programs` | Get opted-in programs |
+
+</details>
+
+### Inventory Management (30 tools)
+
+<details>
+<summary><b>View Inventory Tools</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_inventory_items` | Retrieve all inventory items |
+| `ebay_get_inventory_item` | Get single inventory item by SKU |
+| `ebay_create_inventory_item` | Create or replace inventory item |
+| `ebay_bulk_create_or_replace_inventory_item` | Bulk create/update items |
+| `ebay_bulk_get_inventory_item` | Bulk retrieve items |
+| `ebay_get_offers` | Get all offers |
+| `ebay_get_offer` | Get single offer |
+| `ebay_create_offer` | Create new offer |
+| `ebay_update_offer` | Update existing offer |
+| `ebay_delete_offer` | Delete offer |
+| `ebay_publish_offer` | Publish offer to eBay |
+| `ebay_withdraw_offer` | Withdraw published offer |
+| `ebay_bulk_create_offer` | Bulk create offers |
+| `ebay_bulk_publish_offer` | Bulk publish offers |
+| `ebay_bulk_update_price_quantity` | Bulk update pricing and quantity |
+| `ebay_get_listing_fees` | Preview listing fees |
+| `ebay_bulk_migrate_listing` | Migrate listings to inventory model |
+| `ebay_get_product_compatibility` | Get product compatibility |
+| `ebay_create_or_replace_product_compatibility` | Set product compatibility |
+| `ebay_delete_product_compatibility` | Remove product compatibility |
+| `ebay_get_inventory_item_group` | Get item group (variations) |
+| `ebay_create_or_replace_inventory_item_group` | Create/update item group |
+| `ebay_delete_inventory_item_group` | Delete item group |
+| `ebay_get_inventory_locations` | Get all inventory locations |
+| `ebay_get_inventory_location` | Get single location |
+| `ebay_create_or_replace_inventory_location` | Create/update location |
+| `ebay_delete_inventory_location` | Delete location |
+| `ebay_disable_inventory_location` | Disable location |
+| `ebay_enable_inventory_location` | Enable location |
+| `ebay_update_location_details` | Update location details |
+
+</details>
+
+### Order Management (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_orders` | Retrieve orders with filters |
+| `ebay_get_order` | Get single order details |
+| `ebay_create_shipping_fulfillment` | Create shipping fulfillment |
+| `ebay_issue_refund` | Issue refund for order |
+
+### Marketing & Promotions (9 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_campaigns` | Get marketing campaigns |
+| `ebay_get_campaign` | Get single campaign |
+| `ebay_pause_campaign` | Pause running campaign |
+| `ebay_resume_campaign` | Resume paused campaign |
+| `ebay_end_campaign` | End campaign permanently |
+| `ebay_update_campaign_identification` | Update campaign name |
+| `ebay_clone_campaign` | Clone existing campaign |
+| `ebay_get_promotions` | Get promotions |
+| `ebay_find_listing_recommendations` | Get listing recommendations |
+
+### Analytics & Reporting (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_traffic_report` | Get traffic report data |
+| `ebay_find_seller_standards_profiles` | Get seller standards profiles |
+| `ebay_get_seller_standards_profile` | Get specific standards profile |
+| `ebay_get_customer_service_metric` | Get customer service metrics |
+
+### Metadata & Policies (22 tools)
+
+<details>
+<summary><b>View Metadata Tools</b></summary>
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_automotive_parts_compatibility_policies` | Get auto parts policies |
+| `ebay_get_category_policies` | Get category-specific policies |
+| `ebay_get_extended_producer_responsibility_policies` | Get EPR policies |
+| `ebay_get_hazardous_materials_labels` | Get hazmat labels |
+| `ebay_get_item_condition_policies` | Get item condition policies |
+| `ebay_get_listing_structure_policies` | Get listing structure policies |
+| `ebay_get_negotiated_price_policies` | Get negotiated price policies |
+| `ebay_get_product_safety_labels` | Get product safety labels |
+| `ebay_get_regulatory_policies` | Get regulatory policies |
+| `ebay_get_shipping_cost_type_policies` | Get shipping cost policies |
+| `ebay_get_classified_ad_policies` | Get classified ad policies |
+| `ebay_get_currencies` | Get supported currencies |
+| `ebay_get_listing_type_policies` | Get listing type policies |
+| `ebay_get_motors_listing_policies` | Get motors listing policies |
+| `ebay_get_shipping_policies` | Get shipping policies |
+| `ebay_get_site_visibility_policies` | Get site visibility policies |
+| `ebay_get_compatibilities_by_specification` | Get compatibilities |
+| `ebay_get_compatibility_property_names` | Get compatibility property names |
+| `ebay_get_compatibility_property_values` | Get property values |
+| `ebay_get_multi_compatibility_property_values` | Get multiple property values |
+| `ebay_get_product_compatibilities` | Get product compatibilities |
+| `ebay_get_sales_tax_jurisdictions` | Get sales tax jurisdictions |
+
+</details>
+
+### Taxonomy (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_default_category_tree_id` | Get default category tree |
+| `ebay_get_category_tree` | Get category tree structure |
+| `ebay_get_category_suggestions` | Get category suggestions |
+| `ebay_get_item_aspects_for_category` | Get required item aspects |
+
+### Communication (3 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ebay_get_offers_to_buyers` | Get offers to buyers (negotiations) |
+| `ebay_send_offer_to_interested_buyers` | Send counter-offer |
+| `ebay_search_messages` | Search buyer-seller messages |
+
+### Utility Tools
+
+| Tool | Description |
+|------|-------------|
+| `search` | Search the web (ChatGPT, Claude, Claude Code) |
+| `fetch` | Fetch web content (ChatGPT, Claude, Claude Code) |
+
+**Total: 170+ tools**
+
+---
+
+## 📚 API Reference
+
+### Architecture Overview
 
 ```
 ┌─────────────┐         ┌──────────────┐         ┌─────────────┐
@@ -172,364 +490,461 @@ MCP is a standardized protocol that allows AI assistants to interact with extern
 └─────────────┘         └──────────────┘         └─────────────┘
 ```
 
-1. AI assistant sends MCP tool requests (e.g., "get my orders")
-2. MCP server validates and forwards requests to eBay APIs
-3. eBay processes the request and returns data
-4. MCP server formats the response for the AI assistant
-5. AI assistant uses the data to help you
+### Request Flow
 
-### Authentication Flow
-
-This server supports two authentication modes:
-
-**User Tokens (Recommended):**
-- Higher rate limits (10,000-50,000 requests/day)
-- Full access to all seller operations
-- Requires OAuth user authorization
-- Tokens automatically refresh
-
-**Client Credentials (Fallback):**
-- Lower rate limits (1,000 requests/day)
-- Limited to app-level operations
-- No user authorization needed
-- Used automatically when user tokens unavailable
-
-### OAuth Scopes & Environment Differences
-
-**Important:** eBay's Production and Sandbox environments support different OAuth scopes. The server automatically validates scopes and warns you when requesting environment-incompatible scopes.
-
-**Key Differences:**
-- **Production**: 27 unique scopes (includes `sell.edelivery`, `commerce.shipping`)
-- **Sandbox**: 35 unique scopes (includes Buy API scopes, extended Identity scopes, `sell.item.draft`)
-- **Common**: 21 scopes available in both environments
-
-**Scope Validation:**
-- ✅ Automatic validation when generating OAuth URLs
-- ✅ Warnings when loading tokens with environment-incompatible scopes
-- ✅ Environment-specific default scopes loaded from JSON files
-
-**Recommendation:** Use default scopes (don't specify `scopes` parameter) to automatically get environment-appropriate scopes.
-
-📚 **For detailed scope information**, see [docs/auth/scope-differences.md](./docs/auth/scope-differences.md)
+1. **AI Assistant** sends MCP tool request (e.g., "get my orders")
+2. **MCP Server** validates request and calls appropriate eBay API
+3. **eBay API** processes request and returns data
+4. **MCP Server** formats response for AI assistant
+5. **AI Assistant** uses data to help user
 
 ### API Categories
 
-The server organizes eBay's APIs into logical categories:
+| Category | Description | API Version |
+|----------|-------------|-------------|
+| **Account** | Seller policies, payment settings, tax configuration | v1 |
+| **Inventory** | Manage products, offers, locations | v1 |
+| **Fulfillment** | Process orders, create shipments, issue refunds | v1 |
+| **Marketing** | Campaigns, promotions, recommendations | v1 |
+| **Analytics** | Sales reports, traffic data, seller metrics | v1 |
+| **Metadata** | Category policies, compatibility rules | v1 |
+| **Taxonomy** | Browse eBay's category tree | v1 |
+| **Communication** | Messages, negotiations, feedback, notifications | v1/v1_beta |
 
-- **Account**: Seller policies, payment settings, tax configuration
-- **Inventory**: Manage products, offers, and locations
-- **Fulfillment**: Process orders, create shipments, issue refunds
-- **Marketing**: Campaigns, promotions, and recommendations
-- **Analytics**: Sales reports, traffic data, seller metrics
-- **Metadata**: Category policies, compatibility rules
-- **Taxonomy**: Browse eBay's category tree
-- **Communication**: Messages, negotiations, feedback
+---
 
-## Available Tools
+## 💡 Examples
 
-This MCP server exposes the following tools:
+### Example 1: List Inventory
 
-### General Tools
+```typescript
+// AI uses tool: ebay_get_inventory_items
+{
+  "limit": 100,
+  "offset": 0
+}
 
-| Tool | Supported AI |
-|---|---|
-| `search` | ChatGPT, Claude, Claude Code |
-| `fetch` | ChatGPT, Claude, Claude Code |
-| `ebay_get_oauth_url` | Claude, Claude Code |
-| `ebay_set_user_tokens` | Claude, Claude Code |
-| `ebay_get_token_status` | Claude, Claude Code |
-| `ebay_clear_tokens` | Claude, Claude Code |
-| `create_token_template_file` | Claude, Claude Code |
-
-### Account API
-- `ebay_get_custom_policies`
-- `ebay_get_fulfillment_policies`
-- `ebay_get_payment_policies`
-- `ebay_get_return_policies`
-- `ebay_create_fulfillment_policy`
-- `ebay_get_fulfillment_policy`
-- `ebay_get_fulfillment_policy_by_name`
-- `ebay_update_fulfillment_policy`
-- `ebay_delete_fulfillment_policy`
-- `ebay_create_payment_policy`
-- `ebay_get_payment_policy`
-- `ebay_get_payment_policy_by_name`
-- `ebay_update_payment_policy`
-- `ebay_delete_payment_policy`
-- `ebay_create_return_policy`
-- `ebay_get_return_policy`
-- `ebay_get_return_policy_by_name`
-- `ebay_update_return_policy`
-- `ebay_delete_return_policy`
-- `ebay_create_custom_policy`
-- `ebay_get_custom_policy`
-- `ebay_update_custom_policy`
-- `ebay_delete_custom_policy`
-- `ebay_get_kyc`
-- `ebay_opt_in_to_payments_program`
-- `ebay_get_payments_program_status`
-- `ebay_get_rate_tables`
-- `ebay_create_or_replace_sales_tax`
-- `ebay_bulk_create_or_replace_sales_tax`
-- `ebay_delete_sales_tax`
-- `ebay_get_sales_tax`
-- `ebay_get_sales_taxes`
-- `ebay_get_subscription`
-- `ebay_opt_in_to_program`
-- `ebay_opt_out_of_program`
-- `ebay_get_opted_in_programs`
-
-### Inventory API
-- `ebay_get_inventory_items`
-- `ebay_get_inventory_item`
-- `ebay_create_inventory_item`
-- `ebay_get_offers`
-- `ebay_create_offer`
-- `ebay_publish_offer`
-- `ebay_bulk_create_or_replace_inventory_item`
-- `ebay_bulk_get_inventory_item`
-- `ebay_bulk_update_price_quantity`
-- `ebay_get_product_compatibility`
-- `ebay_create_or_replace_product_compatibility`
-- `ebay_delete_product_compatibility`
-- `ebay_get_inventory_item_group`
-- `ebay_create_or_replace_inventory_item_group`
-- `ebay_delete_inventory_item_group`
-- `ebay_get_inventory_locations`
-- `ebay_get_inventory_location`
-- `ebay_create_or_replace_inventory_location`
-- `ebay_delete_inventory_location`
-- `ebay_disable_inventory_location`
-- `ebay_enable_inventory_location`
-- `ebay_update_location_details`
-- `ebay_get_offer`
-- `ebay_update_offer`
-- `ebay_delete_offer`
-- `ebay_withdraw_offer`
-- `ebay_bulk_create_offer`
-- `ebay_bulk_publish_offer`
-- `ebay_get_listing_fees`
-- `ebay_bulk_migrate_listing`
-
-### Fulfillment API
-- `ebay_get_orders`
-- `ebay_get_order`
-- `ebay_create_shipping_fulfillment`
-- `ebay_issue_refund`
-
-### Marketing API
-- `ebay_get_campaigns`
-- `ebay_get_campaign`
-- `ebay_pause_campaign`
-- `ebay_resume_campaign`
-- `ebay_end_campaign`
-- `ebay_update_campaign_identification`
-- `ebay_clone_campaign`
-- `ebay_get_promotions`
-- `ebay_find_listing_recommendations`
-
-### Analytics API
-- `ebay_get_traffic_report`
-- `ebay_find_seller_standards_profiles`
-- `ebay_get_seller_standards_profile`
-- `ebay_get_customer_service_metric`
-
-### Metadata API
-- `ebay_get_automotive_parts_compatibility_policies`
-- `ebay_get_category_policies`
-- `ebay_get_extended_producer_responsibility_policies`
-- `ebay_get_hazardous_materials_labels`
-- `ebay_get_item_condition_policies`
-- `ebay_get_listing_structure_policies`
-- `ebay_get_negotiated_price_policies`
-- `ebay_get_product_safety_labels`
-- `ebay_get_regulatory_policies`
-- `ebay_get_shipping_cost_type_policies`
-- `ebay_get_classified_ad_policies`
-- `ebay_get_currencies`
-- `ebay_get_listing_type_policies`
-- `ebay_get_motors_listing_policies`
-- `ebay_get_shipping_policies`
-- `ebay_get_site_visibility_policies`
-- `ebay_get_compatibilities_by_specification`
-- `ebay_get_compatibility_property_names`
-- `ebay_get_compatibility_property_values`
-- `ebay_get_multi_compatibility_property_values`
-- `ebay_get_product_compatibilities`
-- `ebay_get_sales_tax_jurisdictions`
-
-### Taxonomy API
-- `ebay_get_default_category_tree_id`
-- `ebay_get_category_tree`
-- `ebay_get_category_suggestions`
-- `ebay_get_item_aspects_for_category`
-
-### Communication API
-- `ebay_get_offers_to_buyers`
-- `ebay_send_offer_to_interested_buyers`
-- `ebay_search_messages`
-
-## Endpoint Status
-
-| Endpoint | Last Updated | Production Ready | Tested |
-|---|---|---|---|
-| Account | 2025-11-10 | Yes | No |
-| Inventory | 2025-11-10 | Yes | No |
-| Fulfillment | 2025-11-10 | Yes | No |
-| Marketing | 2025-11-10 | Yes | No |
-| Analytics | 2025-11-10 | Yes | No |
-| Metadata | 2025-11-10 | Yes | No |
-| Taxonomy | 2025-11-10 | Yes | No |
-| Communication | 2025-11-10 | Yes | No |
-
-## Development
-
-```bash
-# Type check
-npm run typecheck
-
-# Watch mode for development
-npm run watch
-
-# Clean build artifacts
-npm run clean
-
-# Rebuild
-npm run build
+// Server Response
+{
+  "inventoryItems": [
+    {
+      "sku": "WIDGET-001",
+      "product": {
+        "title": "Premium Widget",
+        "description": "High-quality widget"
+      },
+      "availability": {
+        "shipToLocationAvailability": {
+          "quantity": 50
+        }
+      }
+    }
+  ]
+}
 ```
 
-## Project Structure
+### Example 2: Create Listing
+
+```typescript
+// Step 1: Create inventory item
+// Tool: ebay_create_inventory_item
+{
+  "sku": "WIDGET-001",
+  "inventoryItem": {
+    "product": {
+      "title": "Premium Widget",
+      "description": "High-quality widget",
+      "aspects": {
+        "Brand": ["MyBrand"],
+        "Color": ["Blue"]
+      }
+    },
+    "condition": "NEW",
+    "availability": {
+      "shipToLocationAvailability": {
+        "quantity": 100
+      }
+    }
+  }
+}
+
+// Step 2: Create offer
+// Tool: ebay_create_offer
+{
+  "offer": {
+    "sku": "WIDGET-001",
+    "marketplaceId": "EBAY_US",
+    "format": "FIXED_PRICE",
+    "categoryId": "12345",
+    "pricingSummary": {
+      "price": {
+        "currency": "USD",
+        "value": "29.99"
+      }
+    },
+    "listingPolicies": {
+      "fulfillmentPolicyId": "123456789",
+      "paymentPolicyId": "987654321",
+      "returnPolicyId": "456789123"
+    }
+  }
+}
+
+// Step 3: Publish offer
+// Tool: ebay_publish_offer
+{
+  "offerId": "1234567890"
+}
+
+// Result: Live listing on eBay
+```
+
+### Example 3: Process Order
+
+```typescript
+// Step 1: Get pending orders
+// Tool: ebay_get_orders
+{
+  "filter": "orderfulfillmentstatus:{NOT_STARTED}",
+  "limit": 50
+}
+
+// Step 2: Create shipping fulfillment
+// Tool: ebay_create_shipping_fulfillment
+{
+  "orderId": "12-34567-89012",
+  "fulfillment": {
+    "lineItems": [
+      {
+        "lineItemId": "123456789",
+        "quantity": 1
+      }
+    ],
+    "shippingCarrierCode": "USPS",
+    "trackingNumber": "1234567890"
+  }
+}
+
+// Result: Order marked as shipped, buyer receives tracking
+```
+
+### Example 4: Manage Marketing Campaign
+
+```typescript
+// Get campaigns
+// Tool: ebay_get_campaigns
+{
+  "campaignStatus": "RUNNING"
+}
+
+// Pause campaign
+// Tool: ebay_pause_campaign
+{
+  "campaignId": "987654321"
+}
+
+// Clone campaign with new budget
+// Tool: ebay_clone_campaign
+{
+  "campaignId": "987654321",
+  "cloneData": {
+    "campaignName": "Holiday Sale 2025",
+    "fundingStrategy": {
+      "fundingModel": "COST_PER_SALE",
+      "bidPercentage": "15.0"
+    }
+  }
+}
+```
+
+---
+
+## 🏗️ Architecture
+
+### Project Structure
 
 ```
 ebay-api-mcp-server/
 ├── src/
-│   ├── api/                          # eBay API client implementations
+│   ├── index.ts                      # STDIO MCP server entry point
+│   ├── server-http.ts                # HTTP MCP server with OAuth
+│   ├── api/                          # eBay API implementations
 │   │   ├── account-management/       # Account API
-│   │   ├── analytics-and-report/    # Analytics API
-│   │   ├── communication/            # Feedback, Message, Negotiation, Notification APIs
 │   │   ├── listing-management/       # Inventory API
-│   │   ├── listing-metadata/         # Metadata & Taxonomy APIs
-│   │   ├── marketing-and-promotions/ # Marketing & Recommendation APIs
 │   │   ├── order-management/         # Fulfillment & Dispute APIs
-│   │   ├── other/                    # Compliance, Identity, VERO, Translation, eDelivery
-│   │   ├── client.ts                 # HTTP client with OAuth integration
+│   │   ├── marketing-and-promotions/ # Marketing & Recommendation
+│   │   ├── analytics-and-report/     # Analytics API
+│   │   ├── listing-metadata/         # Metadata & Taxonomy
+│   │   ├── communication/            # Messages, Feedback, Negotiation
+│   │   ├── other/                    # Compliance, Identity, VERO, etc.
+│   │   ├── client.ts                 # HTTP client with OAuth
 │   │   └── index.ts                  # API facade (EbaySellerApi)
-│   ├── auth/                         # OAuth 2.0 authentication
-│   │   ├── oauth.ts                  # OAuth client with token management
-│   │   ├── oauth-metadata.ts         # OAuth discovery metadata
-│   │   ├── oauth-middleware.ts       # Express OAuth middleware
-│   │   ├── oauth-types.ts            # OAuth type definitions
-│   │   ├── token-storage.ts          # File-based token persistence
-│   │   └── token-verifier.ts         # JWT token verification
+│   ├── auth/                         # OAuth 2.0/2.1 implementation
+│   │   ├── oauth.ts                  # eBay OAuth client
+│   │   ├── token-storage.ts          # Token persistence
+│   │   ├── token-verifier.ts         # JWT verification (HTTP mode)
+│   │   └── oauth-middleware.ts       # Express middleware (HTTP mode)
 │   ├── config/
 │   │   └── environment.ts            # Environment configuration
 │   ├── tools/                        # MCP tool definitions
-│   │   ├── index.ts                  # Tool dispatcher (executeTool)
-│   │   ├── token-template.ts         # Token template generator
-│   │   └── tool-definitions.ts       # All 170 tool definitions (Zod schemas)
-│   ├── types/                        # TypeScript type definitions
-│   │   ├── commerce_*.ts             # Commerce API OpenAPI types
-│   │   ├── sell_*.ts                 # Sell API OpenAPI types
-│   │   └── ebay.ts                   # Core eBay types
-│   ├── utils/                        # Zod validation schemas
-│   │   ├── account-management/       # Account API schemas
-│   │   ├── analytics-and-report/    # Analytics API schemas
-│   │   ├── communication/            # Communication API schemas
-│   │   ├── listing-management/       # Inventory API schemas
-│   │   ├── listing-metadata/         # Metadata API schemas
-│   │   ├── marketing-and-promotions/ # Marketing API schemas
-│   │   ├── order-management/         # Order API schemas
-│   │   ├── other/                    # Other API schemas
-│   │   └── README.md                 # Zod schema documentation
-│   ├── index.ts                      # STDIO MCP server entrypoint
-│   └── server-http.ts                # HTTP MCP server with OAuth
+│   │   ├── tool-definitions.ts       # 170+ tool definitions
+│   │   ├── index.ts                  # Tool dispatcher
+│   │   └── token-template.ts         # Token template generator
+│   ├── types/                        # TypeScript types
+│   │   ├── openapi-schemas/          # OpenAPI-generated types
+│   │   └── ebay.ts                   # Core types
+│   └── utils/                        # Zod validation schemas
+│       ├── account-management/
+│       ├── listing-management/
+│       ├── order-management/
+│       ├── marketing-and-promotions/
+│       └── [...other categories]
 ├── docs/
-│   ├── auth/                         # Authentication documentation
-│   │   ├── manual-token-config.md   # Manual token setup guide
-│   │   └── oauth_custom.json         # Custom OAuth configuration
-│   ├── buy-apps/                     # Buy APIs (coming soon)
-│   ├── sell-apps/                    # OpenAPI specifications
-│   │   ├── account-management/
-│   │   ├── analytics-and-report/
-│   │   ├── communication/
-│   │   ├── listing-management/
-│   │   ├── listing-metadata/
-│   │   ├── markeitng-and-promotions/
-│   │   ├── order-management/
-│   │   └── other-apis/
-│   └── README.md                     # API documentation index
-├── build/                            # Compiled JavaScript output
-├── .env                              # Environment configuration
+│   ├── auth/                         # Authentication guides
+│   └── sell-apps/                    # OpenAPI specifications
+├── tests/                            # Test files
+├── build/                            # Compiled JavaScript
+├── .env                              # Environment variables
 ├── CLAUDE.md                         # Claude-specific instructions
 ├── GEMINI.md                         # Gemini-specific instructions
 ├── OAUTH-SETUP.md                    # OAuth setup guide
 └── README.md                         # This file
 ```
 
-## Resources
+### Technology Stack
+
+- **Runtime**: Node.js 18+
+- **Language**: TypeScript 5.9.3
+- **MCP SDK**: @modelcontextprotocol/sdk v1.21.1
+- **HTTP Client**: axios v1.7.9
+- **Validation**: zod v3
+- **Testing**: vitest v4.0.8
+- **Server**: express v5.1.0 (HTTP mode)
+- **JWT**: jose v6.1.1, jsonwebtoken v9.0.2
+
+---
+
+## 🔧 Development
+
+### Setup Development Environment
+
+```bash
+# Install dependencies
+npm install
+
+# Type check
+npm run typecheck
+
+# Watch mode (auto-rebuild on changes)
+npm run watch
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
+```
+
+### Build Commands
+
+```bash
+# Clean build artifacts
+npm run clean
+
+# Build TypeScript to JavaScript
+npm run build
+
+# Rebuild (clean + build)
+npm run clean && npm run build
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode for development
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+
+# Open interactive test UI
+npm run test:ui
+```
+
+### Code Quality
+
+- **TypeScript Strict Mode**: Enabled
+- **ESLint**: Configured (coming soon)
+- **Type Safety**: OpenAPI-generated schemas + Zod validation
+- **Test Coverage**: Target 70%+ (in progress)
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### "Access token is missing" Error
+
+**Cause**: No user tokens configured
+
+**Solution**:
+1. Use `ebay_get_oauth_url` to generate authorization URL
+2. Complete OAuth flow in browser
+3. Use `ebay_set_user_tokens` with access and refresh tokens
+
+#### "Rate limit exceeded" Error
+
+**Cause**: Using client credentials (1,000 req/day limit)
+
+**Solution**: Switch to user tokens (10,000-50,000 req/day)
+1. Check status: `ebay_get_token_status`
+2. Set user tokens: `ebay_set_user_tokens`
+
+#### "Invalid scope" Warning
+
+**Cause**: Requesting sandbox-only scopes in production (or vice versa)
+
+**Solution**: Use default scopes or check [scope differences](./docs/auth/scope-differences.md)
+
+#### Server Fails to Start
+
+**Check**:
+1. Node.js version: `node --version` (must be 18+)
+2. Environment file exists: `cat .env`
+3. Valid credentials: Check eBay Developer Portal
+4. Build completed: `npm run build`
+
+#### Token Refresh Failed
+
+**Check**:
+1. Refresh token expiry: `cat ~/.ebay-mcp-tokens.json`
+2. Refresh tokens valid ~18 months
+3. Re-authenticate if expired: Use `ebay_get_oauth_url`
+
+### Debug Mode
+
+Enable verbose logging:
+
+```bash
+# Set environment variable
+export DEBUG=ebay:*
+
+# Run server
+npm run dev
+```
+
+### Get Help
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/ebay-api-mcp-server/issues)
+- **Documentation**: [eBay API Docs](https://developer.ebay.com/docs)
+- **MCP Specification**: [MCP Protocol](https://modelcontextprotocol.io/)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+### Development Setup
+
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/yourusername/ebay-api-mcp-server.git`
+3. Create a branch: `git checkout -b feature/your-feature-name`
+4. Install dependencies: `npm install`
+5. Make your changes
+6. Run tests: `npm test`
+7. Type check: `npm run typecheck`
+8. Submit a pull request
+
+### Contribution Guidelines
+
+- ✅ Follow existing code style and architecture
+- ✅ Add tests for new features
+- ✅ Update documentation (README, CLAUDE.md, etc.)
+- ✅ Use TypeScript strict mode
+- ✅ Validate against OpenAPI specifications in `docs/` folder
+- ✅ Include proper error handling
+- ✅ Follow MCP tool naming conventions
+
+### Priority Areas for Contribution
+
+1. **Testing Infrastructure** - Expand test coverage
+2. **Error Handling** - Improve error messages and logging
+3. **Rate Limiting** - Implement request throttling
+4. **Documentation** - Add more examples and guides
+5. **Missing Endpoints** - Complete eDelivery API (40+ endpoints pending)
+
+### Code of Conduct
+
+Be respectful, collaborative, and constructive. We're all here to build great tools together.
+
+---
+
+## 📚 Resources
+
+### Official Documentation
 
 - **eBay Developer Program**: https://developer.ebay.com/
 - **eBay API Documentation**: https://developer.ebay.com/docs
+- **eBay API Status**: https://developer.ebay.com/support/api-status
+
+### MCP Resources
+
 - **Model Context Protocol**: https://modelcontextprotocol.io/
+- **MCP Specification**: https://spec.modelcontextprotocol.io/
+- **MCP SDK (TypeScript)**: https://github.com/modelcontextprotocol/typescript-sdk
 
-## Contributing
+### OAuth & Security
 
-Contributions are welcome! Please ensure:
-- All API implementations match OpenAPI specifications in `docs/` folder
-- TypeScript strict mode compliance
-- Proper error handling
-- Tool definitions follow MCP specification
+- **OAuth 2.1 Draft**: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13
+- **RFC 6750: Bearer Token Usage**: https://datatracker.ietf.org/doc/html/rfc6750
+- **RFC 7662: Token Introspection**: https://datatracker.ietf.org/doc/html/rfc7662
+- **RFC 9728: Protected Resource Metadata**: https://datatracker.ietf.org/doc/html/rfc9728
 
-## Gemini CLI Setup
+### Related Projects
 
-To add a custom Model Context Protocol (MCP) server to Gemini CLI, follow these steps:
+- **Claude Desktop**: https://claude.ai/download
+- **Gemini CLI**: https://ai.google.dev/gemini-api/docs/cli
+- **Keycloak** (OAuth server): https://www.keycloak.org/
 
-### 1. Locate or Create the `settings.json` file:
+---
 
-The Gemini CLI uses a `settings.json` file for configuration. This file is typically located in your home directory within a hidden `.gemini` folder: `~/.gemini/settings.json`.
-If the `.gemini` directory or `settings.json` file does not exist, create them.
+## 📄 License
 
-### 2. Edit `settings.json` to configure the MCP server:
+MIT License - see [LICENSE](LICENSE) file for details
 
-Open the `settings.json` file in a text editor.
-Add or modify the `mcpServers` object within this JSON file. Each custom MCP server will be an entry within this object.
-The configuration for each server will vary depending on the server's requirements, but generally includes details like the server's `command`, `args`, and any necessary authentication tokens or specific parameters.
+---
 
-```json
-{
-  "mcpServers": {
-    "myCustomServerName": {
-      "command": "path/to/your/server/executable",
-      "args": ["--arg1", "value1", "--arg2", "value2"],
-      "env": {
-        "API_KEY": "your_api_key"
-      }
-    },
-    "anotherMCPserver": {
-      "command": "npx",
-      "args": ["-y", "some-mcp-package@latest", "mcp-command"]
-    }
-  }
-}
-```
+## 🙏 Acknowledgments
 
-Replace `"myCustomServerName"` with a descriptive name for your server.
-Adjust the `command`, `args`, and `env` (for environment variables) according to your specific MCP server's documentation and requirements.
+- **Anthropic** - For Claude and MCP specification
+- **eBay** - For comprehensive Sell APIs
+- **MCP Community** - For protocol development and support
 
-### 3. Install any dependencies:
+---
 
-Ensure that any required dependencies for your custom MCP server are installed on your system.
+## 📞 Support
 
-### 4. Restart Gemini CLI or refresh MCP servers:
+- **Issues**: [GitHub Issues](https://github.com/yourusername/ebay-api-mcp-server/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ebay-api-mcp-server/discussions)
+- **eBay Developer Support**: [eBay Developer Forums](https://community.ebay.com/t5/Developer-Forums/ct-p/api_dev)
 
-After saving the `settings.json` file, restart the Gemini CLI session for the changes to take effect.
-Alternatively, if Gemini CLI is already running, you can use the `/mcp refresh` command within the CLI to reload the server configurations.
+---
 
-### 5. Verify the server connection:
+<div align="center">
 
-Once Gemini CLI has restarted or the MCP servers have been refreshed, use the `/mcp` command within the CLI to list the configured servers and verify that your custom server is recognized and available.
-You can also use `/mcp desc <serverName>` to see detailed information about the tools provided by your custom server.
+**Made with ❤️ for the eBay seller community**
 
-## License
+[⭐ Star this project](https://github.com/yourusername/ebay-api-mcp-server) | [🐛 Report Bug](https://github.com/yourusername/ebay-api-mcp-server/issues) | [💡 Request Feature](https://github.com/yourusername/ebay-api-mcp-server/issues)
 
-MIT
+</div>
