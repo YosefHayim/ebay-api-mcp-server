@@ -1,0 +1,21 @@
+name: Weekly Cleanup
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Sunday
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for workflow history reset
+        run: |
+          echo "This workflow is scheduled to run weekly for cleanup tasks."
+          echo "GitHub Actions automatically manages workflow run history retention based on repository settings."
+          echo "If specific cleanup actions (e.g., deleting artifacts, logs, or temporary files) are needed,"
+          echo "the commands below can be adapted or replaced."
+          # Example: Clean up a specific directory (replace with actual command if needed)
+          # rm -rf /path/to/cleanup/directory/*
+          echo "Cleanup placeholder executed."

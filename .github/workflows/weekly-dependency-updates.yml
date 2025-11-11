@@ -1,0 +1,75 @@
+name: Weekly Dependency Updates
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to create branches and PRs
+      pull-requests: write # Needed to create PRs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Check for outdated dependencies
+        id: check-outdated
+        run: |
+          # Check for outdated dependencies. If any are found, exit with code 1.
+          # Otherwise, exit with code 0.
+          # This command requires 'jq' to be installed on the runner.
+          if pnpm outdated --json | jq 'length > 0' | grep -q true; then
+            echo "::set-output name=has_updates::true"
+            echo "Dependencies need updating."
+          else
+            echo "::set-output name=has_updates::false"
+            echo "Dependencies are up to date."
+          fi
+        env:
+          CI: true # Ensure pnpm behaves correctly in CI
+
+      - name: Create Pull Request if updates are found
+        if: steps.check-outdated.outputs.has_updates == 'true'
+        run: |
+          # Generate a unique branch name
+          BRANCH_NAME="deps/update-$(date +%Y-%m-%d-%H-%M-%S)"
+          git checkout -b $BRANCH_NAME
+
+          # Update dependencies
+          pnpm update
+
+          # Commit changes
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "chore: Update dependencies"
+
+          # Push branch and create Pull Request
+          git push origin $BRANCH_NAME
+
+          # Use GitHub CLI to create the PR. Ensure GH CLI is installed in the runner.
+          # The GITHUB_TOKEN secret is automatically provided by GitHub Actions.
+          gh pr create --base main --head $BRANCH_NAME --title "Weekly Dependency Updates" --body "Automated dependency updates." --label "dependencies" --assignee "@me"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for gh cli and pushing to repo
+          CI: true
