@@ -24,6 +24,8 @@
 - [API Reference](#api-reference)
 - [Examples](#examples)
 - [Architecture](#architecture)
+- [Deployment](#deployment)
+  - [Docker](#docker)
 - [Development](#development)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
