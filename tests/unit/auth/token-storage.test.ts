@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "fs";
-import { TokenStorage } from "../../../src/auth/token-storage.js";
-import type { StoredTokenData } from "../../../src/types/ebay.js";
+import { TokenStorage } from "@/auth/token-storage.js";
+import type { StoredTokenData } from "@/types/ebay.js";
 import { createMockTokens } from "../../helpers/mock-token-storage.js";
 
 describe("TokenStorage", () => {

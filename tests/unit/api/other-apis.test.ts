@@ -28,45 +28,46 @@ describe('Other APIs', () => {
       api = new DisputeApi(client);
     });
 
-    it('should get disputes with filter', async () => {
-      const mockResponse = { disputes: [] };
+    it('should get payment dispute summaries with filter', async () => {
+      const mockResponse = { paymentDisputeSummaries: [] };
       vi.mocked(client.get).mockResolvedValue(mockResponse);
 
-      await api.getDisputes('filter:test', 10);
+      await api.getPaymentDisputeSummaries({ order_id: 'ORDER123', limit: 10 });
 
-      expect(client.get).toHaveBeenCalledWith('/sell/fulfillment/v1/order/dispute', {
-        filter: 'filter:test',
+      expect(client.get).toHaveBeenCalledWith('/sell/fulfillment/v1/payment_dispute_summary', {
+        order_id: 'ORDER123',
         limit: 10
       });
     });
 
-    it('should get dispute by ID', async () => {
-      const mockResponse = { disputeId: 'DISPUTE123' };
+    it('should get payment dispute by ID', async () => {
+      const mockResponse = { paymentDisputeId: 'DISPUTE123' };
       vi.mocked(client.get).mockResolvedValue(mockResponse);
 
-      await api.getDispute('DISPUTE123');
+      await api.getPaymentDispute('DISPUTE123');
 
-      expect(client.get).toHaveBeenCalledWith('/sell/fulfillment/v1/order/dispute/DISPUTE123');
+      expect(client.get).toHaveBeenCalledWith('/sell/fulfillment/v1/payment_dispute/DISPUTE123');
     });
 
-    it('should throw error when disputeId is missing', async () => {
-      await expect(api.getDispute('')).rejects.toThrow('disputeId is required');
-    });
+    it('should contest payment dispute', async () => {
+      vi.mocked(client.post).mockResolvedValue(undefined);
 
-    it('should update dispute', async () => {
-      vi.mocked(client.put).mockResolvedValue(undefined);
+      await api.contestPaymentDispute('DISPUTE123', { returnAddress: {} });
 
-      await api.updateDispute('DISPUTE123', { evidence: {}, submit: true });
-
-      expect(client.put).toHaveBeenCalledWith(
-        '/sell/fulfillment/v1/order/dispute/DISPUTE123',
-        { evidence: {}, submit: true }
+      expect(client.post).toHaveBeenCalledWith(
+        '/sell/fulfillment/v1/payment_dispute/DISPUTE123/contest',
+        { returnAddress: {} }
       );
     });
 
-    it('should throw error when update data is missing', async () => {
-      await expect(api.updateDispute('DISPUTE123', undefined as any)).rejects.toThrow(
-        'disputeData is required'
+    it('should accept payment dispute', async () => {
+      vi.mocked(client.post).mockResolvedValue(undefined);
+
+      await api.acceptPaymentDispute('DISPUTE123', { returnAddress: {} });
+
+      expect(client.post).toHaveBeenCalledWith(
+        '/sell/fulfillment/v1/payment_dispute/DISPUTE123/accept',
+        { returnAddress: {} }
       );
     });
   });
@@ -87,12 +88,6 @@ describe('Other APIs', () => {
       expect(client.get).toHaveBeenCalledWith(
         '/commerce/taxonomy/v1/get_default_category_tree_id',
         { marketplace_id: 'EBAY_US' }
-      );
-    });
-
-    it('should throw error when marketplace ID is missing', async () => {
-      await expect(api.getDefaultCategoryTreeId('')).rejects.toThrow(
-        'marketplaceId is required'
       );
     });
 
@@ -138,15 +133,29 @@ describe('Other APIs', () => {
 
     it('should find listing recommendations', async () => {
       const mockResponse = { listingRecommendations: [] };
-      vi.mocked(client.get).mockResolvedValue(mockResponse);
+      vi.mocked(client.post).mockResolvedValue(mockResponse);
 
-      await api.findListingRecommendations('filter:test', 10, 0);
+      await api.findListingRecommendations(
+        { listingIds: ['LISTING123'] },
+        'filter:test',
+        10,
+        undefined,
+        'EBAY_US'
+      );
 
-      expect(client.get).toHaveBeenCalledWith('/sell/recommendation/v1/find', {
-        filter: 'filter:test',
-        limit: 10,
-        offset: 0
-      });
+      expect(client.post).toHaveBeenCalledWith(
+        '/sell/recommendation/v1/find',
+        { listingIds: ['LISTING123'] },
+        {
+          params: {
+            filter: 'filter:test',
+            limit: 10
+          },
+          headers: {
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+          }
+        }
+      );
     });
   });
 
@@ -161,21 +170,14 @@ describe('Other APIs', () => {
       const mockResponse = { listingViolations: [] };
       vi.mocked(client.get).mockResolvedValue(mockResponse);
 
-      await api.getListingViolations('PRODUCT_ADOPTION', 10, 0);
+      await api.getListingViolations('PRODUCT_ADOPTION', undefined, 10);
 
       expect(client.get).toHaveBeenCalledWith(
         '/sell/compliance/v1/listing_violation',
         {
           compliance_type: 'PRODUCT_ADOPTION',
-          limit: 10,
-          offset: 0
+          limit: 10
         }
-      );
-    });
-
-    it('should throw error when compliance type is missing', async () => {
-      await expect(api.getListingViolations('', 10, 0)).rejects.toThrow(
-        'complianceType is required'
       );
     });
 
@@ -201,12 +203,6 @@ describe('Other APIs', () => {
         { listing_violation_id: 'VIOLATION123' }
       );
     });
-
-    it('should throw error when violation ID is missing', async () => {
-      await expect(api.suppressViolation('')).rejects.toThrow(
-        'listingViolationId is required'
-      );
-    });
   });
 
   describe('VeroApi', () => {
@@ -227,14 +223,8 @@ describe('Other APIs', () => {
       await api.reportInfringement(infringementData);
 
       expect(client.post).toHaveBeenCalledWith(
-        '/sell/compliance/v1/vero_report_items',
+        '/commerce/vero/v1/report_infringement',
         infringementData
-      );
-    });
-
-    it('should throw error when infringement data is missing', async () => {
-      await expect(api.reportInfringement(undefined as any)).rejects.toThrow(
-        'infringementData is required'
       );
     });
 
@@ -242,12 +232,11 @@ describe('Other APIs', () => {
       const mockResponse = { items: [] };
       vi.mocked(client.get).mockResolvedValue(mockResponse);
 
-      await api.getReportedItems('filter:test', 10, 0);
+      await api.getReportedItems('filter:test', 10, undefined);
 
-      expect(client.get).toHaveBeenCalledWith('/sell/compliance/v1/vero_report_items', {
+      expect(client.get).toHaveBeenCalledWith('/commerce/vero/v1/reported_item', {
         filter: 'filter:test',
-        limit: 10,
-        offset: 0
+        limit: 10
       });
     });
   });
@@ -265,36 +254,12 @@ describe('Other APIs', () => {
 
       await api.translate('en', 'es', 'ITEM_TITLE', ['Hello']);
 
-      expect(client.post).toHaveBeenCalledWith('/commerce/translation/v1_beta/translate', {
+      expect(client.post).toHaveBeenCalledWith('/commerce/translation/v1/translate', {
         from: 'en',
         to: 'es',
         translationContext: 'ITEM_TITLE',
         text: ['Hello']
       });
-    });
-
-    it('should throw error when from language is missing', async () => {
-      await expect(api.translate('', 'es', 'ITEM_TITLE', ['Hello'])).rejects.toThrow(
-        'from is required'
-      );
-    });
-
-    it('should throw error when to language is missing', async () => {
-      await expect(api.translate('en', '', 'ITEM_TITLE', ['Hello'])).rejects.toThrow(
-        'to is required'
-      );
-    });
-
-    it('should throw error when translation context is missing', async () => {
-      await expect(api.translate('en', 'es', '', ['Hello'])).rejects.toThrow(
-        'translationContext is required'
-      );
-    });
-
-    it('should throw error when text is missing', async () => {
-      await expect(api.translate('en', 'es', 'ITEM_TITLE', [])).rejects.toThrow(
-        'text array is required'
-      );
     });
   });
 

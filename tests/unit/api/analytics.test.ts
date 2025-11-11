@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AnalyticsApi } from '../../../src/api/analytics-and-report/analytics.js';
-import type { EbayApiClient } from '../../../src/api/client.js';
+import { AnalyticsApi } from '@/api/analytics-and-report/analytics.js';
+import type { EbayApiClient } from '@/api/client.js';
 
 describe('AnalyticsApi', () => {
   let client: EbayApiClient;
