@@ -1,63 +1,62 @@
 import type { EbaySellerApi } from '@/api/index.js';
 import { TokenStorage } from '@/auth/token-storage.js';
 import { getOAuthAuthorizationUrl, validateScopes } from '@/config/environment.js';
-import { convertToTimestamp, validateTokenExpiry } from '@/utils/date-converter.js';
 import {
   accountTools,
   analyticsTools,
-  chatGptTools,
-  claudeTools, // Add claudeTools here
   communicationTools,
   fulfillmentTools,
   inventoryTools,
   marketingTools,
   metadataTools,
   otherApiTools,
-  type ToolDefinition,
   taxonomyTools,
-} from '@/tools/tool-definitions.js';
+  tokenManagementTools,
+  type ToolDefinition,
+} from '@/tools/definitions/index.js';
+import { convertToTimestamp, validateTokenExpiry } from '@/utils/date-converter.js';
 
 // Import Zod schemas for input validation
 import {
-  getFeedbackSchema,
+  getAwaitingFeedbackSchema,
   getFeedbackRatingSummarySchema,
+  getFeedbackSchema,
   leaveFeedbackForBuyerSchema,
   respondToFeedbackSchema,
-  getAwaitingFeedbackSchema,
 } from '@/utils/communication/feedback.js';
 import {
-  getConversationsSchema,
-  getConversationSchema,
-  sendMessageSchema,
   bulkUpdateConversationSchema,
+  getConversationSchema,
+  getConversationsSchema,
+  sendMessageSchema,
   updateConversationSchema,
 } from '@/utils/communication/message.js';
 import {
   findEligibleItemsSchema,
-  sendOfferToInterestedBuyersSchema,
   getOffersToBuyersSchema,
+  sendOfferToInterestedBuyersSchema,
 } from '@/utils/communication/negotiation.js';
 import {
-  getPublicKeySchema,
-  getConfigSchema,
-  updateConfigSchema,
-  getDestinationSchema,
   createDestinationSchema,
-  updateDestinationSchema,
-  deleteDestinationSchema,
-  getSubscriptionsSchema,
+  createSubscriptionFilterSchema,
   createSubscriptionSchema,
-  getSubscriptionSchema,
-  updateSubscriptionSchema,
+  deleteDestinationSchema,
+  deleteSubscriptionFilterSchema,
   deleteSubscriptionSchema,
   disableSubscriptionSchema,
   enableSubscriptionSchema,
-  testSubscriptionSchema,
+  getConfigSchema,
+  getDestinationSchema,
+  getPublicKeySchema,
+  getSubscriptionFilterSchema,
+  getSubscriptionSchema,
+  getSubscriptionsSchema,
   getTopicSchema,
   getTopicsSchema,
-  createSubscriptionFilterSchema,
-  getSubscriptionFilterSchema,
-  deleteSubscriptionFilterSchema,
+  testSubscriptionSchema,
+  updateConfigSchema,
+  updateDestinationSchema,
+  updateSubscriptionSchema,
 } from '@/utils/communication/notification.js';
 
 export type { ToolDefinition };
@@ -67,7 +66,7 @@ export type { ToolDefinition };
  */
 export function getToolDefinitions(): ToolDefinition[] {
   return [
-    ...chatGptTools,
+    ...tokenManagementTools,
     ...accountTools,
     ...inventoryTools,
     ...fulfillmentTools,
@@ -77,7 +76,6 @@ export function getToolDefinitions(): ToolDefinition[] {
     ...taxonomyTools,
     ...communicationTools,
     ...otherApiTools,
-    ...claudeTools, // Add claudeTools here
   ];
 }
 
@@ -94,15 +92,15 @@ export async function executeTool(
     case 'search': {
       // For this example, we'll treat the query as a search for inventory items.
       // A more robust implementation might search across different types of content.
-      const response = await api.inventory.getInventoryItems((args.limit as number) || 10);
+      const response = await api.inventory.getInventoryItems((args.limit as number) ?? 10);
       const results =
         response.inventoryItems?.map((item, index) => ({
           id: `item-${index}`,
-          title: item.product?.title || 'No Title',
+          title: item.product?.title ?? 'No Title',
           // The URL should be a canonical link to the item, which we don't have here.
           // We'll use a placeholder.
           url: `https://www.ebay.com/`, // Placeholder URL
-        })) || [];
+        })) ?? [];
 
       // Format the response as required by the ChatGPT connector spec.
       return {
@@ -122,8 +120,8 @@ export async function executeTool(
       // Format the response as required by the ChatGPT connector spec.
       const result = {
         id: sku,
-        title: item.product?.title || 'No Title',
-        text: item.product?.description || 'No description available.',
+        title: item.product?.title ?? 'No Title',
+        text: item.product?.description ?? 'No description available.',
         url: `https://www.ebay.com/`, // Placeholder URL
         metadata: {
           source: 'ebay_inventory',
@@ -144,12 +142,12 @@ export async function executeTool(
 
     case 'ebay_get_oauth_url': {
       // Get config from environment
-      const clientId = process.env.EBAY_CLIENT_ID || '';
-      const environment = (process.env.EBAY_ENVIRONMENT || 'sandbox') as 'production' | 'sandbox';
+      const clientId = process.env.EBAY_CLIENT_ID ?? '';
+      const environment = (process.env.EBAY_ENVIRONMENT ?? 'sandbox') as 'production' | 'sandbox';
       const envRedirectUri = process.env.EBAY_REDIRECT_URI;
 
       // Use redirectUri from args if provided, otherwise use from .env
-      const redirectUri = (args.redirectUri as string | undefined) || envRedirectUri;
+      const redirectUri = (args.redirectUri as string | undefined) ?? envRedirectUri;
       const scopes = args.scopes as string[] | undefined;
       const state = args.state as string | undefined;
 
@@ -187,7 +185,7 @@ export async function executeTool(
         instructions:
           'Open this URL in a browser to authorize the application. After authorization, you will be redirected to your redirect URI with an authorization code that can be exchanged for an access token.',
         environment,
-        scopes: scopes || 'default (all Sell API scopes)',
+        scopes: scopes ?? 'default (all Sell API scopes)',
       };
 
       // Include warnings if any scopes are invalid for the environment
@@ -202,7 +200,7 @@ export async function executeTool(
       const accessToken = args.accessToken as string;
       const refreshToken = args.refreshToken as string;
 
-      if (!accessToken || !refreshToken) {
+      if (accessToken ?? !refreshToken) {
         throw new Error('Both accessToken and refreshToken are required');
       }
 
@@ -299,7 +297,7 @@ export async function executeTool(
       const refreshTokenExpiry = args.refreshTokenExpiry as string | number | undefined;
       const autoRefresh = (args.autoRefresh as boolean) ?? true;
 
-      if (!accessToken || !refreshToken) {
+      if (accessToken ?? !refreshToken) {
         throw new Error('Both accessToken and refreshToken are required');
       }
 
@@ -801,7 +799,7 @@ export async function executeTool(
     case 'ebay_reply_to_message': {
       // This is a deprecated method that maps to sendMessage
       // We'll validate with a simple schema
-      if (!args.messageId || !args.messageContent) {
+      if (!args.messageId ?? !args.messageContent) {
         throw new Error('messageId and messageContent are required');
       }
       return await api.message.replyToMessage(
@@ -930,7 +928,7 @@ export async function executeTool(
     // Communication - Feedback
     case 'ebay_get_feedback': {
       const validated = getFeedbackSchema.parse(args);
-      return await api.feedback.getFeedback(validated.transaction_id || '');
+      return await api.feedback.getFeedback(validated.transaction_id ?? '');
     }
     case 'ebay_leave_feedback_for_buyer': {
       const validated = leaveFeedbackForBuyerSchema.parse(args);
@@ -951,8 +949,8 @@ export async function executeTool(
     case 'ebay_respond_to_feedback': {
       const validated = respondToFeedbackSchema.parse(args);
       return await api.feedback.respondToFeedback(
-        validated.feedback_id || '',
-        validated.response_text || ''
+        validated.feedback_id ?? '',
+        validated.response_text ?? ''
       );
     }
 
