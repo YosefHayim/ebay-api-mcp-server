@@ -1,4 +1,27 @@
 import { z } from 'zod';
+import {
+  TimeDurationUnit,
+  RegionType,
+  ShippingCostType,
+  ShippingOptionType,
+  DepositType,
+  RefundMethod,
+  ReturnMethod,
+  ReturnShippingCostPayer,
+  Condition,
+  LengthUnit,
+  WeightUnit,
+  PricingVisibility,
+  FormatType,
+  LocationType,
+  MerchantLocationStatus,
+  DayOfWeek,
+  ReasonForRefund,
+  FundingModel,
+  MessageReferenceType,
+  FeedbackRating,
+  ReportedItemType
+} from '@/types/ebay-enums.js';
 
 /**
  * Reusable Zod schemas for eBay API tool input validation
@@ -12,7 +35,7 @@ import { z } from 'zod';
 // ============================================================================
 
 export const timeDurationSchema = z.object({
-  unit: z.enum(['YEAR', 'MONTH', 'DAY', 'HOUR', 'CALENDAR_DAY', 'BUSINESS_DAY', 'MINUTE', 'SECOND', 'MILLISECOND']),
+  unit: z.nativeEnum(TimeDurationUnit),
   value: z.number()
 }).passthrough();
 
@@ -23,7 +46,7 @@ export const amountSchema = z.object({
 
 export const regionSchema = z.object({
   regionName: z.string().optional(),
-  regionType: z.enum(['COUNTRY', 'COUNTRY_REGION', 'STATE_OR_PROVINCE', 'WORLD_REGION', 'WORLDWIDE']).optional()
+  regionType: z.nativeEnum(RegionType).optional()
 }).passthrough();
 
 export const regionSetSchema = z.object({
@@ -54,8 +77,8 @@ export const shippingServiceSchema = z.object({
 }).passthrough();
 
 export const shippingOptionSchema = z.object({
-  costType: z.enum(['CALCULATED', 'FLAT_RATE', 'NOT_SPECIFIED']),
-  optionType: z.enum(['DOMESTIC', 'INTERNATIONAL']),
+  costType: z.nativeEnum(ShippingCostType),
+  optionType: z.nativeEnum(ShippingOptionType),
   packageHandlingCost: amountSchema.optional(),
   rateTableId: z.string().optional(),
   shippingServices: z.array(shippingServiceSchema).optional()
@@ -86,7 +109,7 @@ export const paymentMethodSchema = z.object({
 
 export const depositSchema = z.object({
   depositAmount: amountSchema.optional(),
-  depositType: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']).optional(),
+  depositType: z.nativeEnum(DepositType).optional(),
   dueIn: timeDurationSchema.optional()
 }).passthrough();
 
@@ -108,13 +131,13 @@ export const returnPolicySchema = z.object({
   categoryTypes: z.array(categoryTypeSchema).optional(),
   description: z.string().optional(),
   extendedHolidayReturnsOffered: z.boolean().optional(),
-  refundMethod: z.enum(['MONEY_BACK', 'MERCHANDISE_CREDIT']).optional(),
+  refundMethod: z.nativeEnum(RefundMethod).optional(),
   restockingFeePercentage: z.string().optional(),
   returnInstructions: z.string().optional(),
-  returnMethod: z.enum(['REPLACEMENT', 'EXCHANGE']).optional(),
+  returnMethod: z.nativeEnum(ReturnMethod).optional(),
   returnPeriod: timeDurationSchema.optional(),
   returnsAccepted: z.boolean().optional(),
-  returnShippingCostPayer: z.enum(['BUYER', 'SELLER']).optional()
+  returnShippingCostPayer: z.nativeEnum(ReturnShippingCostPayer).optional()
 }).passthrough();
 
 export const customPolicySchema = z.object({
@@ -158,19 +181,19 @@ export const productSchema = z.object({
 
 export const inventoryItemSchema = z.object({
   availability: availabilitySchema.optional(),
-  condition: z.enum(['NEW', 'LIKE_NEW', 'NEW_OTHER', 'NEW_WITH_DEFECTS', 'MANUFACTURER_REFURBISHED', 'CERTIFIED_REFURBISHED', 'EXCELLENT_REFURBISHED', 'VERY_GOOD_REFURBISHED', 'GOOD_REFURBISHED', 'SELLER_REFURBISHED', 'USED_EXCELLENT', 'USED_VERY_GOOD', 'USED_GOOD', 'USED_ACCEPTABLE', 'FOR_PARTS_OR_NOT_WORKING']).optional(),
+  condition: z.nativeEnum(Condition).optional(),
   conditionDescription: z.string().optional(),
   packageWeightAndSize: z.object({
     dimensions: z.object({
       height: z.number().optional(),
       length: z.number().optional(),
       width: z.number().optional(),
-      unit: z.enum(['INCH', 'FEET', 'CENTIMETER', 'METER']).optional()
+      unit: z.nativeEnum(LengthUnit).optional()
     }).passthrough().optional(),
     packageType: z.string().optional(),
     weight: z.object({
       value: z.number().optional(),
-      unit: z.enum(['POUND', 'KILOGRAM', 'OUNCE', 'GRAM']).optional()
+      unit: z.nativeEnum(WeightUnit).optional()
     }).passthrough().optional()
   }).passthrough().optional(),
   product: productSchema.optional()
@@ -178,7 +201,7 @@ export const inventoryItemSchema = z.object({
 
 export const pricingSchema = z.object({
   price: amountSchema,
-  pricingVisibility: z.enum(['NONE', 'PRE_CHECKOUT', 'DURING_CHECKOUT']).optional(),
+  pricingVisibility: z.nativeEnum(PricingVisibility).optional(),
   minimumAdvertisedPrice: amountSchema.optional(),
   originalRetailPrice: amountSchema.optional()
 }).passthrough();
@@ -198,7 +221,7 @@ export const listingPoliciesSchema = z.object({
 export const offerSchema = z.object({
   sku: z.string(),
   marketplaceId: z.string(),
-  format: z.enum(['AUCTION', 'FIXED_PRICE']),
+  format: z.nativeEnum(FormatType),
   availableQuantity: z.number().optional(),
   categoryId: z.string().optional(),
   listingDescription: z.string().optional(),
@@ -258,12 +281,12 @@ export const locationSchema = z.object({
   }).passthrough().optional(),
   locationAdditionalInformation: z.string().optional(),
   locationInstructions: z.string().optional(),
-  locationTypes: z.array(z.enum(['STORE', 'WAREHOUSE'])).optional(),
+  locationTypes: z.array(z.nativeEnum(LocationType)).optional(),
   locationWebUrl: z.string().optional(),
-  merchantLocationStatus: z.enum(['ENABLED', 'DISABLED']).optional(),
+  merchantLocationStatus: z.nativeEnum(MerchantLocationStatus).optional(),
   name: z.string().optional(),
   operatingHours: z.array(z.object({
-    dayOfWeekEnum: z.enum(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']).optional(),
+    dayOfWeekEnum: z.nativeEnum(DayOfWeek).optional(),
     intervals: z.array(z.object({
       open: z.string().optional(),
       close: z.string().optional()
@@ -293,17 +316,7 @@ export const lineItemRefundSchema = z.object({
 }).passthrough();
 
 export const refundDataSchema = z.object({
-  reasonForRefund: z.enum([
-    'BUYER_CANCEL',
-    'OUT_OF_STOCK',
-    'FOUND_CHEAPER_PRICE',
-    'INCORRECT_PRICE',
-    'ITEM_DAMAGED',
-    'ITEM_DEFECTIVE',
-    'LOST_IN_TRANSIT',
-    'MUTUALLY_AGREED',
-    'SELLER_CANCEL'
-  ]),
+  reasonForRefund: z.nativeEnum(ReasonForRefund),
   comment: z.string().optional(),
   refundItems: z.array(lineItemRefundSchema).optional(),
   orderLevelRefundAmount: amountSchema.optional()
@@ -338,7 +351,7 @@ export const campaignCriterionSchema = z.object({
 
 export const fundingStrategySchema = z.object({
   bidPercentage: z.string().optional(),
-  fundingModel: z.enum(['COST_PER_SALE', 'COST_PER_CLICK']).optional()
+  fundingModel: z.nativeEnum(FundingModel).optional()
 }).passthrough();
 
 export const campaignSchema = z.object({
@@ -360,7 +373,7 @@ export const messageDataSchema = z.object({
   otherPartyUsername: z.string().optional(),
   reference: z.object({
     referenceId: z.string().optional(),
-    referenceType: z.enum(['LISTING', 'ORDER']).optional()
+    referenceType: z.nativeEnum(MessageReferenceType).optional()
   }).passthrough().optional(),
   messageMedia: z.array(z.object({
     mediaUrl: z.string().optional(),
@@ -371,7 +384,7 @@ export const messageDataSchema = z.object({
 
 export const feedbackDataSchema = z.object({
   orderLineItemId: z.string(),
-  rating: z.enum(['POSITIVE', 'NEUTRAL', 'NEGATIVE']),
+  rating: z.nativeEnum(FeedbackRating),
   feedbackText: z.string().optional()
 }).passthrough();
 
@@ -412,7 +425,7 @@ export const compatibilityDataSchema = z.object({
 
 export const infringementDataSchema = z.object({
   itemId: z.string(),
-  reportedItemType: z.enum(['LISTING', 'IMAGE']).optional(),
+  reportedItemType: z.nativeEnum(ReportedItemType).optional(),
   reportingReason: z.string().optional(),
   comments: z.string().optional()
 }).passthrough();
@@ -501,7 +514,7 @@ export const listingFeesRequestSchema = z.object({
     offerId: z.string().optional(),
     sku: z.string().optional(),
     marketplaceId: z.string().optional(),
-    format: z.enum(['AUCTION', 'FIXED_PRICE']).optional()
+    format: z.nativeEnum(FormatType).optional()
   }).passthrough())
 }).passthrough();
 

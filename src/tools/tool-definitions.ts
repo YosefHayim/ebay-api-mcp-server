@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MarketplaceId } from '@/types/ebay-enums.js';
 import {
   fulfillmentPolicySchema,
   paymentPolicySchema,
@@ -120,21 +121,21 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_get_fulfillment_policies',
     description: 'Get fulfillment policies for the seller.\n\nRequired OAuth Scope: sell.account.readonly or sell.account\nMinimum Scope: https://api.ebay.com/oauth/api_scope/sell.account.readonly',
     inputSchema: {
-      marketplaceId: z.string().optional().describe('eBay marketplace ID (e.g., EBAY_US)')
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('eBay marketplace ID')
     }
   },
   {
     name: 'ebay_get_payment_policies',
     description: 'Get payment policies for the seller',
     inputSchema: {
-      marketplaceId: z.string().optional().describe('eBay marketplace ID (e.g., EBAY_US)')
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('eBay marketplace ID')
     }
   },
   {
     name: 'ebay_get_return_policies',
     description: 'Get return policies for the seller',
     inputSchema: {
-      marketplaceId: z.string().optional().describe('eBay marketplace ID (e.g., EBAY_US)')
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('eBay marketplace ID')
     }
   },
   // Fulfillment Policy CRUD
@@ -156,7 +157,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_get_fulfillment_policy_by_name',
     description: 'Get a fulfillment policy by name',
     inputSchema: {
-      marketplaceId: z.string().describe('eBay marketplace ID (e.g., EBAY_US)'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('eBay marketplace ID'),
       name: z.string().describe('Policy name')
     }
   },
@@ -194,7 +195,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_get_payment_policy_by_name',
     description: 'Get a payment policy by name',
     inputSchema: {
-      marketplaceId: z.string().describe('eBay marketplace ID (e.g., EBAY_US)'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('eBay marketplace ID'),
       name: z.string().describe('Policy name')
     }
   },
@@ -232,7 +233,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_get_return_policy_by_name',
     description: 'Get a return policy by name',
     inputSchema: {
-      marketplaceId: z.string().describe('eBay marketplace ID (e.g., EBAY_US)'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('eBay marketplace ID'),
       name: z.string().describe('Policy name')
     }
   },
@@ -291,7 +292,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_opt_in_to_payments_program',
     description: 'Opt-in to a payments program',
     inputSchema: {
-      marketplaceId: z.string().describe('eBay marketplace ID (e.g., EBAY_US)'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('eBay marketplace ID'),
       paymentsProgramType: z.string().describe('Payments program type')
     }
   },
@@ -299,7 +300,7 @@ export const accountTools: ToolDefinition[] = [
     name: 'ebay_get_payments_program_status',
     description: 'Get payments program status',
     inputSchema: {
-      marketplaceId: z.string().describe('eBay marketplace ID (e.g., EBAY_US)'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('eBay marketplace ID'),
       paymentsProgramType: z.string().describe('Payments program type')
     }
   },
@@ -404,7 +405,7 @@ export const inventoryTools: ToolDefinition[] = [
     description: 'Get all offers for the seller',
     inputSchema: {
       sku: z.string().optional().describe('Filter by SKU'),
-      marketplaceId: z.string().optional().describe('Filter by marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('Filter by marketplace ID'),
       limit: z.number().optional().describe('Number of offers to return')
     }
   },
@@ -667,7 +668,7 @@ export const marketingTools: ToolDefinition[] = [
     description: 'Get marketing campaigns for the seller',
     inputSchema: {
       campaignStatus: z.string().optional().describe('Filter by campaign status (RUNNING, PAUSED, ENDED)'),
-      marketplaceId: z.string().optional().describe('Filter by marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('Filter by marketplace ID'),
       limit: z.number().optional().describe('Number of campaigns to return')
     }
   },
@@ -729,7 +730,7 @@ export const marketingTools: ToolDefinition[] = [
     name: 'ebay_get_promotions',
     description: 'Get promotions for the seller',
     inputSchema: {
-      marketplaceId: z.string().optional().describe('Filter by marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('Filter by marketplace ID'),
       limit: z.number().optional().describe('Number of promotions to return')
     }
   },
@@ -786,7 +787,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_automotive_parts_compatibility_policies',
     description: 'Get automotive parts compatibility policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -794,7 +795,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_category_policies',
     description: 'Get category policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -802,7 +803,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_extended_producer_responsibility_policies',
     description: 'Get extended producer responsibility policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -810,14 +811,14 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_hazardous_materials_labels',
     description: 'Get hazardous materials labels for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID')
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID')
     }
   },
   {
     name: 'ebay_get_item_condition_policies',
     description: 'Get item condition policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -825,7 +826,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_listing_structure_policies',
     description: 'Get listing structure policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -833,7 +834,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_negotiated_price_policies',
     description: 'Get negotiated price policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -841,14 +842,14 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_product_safety_labels',
     description: 'Get product safety labels for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID')
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID')
     }
   },
   {
     name: 'ebay_get_regulatory_policies',
     description: 'Get regulatory policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -857,7 +858,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_shipping_cost_type_policies',
     description: 'Get shipping cost type policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -865,7 +866,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_classified_ad_policies',
     description: 'Get classified ad policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -873,14 +874,14 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_currencies',
     description: 'Get currencies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID')
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID')
     }
   },
   {
     name: 'ebay_get_listing_type_policies',
     description: 'Get listing type policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -888,7 +889,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_motors_listing_policies',
     description: 'Get motors listing policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -896,7 +897,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_shipping_policies',
     description: 'Get shipping policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },
@@ -904,7 +905,7 @@ export const metadataTools: ToolDefinition[] = [
     name: 'ebay_get_site_visibility_policies',
     description: 'Get site visibility policies for a marketplace',
     inputSchema: {
-      marketplaceId: z.string().describe('Marketplace ID'),
+      marketplaceId: z.nativeEnum(MarketplaceId).describe('Marketplace ID'),
       filter: z.string().optional().describe('Filter criteria')
     }
   },

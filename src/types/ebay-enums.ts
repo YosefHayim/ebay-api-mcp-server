@@ -651,6 +651,209 @@ export enum CurrencyCode {
 }
 
 /**
+ * Region Type Enum
+ *
+ * Geographic region classification types.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/account/types/ba:RegionTypeEnum
+ */
+export enum RegionType {
+  /** Country-level region */
+  COUNTRY = 'COUNTRY',
+
+  /** Sub-country region (state, province) */
+  COUNTRY_REGION = 'COUNTRY_REGION',
+
+  /** State or province */
+  STATE_OR_PROVINCE = 'STATE_OR_PROVINCE',
+
+  /** World region (e.g., Asia, Europe) */
+  WORLD_REGION = 'WORLD_REGION',
+
+  /** Worldwide */
+  WORLDWIDE = 'WORLDWIDE'
+}
+
+/**
+ * Deposit Type Enum
+ *
+ * Type of deposit for a payment policy.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/account/types/api:DepositTypeEnum
+ */
+export enum DepositType {
+  /** Percentage of total price */
+  PERCENTAGE = 'PERCENTAGE',
+
+  /** Fixed amount */
+  FIXED_AMOUNT = 'FIXED_AMOUNT'
+}
+
+/**
+ * Pricing Visibility Enum
+ *
+ * When pricing information is displayed to buyers.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/inventory/types/slr:PricingVisibilityEnum
+ */
+export enum PricingVisibility {
+  /** Price not visible */
+  NONE = 'NONE',
+
+  /** Price visible before checkout */
+  PRE_CHECKOUT = 'PRE_CHECKOUT',
+
+  /** Price visible during checkout */
+  DURING_CHECKOUT = 'DURING_CHECKOUT'
+}
+
+/**
+ * Location Type Enum
+ *
+ * Type of inventory location.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/inventory/types/api:LocationTypeEnum
+ */
+export enum LocationType {
+  /** Retail store */
+  STORE = 'STORE',
+
+  /** Warehouse or storage facility */
+  WAREHOUSE = 'WAREHOUSE'
+}
+
+/**
+ * Merchant Location Status Enum
+ *
+ * Status of an inventory location.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/inventory/types/api:MerchantLocationStatusEnum
+ */
+export enum MerchantLocationStatus {
+  /** Location is enabled and active */
+  ENABLED = 'ENABLED',
+
+  /** Location is disabled */
+  DISABLED = 'DISABLED'
+}
+
+/**
+ * Day of Week Enum
+ *
+ * Days of the week for operating hours.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/inventory/types/api:DayOfWeekEnum
+ */
+export enum DayOfWeek {
+  MONDAY = 'MONDAY',
+  TUESDAY = 'TUESDAY',
+  WEDNESDAY = 'WEDNESDAY',
+  THURSDAY = 'THURSDAY',
+  FRIDAY = 'FRIDAY',
+  SATURDAY = 'SATURDAY',
+  SUNDAY = 'SUNDAY'
+}
+
+/**
+ * Reason for Refund Enum
+ *
+ * Reason codes for issuing refunds.
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/fulfillment/types/api:ReasonForRefundEnum
+ */
+export enum ReasonForRefund {
+  /** Buyer canceled the order */
+  BUYER_CANCEL = 'BUYER_CANCEL',
+
+  /** Item is out of stock */
+  OUT_OF_STOCK = 'OUT_OF_STOCK',
+
+  /** Buyer found a cheaper price elsewhere */
+  FOUND_CHEAPER_PRICE = 'FOUND_CHEAPER_PRICE',
+
+  /** Price was incorrect in listing */
+  INCORRECT_PRICE = 'INCORRECT_PRICE',
+
+  /** Item was damaged in transit or storage */
+  ITEM_DAMAGED = 'ITEM_DAMAGED',
+
+  /** Item is defective */
+  ITEM_DEFECTIVE = 'ITEM_DEFECTIVE',
+
+  /** Item was lost in transit */
+  LOST_IN_TRANSIT = 'LOST_IN_TRANSIT',
+
+  /** Buyer and seller mutually agreed to refund */
+  MUTUALLY_AGREED = 'MUTUALLY_AGREED',
+
+  /** Seller canceled the order */
+  SELLER_CANCEL = 'SELLER_CANCEL'
+}
+
+/**
+ * Funding Model Enum
+ *
+ * How campaigns are funded (cost per sale or cost per click).
+ *
+ * Reference: https://developer.ebay.com/api-docs/sell/marketing/types/pls:FundingModelEnum
+ */
+export enum FundingModel {
+  /** Cost per sale - pay when item sells */
+  COST_PER_SALE = 'COST_PER_SALE',
+
+  /** Cost per click - pay when ad is clicked */
+  COST_PER_CLICK = 'COST_PER_CLICK'
+}
+
+/**
+ * Message Reference Type Enum
+ *
+ * Type of item the message references.
+ *
+ * Reference: https://developer.ebay.com/api-docs/commerce/message/types/api:ReferenceTypeEnum
+ */
+export enum MessageReferenceType {
+  /** Message references a listing */
+  LISTING = 'LISTING',
+
+  /** Message references an order */
+  ORDER = 'ORDER'
+}
+
+/**
+ * Feedback Rating Enum
+ *
+ * Rating types for buyer/seller feedback.
+ *
+ * Reference: https://developer.ebay.com/api-docs/commerce/feedback/types/api:RatingEnum
+ */
+export enum FeedbackRating {
+  /** Positive feedback */
+  POSITIVE = 'POSITIVE',
+
+  /** Neutral feedback */
+  NEUTRAL = 'NEUTRAL',
+
+  /** Negative feedback */
+  NEGATIVE = 'NEGATIVE'
+}
+
+/**
+ * Reported Item Type Enum
+ *
+ * Type of item being reported for VERO infringement.
+ *
+ * Reference: https://developer.ebay.com/api-docs/commerce/vero/types/api:ReportedItemTypeEnum
+ */
+export enum ReportedItemType {
+  /** Entire listing */
+  LISTING = 'LISTING',
+
+  /** Image within a listing */
+  IMAGE = 'IMAGE'
+}
+
+/**
  * Helper functions for working with enums
  */
 export const EbayEnums = {
