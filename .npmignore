@@ -29,6 +29,12 @@ build/**/*.map
 build/**/*.d.ts.map
 build/types/ebay/
 build/types/openapi-schemas/
+build/tests/
+build/src/
+build/**/*.test.js
+build/**/*.test.d.ts
+build/**/*.spec.js
+build/**/*.spec.d.ts
 
 # IDE
 .vscode/
@@ -66,10 +72,16 @@ tmp/
 temp/
 *.log
 
-# MCP config (not needed in published package)
-.mcp.json
-
-# Other
-CHANGELOG.md
-LICENSE
+# Other documentation (keep minimal docs in package)
+CONTRIBUTING.md
+SECURITY.md
+OAUTH-SETUP.md
+ESLINT-SETUP.md
 *.md.backup
+
+# MCP setup files (not needed in published package)
+mcp-setup.json
+mcp-setup.json.template
+claude_desktop_config.json
+gemini_config.json
+chatgpt_config.json

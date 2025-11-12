@@ -47,7 +47,11 @@
 	"author": "Yosef Hayim Sabag",
 	"license": "MIT",
 	"files": [
-		"build",
+		"build/**/*.js",
+		"build/**/*.d.ts",
+		"!build/tests/**",
+		"!build/**/*.test.*",
+		"!build/**/*.spec.*",
 		"README.md",
 		"GEMINI.md",
 		"CLAUDE.md",
