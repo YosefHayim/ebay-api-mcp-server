@@ -22,6 +22,17 @@ export interface EbayAuthToken {
 }
 
 /**
+ * App access token response from client credentials flow
+ * Used for application-level operations (1,000 requests/day)
+ * No refresh token - app tokens are short-lived and re-generated
+ */
+export interface EbayAppAccessTokenResponse {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+}
+
+/**
  * User access token with refresh token
  * Used for user-specific operations (10,000-50,000 requests/day)
  */
@@ -35,14 +46,14 @@ export interface EbayUserToken {
 }
 
 /**
- * Stored token data with expiry timestamps
+ * Stored user token data with expiry timestamps
  */
 export interface StoredTokenData {
-  accessToken: string;
-  refreshToken: string;
+  userAccessToken: string;
+  userRefreshToken: string;
   tokenType: string;
-  accessTokenExpiry: number; // Unix timestamp in milliseconds
-  refreshTokenExpiry: number; // Unix timestamp in milliseconds
+  userAccessTokenExpiry: number; // Unix timestamp in milliseconds
+  userRefreshTokenExpiry: number; // Unix timestamp in milliseconds
   scope?: string;
 }
 

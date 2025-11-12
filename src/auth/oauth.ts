@@ -1,7 +1,7 @@
 import axios from "axios";
-import { getAuthUrl, getDefaultScopes, validateScopes } from "@/config/environment.js";
+import { getAuthUrl, getBaseUrl, getDefaultScopes, validateScopes } from "@/config/environment.js";
 import type {
-  EbayAuthToken,
+  EbayAppAccessTokenResponse,
   EbayConfig,
   EbayUserToken,
   StoredTokenData,
@@ -13,8 +13,8 @@ import { TokenStorage } from "@/auth/token-storage.js";
  * Supports both client credentials (app tokens) and user access tokens with refresh
  */
 export class EbayOAuthClient {
-  private token: EbayAuthToken | null = null;
-  private tokenExpiry = 0;
+  private appAccessToken: string | null = null;
+  private appAccessTokenExpiry = 0;
   private userTokens: StoredTokenData | null = null;
 
   constructor(private config: EbayConfig) { }
@@ -50,24 +50,24 @@ export class EbayOAuthClient {
   /**
    * Get a valid access token, with priority order:
    * 1. User access token (if available and valid, or refreshable)
-   * 2. Client credentials token (fallback)
+   * 2. App access token from client credentials (fallback)
    */
   async getAccessToken(): Promise<string> {
     // Try to use user token first
     if (this.userTokens) {
       // Check if access token is still valid
-      if (!TokenStorage.isAccessTokenExpired(this.userTokens)) {
-        return this.userTokens.accessToken;
+      if (!TokenStorage.isUserAccessTokenExpired(this.userTokens)) {
+        return this.userTokens.userAccessToken;
       }
 
       // Try to refresh if refresh token is valid
-      if (!TokenStorage.isRefreshTokenExpired(this.userTokens)) {
+      if (!TokenStorage.isUserRefreshTokenExpired(this.userTokens)) {
         try {
           await this.refreshUserToken();
-          return this.userTokens.accessToken;
+          return this.userTokens.userAccessToken;
         } catch (error) {
           console.error(
-            "Failed to refresh user token, falling back to client credentials:",
+            "Failed to refresh user token, falling back to app access token:",
             error,
           );
           // Clear invalid tokens
@@ -76,7 +76,7 @@ export class EbayOAuthClient {
         }
       } else {
         // Refresh token expired
-        console.error("Refresh token expired. User needs to re-authorize.");
+        console.error("User refresh token expired. User needs to re-authorize.");
         this.userTokens = null;
         await TokenStorage.clearTokens();
         throw new Error(
@@ -85,13 +85,13 @@ export class EbayOAuthClient {
       }
     }
 
-    // Fallback to client credentials
-    if (this.token && Date.now() < this.tokenExpiry) {
-      return this.token.access_token;
+    // Fallback to app access token (client credentials)
+    if (this.appAccessToken && Date.now() < this.appAccessTokenExpiry) {
+      return this.appAccessToken;
     }
 
-    await this.authenticateClientCredentials();
-    return this.token!.access_token;
+    await this.getAppAccessToken();
+    return this.appAccessToken!;
   }
 
   /**
@@ -109,15 +109,65 @@ export class EbayOAuthClient {
     // Refresh tokens typically expire in 18 months
     const now = Date.now();
     const storedTokens: StoredTokenData = {
-      accessToken,
-      refreshToken,
+      userAccessToken: accessToken,
+      userRefreshToken: refreshToken,
       tokenType: "Bearer",
-      accessTokenExpiry: accessTokenExpiry ?? (now + 7200 * 1000), // 2 hours default
-      refreshTokenExpiry: refreshTokenExpiry ?? (now + 18 * 30 * 24 * 60 * 60 * 1000), // ~18 months default
+      userAccessTokenExpiry: accessTokenExpiry ?? (now + 7200 * 1000), // 2 hours default
+      userRefreshTokenExpiry: refreshTokenExpiry ?? (now + 18 * 30 * 24 * 60 * 60 * 1000), // ~18 months default
     };
 
     this.userTokens = storedTokens;
     await TokenStorage.saveTokens(storedTokens);
+  }
+
+  /**
+   * Get app access token using client credentials flow
+   * This is a public method that can be called directly to get app-level access
+   * Rate limit: 1,000 requests/day
+   */
+  async getAppAccessToken(): Promise<string> {
+    // Return cached token if still valid
+    if (this.appAccessToken && Date.now() < this.appAccessTokenExpiry) {
+      return this.appAccessToken;
+    }
+
+    const authUrl = `${getBaseUrl(this.config.environment)}/identity/v1/oauth2/token`;
+    const credentials = Buffer.from(
+      `${this.config.clientId}:${this.config.clientSecret}`,
+    ).toString("base64");
+
+    // Get application scopes for the environment
+    const scopes = getDefaultScopes(this.config.environment);
+    const scopeParam = scopes.join(" ");
+
+    try {
+      const response = await axios.post<EbayAppAccessTokenResponse>(
+        authUrl,
+        new URLSearchParams({
+          grant_type: "client_credentials",
+          scope: scopeParam,
+        }).toString(),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${credentials}`,
+          },
+        },
+      );
+
+      this.appAccessToken = response.data.access_token;
+      // Set expiry with 60 second buffer
+      this.appAccessTokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
+
+      return this.appAccessToken;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          `Failed to get app access token: ${error.response?.data?.error_description || error.message}`,
+        );
+      }
+      throw error;
+    }
   }
 
   /**
@@ -156,11 +206,11 @@ export class EbayOAuthClient {
       // Store the user tokens
       const now = Date.now();
       const storedTokens: StoredTokenData = {
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token,
+        userAccessToken: tokenData.access_token,
+        userRefreshToken: tokenData.refresh_token,
         tokenType: tokenData.token_type,
-        accessTokenExpiry: now + tokenData.expires_in * 1000,
-        refreshTokenExpiry: now + tokenData.refresh_token_expires_in * 1000,
+        userAccessTokenExpiry: now + tokenData.expires_in * 1000,
+        userRefreshTokenExpiry: now + tokenData.refresh_token_expires_in * 1000,
         scope: tokenData.scope,
       };
 
@@ -196,7 +246,7 @@ export class EbayOAuthClient {
         authUrl,
         new URLSearchParams({
           grant_type: "refresh_token",
-          refresh_token: this.userTokens.refreshToken,
+          refresh_token: this.userTokens.userRefreshToken,
         }).toString(),
         {
           headers: {
@@ -211,13 +261,13 @@ export class EbayOAuthClient {
       // Update stored tokens
       const now = Date.now();
       const updatedTokens: StoredTokenData = {
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token || this.userTokens.refreshToken, // Use new refresh token if provided
+        userAccessToken: tokenData.access_token,
+        userRefreshToken: tokenData.refresh_token || this.userTokens.userRefreshToken, // Use new refresh token if provided
         tokenType: tokenData.token_type,
-        accessTokenExpiry: now + tokenData.expires_in * 1000,
-        refreshTokenExpiry: tokenData.refresh_token_expires_in
+        userAccessTokenExpiry: now + tokenData.expires_in * 1000,
+        userRefreshTokenExpiry: tokenData.refresh_token_expires_in
           ? now + tokenData.refresh_token_expires_in * 1000
-          : this.userTokens.refreshTokenExpiry, // Keep existing expiry if not provided
+          : this.userTokens.userRefreshTokenExpiry, // Keep existing expiry if not provided
         scope: tokenData.scope,
       };
 
@@ -234,60 +284,24 @@ export class EbayOAuthClient {
   }
 
   /**
-   * Authenticate using client credentials flow (application token)
-   * Used as fallback when no user token is available
-   * Rate limit: 1,000 requests/day
-   */
-  private async authenticateClientCredentials(): Promise<void> {
-    const authUrl = getAuthUrl(this.config.environment);
-    const credentials = Buffer.from(
-      `${this.config.clientId}:${this.config.clientSecret}`,
-    ).toString("base64");
-
-    try {
-      const response = await axios.post(
-        authUrl,
-        "grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${credentials}`,
-          },
-        },
-      );
-
-      this.token = response.data;
-      // Set expiry with 60 second buffer
-      this.tokenExpiry = Date.now() + (this.token!.expires_in - 60) * 1000;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(
-          `eBay authentication failed: ${error.response?.data?.error_description || error.message}`,
-        );
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Check if currently authenticated (either user or client credentials)
+   * Check if currently authenticated (either user or app credentials)
    */
   isAuthenticated(): boolean {
     if (
       this.userTokens &&
-      !TokenStorage.isAccessTokenExpired(this.userTokens)
+      !TokenStorage.isUserAccessTokenExpired(this.userTokens)
     ) {
       return true;
     }
-    return this.token !== null && Date.now() < this.tokenExpiry;
+    return this.appAccessToken !== null && Date.now() < this.appAccessTokenExpiry;
   }
 
   /**
    * Clear all authentication tokens
    */
   async clearAllTokens(): Promise<void> {
-    this.token = null;
-    this.tokenExpiry = 0;
+    this.appAccessToken = null;
+    this.appAccessTokenExpiry = 0;
     this.userTokens = null;
     await TokenStorage.clearTokens();
   }
@@ -295,12 +309,12 @@ export class EbayOAuthClient {
   /**
    * Get current token info for debugging
    */
-  getTokenInfo(): { hasUserToken: boolean; hasClientToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } {
-    const info: { hasUserToken: boolean; hasClientToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } = {
+  getTokenInfo(): { hasUserToken: boolean; hasAppAccessToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } {
+    const info: { hasUserToken: boolean; hasAppAccessToken: boolean; scopeInfo?: { tokenScopes: string[]; environmentScopes: string[]; missingScopes: string[] } } = {
       hasUserToken:
         this.userTokens !== null &&
-        !TokenStorage.isAccessTokenExpired(this.userTokens),
-      hasClientToken: this.token !== null && Date.now() < this.tokenExpiry,
+        !TokenStorage.isUserAccessTokenExpired(this.userTokens),
+      hasAppAccessToken: this.appAccessToken !== null && Date.now() < this.appAccessTokenExpiry,
     };
 
     // Add scope comparison info if user tokens are available

@@ -45,7 +45,7 @@ export class TokenStorage {
       const tokens = JSON.parse(data) as StoredTokenData;
 
       // Validate token structure
-      if (!tokens.accessToken || !tokens.refreshToken) {
+      if (!tokens.userAccessToken || !tokens.userRefreshToken) {
         return null;
       }
 
@@ -87,17 +87,17 @@ export class TokenStorage {
   }
 
   /**
-   * Check if access token is expired
+   * Check if user access token is expired
    */
-  static isAccessTokenExpired(tokens: StoredTokenData): boolean {
-    return Date.now() >= tokens.accessTokenExpiry;
+  static isUserAccessTokenExpired(tokens: StoredTokenData): boolean {
+    return Date.now() >= tokens.userAccessTokenExpiry;
   }
 
   /**
-   * Check if refresh token is expired
+   * Check if user refresh token is expired
    */
-  static isRefreshTokenExpired(tokens: StoredTokenData): boolean {
-    return Date.now() >= tokens.refreshTokenExpiry;
+  static isUserRefreshTokenExpired(tokens: StoredTokenData): boolean {
+    return Date.now() >= tokens.userRefreshTokenExpiry;
   }
 
   /**

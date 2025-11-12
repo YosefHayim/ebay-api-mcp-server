@@ -229,16 +229,16 @@ export async function executeTool(
 
       return {
         hasUserToken: tokenInfo.hasUserToken,
-        hasClientToken: tokenInfo.hasClientToken,
+        hasAppAccessToken: tokenInfo.hasAppAccessToken,
         authenticated: api.isAuthenticated(),
         currentTokenType: tokenInfo.hasUserToken
           ? "user_token (10,000-50,000 req/day)"
-          : tokenInfo.hasClientToken
-            ? "client_credentials (1,000 req/day)"
+          : tokenInfo.hasAppAccessToken
+            ? "app_access_token (1,000 req/day)"
             : "none",
         message: hasUserTokens
           ? "Using user access token with automatic refresh"
-          : "Using client credentials flow (lower rate limits). Consider setting user tokens for higher rate limits.",
+          : "Using app access token from client credentials flow (lower rate limits). Consider setting user tokens for higher rate limits.",
       };
     }
 
@@ -329,7 +329,7 @@ export async function executeTool(
         const storedTokens = await TokenStorage.loadTokens();
 
         // If autoRefresh is enabled and access token is expired but refresh token is valid
-        if (autoRefresh && storedTokens && TokenStorage.isAccessTokenExpired(storedTokens) && !TokenStorage.isRefreshTokenExpired(storedTokens)) {
+        if (autoRefresh && storedTokens && TokenStorage.isUserAccessTokenExpired(storedTokens) && !TokenStorage.isUserRefreshTokenExpired(storedTokens)) {
           try {
             // Force a refresh by calling getAccessToken
             const authClient = api.getAuthClient().getOAuthClient();
