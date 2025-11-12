@@ -25,12 +25,12 @@ export class MockTokenStorage {
     this.tokens = null;
   }
 
-  static isAccessTokenExpired(tokens: StoredTokenData): boolean {
-    return Date.now() >= tokens.accessTokenExpiry;
+  static isUserAccessTokenExpired(tokens: StoredTokenData): boolean {
+    return Date.now() >= tokens.userAccessTokenExpiry;
   }
 
-  static isRefreshTokenExpired(tokens: StoredTokenData): boolean {
-    return Date.now() >= tokens.refreshTokenExpiry;
+  static isUserRefreshTokenExpired(tokens: StoredTokenData): boolean {
+    return Date.now() >= tokens.userRefreshTokenExpiry;
   }
 
   // Helper methods for testing
@@ -55,11 +55,11 @@ export function createMockTokens(
 ): StoredTokenData {
   const now = Date.now();
   return {
-    accessToken: "mock_access_token",
-    refreshToken: "mock_refresh_token",
+    userAccessToken: "mock_access_token",
+    userRefreshToken: "mock_refresh_token",
     tokenType: "Bearer",
-    accessTokenExpiry: now + 7200 * 1000, // 2 hours from now
-    refreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // 18 months
+    userAccessTokenExpiry: now + 7200 * 1000, // 2 hours from now
+    userRefreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // 18 months
     scope: "https://api.ebay.com/oauth/api_scope/sell.inventory",
     ...overrides,
   };
@@ -71,8 +71,8 @@ export function createMockTokens(
 export function createExpiredAccessToken(): StoredTokenData {
   const now = Date.now();
   return createMockTokens({
-    accessTokenExpiry: now - 1000, // 1 second ago
-    refreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // Still valid
+    userAccessTokenExpiry: now - 1000, // 1 second ago
+    userRefreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // Still valid
   });
 }
 
@@ -82,7 +82,7 @@ export function createExpiredAccessToken(): StoredTokenData {
 export function createFullyExpiredTokens(): StoredTokenData {
   const now = Date.now();
   return createMockTokens({
-    accessTokenExpiry: now - 1000, // 1 second ago
-    refreshTokenExpiry: now - 1000, // Also expired
+    userAccessTokenExpiry: now - 1000, // 1 second ago
+    userRefreshTokenExpiry: now - 1000, // Also expired
   });
 }

@@ -136,9 +136,9 @@ export class EbayOAuthClient {
       `${this.config.clientId}:${this.config.clientSecret}`,
     ).toString("base64");
 
-    // Get application scopes for the environment
-    const scopes = getDefaultScopes(this.config.environment);
-    const scopeParam = scopes.join(" ");
+    // Client credentials flow only supports basic scope
+    // User authorization flows can request additional scopes
+    const scopeParam = "https://api.ebay.com/oauth/api_scope";
 
     try {
       const response = await axios.post<EbayAppAccessTokenResponse>(

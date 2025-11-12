@@ -15,8 +15,8 @@ const mockTokenStorage = vi.hoisted(() => ({
   loadTokens: vi.fn(),
   saveTokens: vi.fn(),
   clearTokens: vi.fn(),
-  isAccessTokenExpired: vi.fn(),
-  isRefreshTokenExpired: vi.fn(),
+  isUserAccessTokenExpired: vi.fn(),
+  isUserRefreshTokenExpired: vi.fn(),
 }));
 
 vi.mock("../../../src/auth/token-storage.js", () => ({
@@ -42,7 +42,7 @@ describe("Inventory Tools Integration Tests", () => {
     const mockTokens = createMockTokens();
     mockTokenStorage.hasTokens.mockResolvedValue(true);
     mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-    mockTokenStorage.isAccessTokenExpired.mockReturnValue(false);
+    mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
 
     api = new EbaySellerApi(config);
     await api.initialize();
