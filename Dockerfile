@@ -1,26 +1,49 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install pnpm globally
+# Install pnpm
 RUN npm install -g pnpm
 
-# Copy package.json and pnpm-lock.yaml (if it exists)
-COPY package.json ./
+# Copy all source files first (before removing prepare script)
+COPY . .
+
+# Now remove prepare script to avoid issues during prod install
+RUN sed -i '/"prepare":/d' package.json
 
 # Install dependencies
-RUN pnpm install --prod --frozen-lockfile || pnpm install --prod
-
-# Copy the rest of the application code
-COPY . .
+RUN pnpm install --frozen-lockfile || pnpm install
 
 # Build the application
 RUN pnpm run build
 
-# Expose the port the app runs on
+# Production stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files and remove prepare script
+COPY package.json ./
+RUN sed -i '/"prepare":/d' package.json
+
+# Copy lockfile
+COPY pnpm-lock.yaml* ./
+
+# Install only production dependencies
+RUN pnpm install --prod --frozen-lockfile || pnpm install --prod
+
+# Copy built application from builder
+COPY --from=builder /app/build ./build
+
+# Copy docs directory (needed for scopes)
+COPY --from=builder /app/docs ./docs
+
+# Expose port
 EXPOSE 3000
 
-# Define the command to run the app
-CMD ["pnpm", "start"]
+# Run the server
+CMD ["node", "build/index.js"]

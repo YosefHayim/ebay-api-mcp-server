@@ -173,7 +173,7 @@ pnpm run build
 
 ### Automated Setup (Recommended)
 
-**We provide an automated setup script that configures the MCP server for all supported clients:**
+**We provide centralized configuration for easy setup across all MCP clients:**
 
 ```bash
 # Clone or install the package
@@ -184,27 +184,47 @@ cd ebay-api-mcp-server
 npm install
 npm run build
 
-# Run the automated setup script
+# Step 1: Create centralized configuration file
+./scripts/create-mcp-setup.sh
+
+# Step 2: Edit mcp-setup.json with your eBay credentials
+# (Use your favorite editor - VS Code, nano, vim, etc.)
+nano mcp-setup.json
+
+# Step 3: Auto-generate MCP client configurations
 ./scripts/setup-mcp-clients.sh
 ```
 
-The script will:
-- ✅ Prompt for your eBay API credentials
-- ✅ Auto-detect and configure **Claude Desktop** (if installed)
-- ✅ Auto-detect and configure **Gemini CLI** (if installed)
-- ✅ Auto-detect and configure **ChatGPT Desktop** (if installed)
-- ✅ Create proper configuration files with correct paths
-- ✅ Validate your build and environment
+**What this workflow does:**
 
-**Supported Platforms:**
-- **macOS** - Full support for all clients
-- **Linux** - Full support for all clients
-- **Windows** - Support via WSL or manual configuration
+**Step 1** (`create-mcp-setup.sh`):
+- 📝 Creates `mcp-setup.json` template at project root
+- 🔧 Auto-detects build path
+- 📋 Includes all required and optional fields
 
-**After running the script:**
-1. Restart your AI client (Claude Desktop, Gemini CLI, or ChatGPT Desktop)
+**Step 2** (Edit `mcp-setup.json`):
+- 🔑 Add your eBay credentials (clientId, clientSecret, environment)
+- 🎟️ Optionally add user tokens (accessToken, refreshToken)
+- ✅ Enable/disable MCP clients (Claude, Cline, Continue, Zed)
+
+**Step 3** (`setup-mcp-clients.sh`):
+- ✅ Reads configuration from `mcp-setup.json`
+- ✅ Auto-generates configs for enabled MCP clients
+- ✅ Creates `.ebay-mcp-tokens.json` if tokens provided
+- ✅ Backs up existing configs before modifying
+- ✅ Works on macOS, Linux, and Windows (WSL)
+
+**Supported MCP Clients:**
+- **Claude Desktop** - macOS, Linux, Windows
+- **Cline** - VS Code extension
+- **Continue** - VS Code extension
+- **Zed** - Text editor
+
+**After running the setup:**
+1. Restart your AI client (Claude Desktop, VS Code, Zed, etc.)
 2. The eBay MCP server will be available automatically
 3. Use `ebay_get_token_status` to verify authentication
+4. Use `ebay_get_oauth_url` to set up user tokens (recommended for higher rate limits)
 
 ---
 
@@ -298,7 +318,7 @@ eBay API MCP Server running on stdio
 | `EBAY_CLIENT_ID` | ✅ | - | Your eBay application Client ID |
 | `EBAY_CLIENT_SECRET` | ✅ | - | Your eBay application Client Secret |
 | `EBAY_ENVIRONMENT` | ✅ | `sandbox` | API environment: `sandbox` or `production` |
-| `EBAY_REDIRECT_URI` | ❌ | - | OAuth redirect URI (for user authorization flow) |
+| `EBAY_REDIRECT_URI` | ⚠️ | - | **Highly Recommended** - OAuth redirect URI for user authorization flow. Required to use `ebay_get_oauth_url` tool. Must be registered in your eBay application settings. |
 | `MCP_HOST` | ❌ | `localhost` | HTTP server host (HTTP mode only) |
 | `MCP_PORT` | ❌ | `3000` | HTTP server port (HTTP mode only) |
 | `OAUTH_ENABLED` | ❌ | `true` | Enable OAuth authorization (HTTP mode only) |
@@ -308,13 +328,64 @@ eBay API MCP Server running on stdio
 
 ### Manual Token Configuration
 
-For development, you can manually configure tokens without using the `ebay_set_user_tokens` tool:
+You have multiple ways to configure OAuth tokens for development:
 
-1. Use the `create_token_template_file` tool to generate a template
-2. Copy `.ebay-mcp-tokens.json` to your home directory
-3. Fill in your OAuth token values
+#### Option 1: MCP Client Configuration (⚡ Fastest - Recommended)
 
-📚 **See [Manual Token Configuration Guide](./docs/auth/manual-token-config.md)** for details.
+Configure tokens directly in your MCP client config and use the `ebay_set_user_tokens` tool:
+
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/absolute/path/to/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_client_id",
+        "EBAY_CLIENT_SECRET": "your_client_secret",
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-redirect-uri.com/callback"
+      }
+    }
+  }
+}
+```
+
+Then in Claude Desktop, use the tool:
+```
+ebay_set_user_tokens with your access_token and refresh_token
+```
+
+**Benefits:**
+- ✅ No manual file editing required
+- ✅ Tokens managed through MCP interface
+- ✅ Easy to update and rotate tokens
+- ✅ Works across all MCP clients
+
+#### Option 2: Token File Generation Script
+
+Generate a token template file that you manually edit:
+
+```bash
+./scripts/create-token-template.sh
+```
+
+This creates `.ebay-mcp-tokens.json` in the project root with placeholder values. Then:
+1. Edit `.ebay-mcp-tokens.json`
+2. Replace placeholder values with your actual OAuth tokens
+3. Server automatically loads tokens on startup
+
+**Benefits:**
+- ✅ Quick local development setup
+- ✅ File-based token persistence
+- ✅ Good for testing and debugging
+
+#### Option 3: MCP Tool
+
+Call the `create_token_template_file` tool through your MCP client to generate the template file, then edit it manually.
+
+📚 **See [Detailed Token Configuration Guide](./docs/auth/README.md)** for OAuth token acquisition and management.
 
 ---
 
@@ -347,14 +418,17 @@ If you need to manually configure your MCP client, follow the instructions below
       "env": {
         "EBAY_CLIENT_ID": "your_client_id",
         "EBAY_CLIENT_SECRET": "your_client_secret",
-        "EBAY_ENVIRONMENT": "sandbox"
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-app.com/callback"
       }
     }
   }
 }
 ```
 
-**Important:** Use the absolute path to `build/index.js`, not a relative path.
+**Important:**
+- Use the absolute path to `build/index.js`, not a relative path.
+- `EBAY_REDIRECT_URI` is highly recommended for user authentication (higher API rate limits). The redirect URI must be registered in your eBay application settings at https://developer.ebay.com/my/keys
 
 3. Restart Claude Desktop
 
@@ -371,14 +445,17 @@ If you need to manually configure your MCP client, follow the instructions below
       "env": {
         "EBAY_CLIENT_ID": "your_client_id",
         "EBAY_CLIENT_SECRET": "your_client_secret",
-        "EBAY_ENVIRONMENT": "sandbox"
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-app.com/callback"
       }
     }
   }
 }
 ```
 
-**Important:** Use the absolute path to `build/index.js`, not a relative path.
+**Important:**
+- Use the absolute path to `build/index.js`, not a relative path.
+- `EBAY_REDIRECT_URI` is highly recommended for user authentication (higher API rate limits). The redirect URI must be registered in your eBay application settings at https://developer.ebay.com/my/keys
 
 2. Restart Gemini CLI or run `gemini mcp refresh`
 
@@ -400,14 +477,17 @@ If you need to manually configure your MCP client, follow the instructions below
       "env": {
         "EBAY_CLIENT_ID": "your_client_id",
         "EBAY_CLIENT_SECRET": "your_client_secret",
-        "EBAY_ENVIRONMENT": "sandbox"
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-app.com/callback"
       }
     }
   }
 }
 ```
 
-**Important:** Use the absolute path to `build/index.js`, not a relative path.
+**Important:**
+- Use the absolute path to `build/index.js`, not a relative path.
+- `EBAY_REDIRECT_URI` is highly recommended for user authentication (higher API rate limits). The redirect URI must be registered in your eBay application settings at https://developer.ebay.com/my/keys
 
 **Note:** ChatGPT Desktop MCP support may vary. Check ChatGPT documentation for current MCP compatibility.
 
@@ -1117,7 +1197,7 @@ If your AI client isn't automatically detected:
 #### Token Refresh Failed
 
 **Check**:
-1. Refresh token expiry: `cat ~/.ebay-mcp-tokens.json`
+1. Refresh token expiry: `cat .ebay-mcp-tokens.json` (in project root)
 2. Refresh tokens valid ~18 months
 3. Re-authenticate if expired: Use `ebay_get_oauth_url`
 

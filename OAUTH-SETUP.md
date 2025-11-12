@@ -138,6 +138,7 @@ Create a `.env` file based on `.env.example`:
 EBAY_CLIENT_ID=your_ebay_client_id
 EBAY_CLIENT_SECRET=your_ebay_client_secret
 EBAY_ENVIRONMENT=sandbox
+EBAY_REDIRECT_URI=https://your-app.com/callback  # Required for user OAuth flow
 
 # MCP Server
 MCP_HOST=localhost
@@ -151,6 +152,8 @@ OAUTH_CLIENT_SECRET=your_keycloak_client_secret
 OAUTH_REQUIRED_SCOPES=mcp:tools
 OAUTH_USE_INTROSPECTION=true
 ```
+
+**Note:** `EBAY_REDIRECT_URI` is required if you want to use the `ebay_get_oauth_url` tool to generate authorization URLs for user authentication. This redirect URI must be registered in your eBay application settings at https://developer.ebay.com/my/keys
 
 ### Step 4: Start the Server
 
@@ -241,12 +244,15 @@ Configure in `claude_desktop_config.json`:
       "env": {
         "EBAY_CLIENT_ID": "your_ebay_client_id",
         "EBAY_CLIENT_SECRET": "your_ebay_client_secret",
-        "EBAY_ENVIRONMENT": "sandbox"
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-app.com/callback"
       }
     }
   }
 }
 ```
+
+**Note:** `EBAY_REDIRECT_URI` is highly recommended for user authentication. The redirect URI must be registered in your eBay application settings at https://developer.ebay.com/my/keys
 
 ### HTTP Mode with OAuth
 

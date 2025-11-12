@@ -1,21 +1,24 @@
 import { promises as fs } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import type { StoredTokenData } from '../types/ebay.js';
 
 /**
- * Token storage file path (in user's home directory)
- * Falls back to /tmp if home directory is not writable
+ * Get the project root directory
  */
-const getTokenFilePath = (): string => {
-  try {
-    return join(homedir(), '.ebay-mcp-tokens.json');
-  } catch {
-    return join('/tmp', '.ebay-mcp-tokens.json');
-  }
+const getProjectRoot = (): string => {
+  // Get current file's directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+
+  // Go up two levels from src/auth/ to project root
+  return join(__dirname, '..', '..');
 };
 
-const TOKEN_FILE_PATH = getTokenFilePath();
+/**
+ * Token storage file path (in project root directory)
+ */
+const TOKEN_FILE_PATH = join(getProjectRoot(), '.ebay-mcp-tokens.json');
 
 /**
  * Manages persistent storage of OAuth tokens

@@ -418,22 +418,82 @@ await use_mcp_tool("ebay_set_user_tokens", {
 ```
 
 Tokens are automatically:
-- Stored in `~/.ebay-mcp-tokens.json`
+- Stored in `.ebay-mcp-tokens.json` (project root directory)
 - Loaded on server startup
 - Refreshed when access token expires
 
 ### Manual Token Configuration
 
-Alternative method for local development and testing.
+You have **three methods** to configure OAuth tokens for development and testing. Choose based on your workflow:
 
-#### Step 1: Create Token File
+---
 
-Create `.ebay-mcp-tokens.json` in your home directory:
-- **macOS/Linux**: `~/.ebay-mcp-tokens.json`
-- **Windows**: `C:\Users\your-username\.ebay-mcp-tokens.json`
+#### Method 1: MCP Client Configuration (⚡ Fastest - Recommended)
 
-#### Step 2: Add Token Information
+**Best for:** Production use, quick setup, avoiding manual file editing, all MCP clients
 
+**How it works:**
+1. Configure eBay credentials in your MCP client config (e.g., `claude_desktop_config.json`)
+2. Use the `ebay_set_user_tokens` tool to save tokens
+3. Tokens automatically persist to `.ebay-mcp-tokens.json`
+
+**Example Configuration:**
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/absolute/path/to/ebay-api-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_client_id",
+        "EBAY_CLIENT_SECRET": "your_client_secret",
+        "EBAY_ENVIRONMENT": "sandbox",
+        "EBAY_REDIRECT_URI": "https://your-redirect-uri.com/callback"
+      }
+    }
+  }
+}
+```
+
+**Then in your MCP client:**
+```
+Use tool: ebay_set_user_tokens
+Parameters:
+  - accessToken: "v^1.1#i^1#..."
+  - refreshToken: "v^1.1#i^1#..."
+```
+
+**Benefits:**
+- ✅ No manual file editing required
+- ✅ Tokens managed through MCP interface
+- ✅ Easy to update and rotate tokens
+- ✅ Works across all MCP clients
+- ✅ Automatic persistence to file
+
+---
+
+#### Method 2: Shell Script Token Template (🚀 Quick Setup)
+
+**Best for:** Local development, quick testing, visual file management
+
+**Step 1: Generate Template**
+
+Run the token template generator script:
+```bash
+./scripts/create-token-template.sh
+```
+
+**What the script does:**
+- Creates `.ebay-mcp-tokens.json` in project root with placeholders
+- Warns if file already exists (prevents accidental overwrites)
+- Provides detailed next steps and documentation links
+- Shows both manual editing and MCP config options
+
+**Step 2: Edit Token File**
+
+Open `.ebay-mcp-tokens.json` in your editor and replace placeholders:
 ```json
 {
   "accessToken": "v^1.1#i^1#...",
@@ -445,22 +505,82 @@ Create `.ebay-mcp-tokens.json` in your home directory:
 }
 ```
 
-**Replace placeholder values**:
-- `accessToken`: Your eBay access token
-- `refreshToken`: Your eBay refresh token
-- `accessTokenExpiry`: Access token expiration timestamp in **milliseconds**
-- `refreshTokenExpiry`: Refresh token expiration timestamp in **milliseconds**
-- `scope`: Space-separated OAuth scopes
+**Replace these values:**
+- `accessToken`: Your eBay OAuth access token
+- `refreshToken`: Your eBay OAuth refresh token
+- `accessTokenExpiry`: Access token expiration in **milliseconds since epoch**
+- `refreshTokenExpiry`: Refresh token expiration in **milliseconds since epoch**
+- `scope`: Space-separated OAuth scopes (see [OAuth Scopes](#oauth-scopes))
 
-#### Step 3: Start Server
+**Step 3: Start Server**
 
-The server will automatically detect and use tokens from the file.
+The server automatically detects and loads tokens from `.ebay-mcp-tokens.json` on startup.
+
+**Benefits:**
+- ✅ Quick local development setup
+- ✅ Visual file-based token management
+- ✅ Interactive script with helpful prompts
+- ✅ Good for testing and debugging
+- ✅ Can commit template (without values) to git
+
+---
+
+#### Method 3: MCP Tool Template Generation
+
+**Best for:** When already connected to MCP client, remote workflows
+
+**Step 1: Call MCP Tool**
+
+Use the `create_token_template_file` tool through your MCP client:
+```
+Tool: create_token_template_file
+Parameters: (none required)
+```
+
+**Step 2: Edit Token File**
+
+Follow the same steps as Method 2 (Shell Script) to edit the generated `.ebay-mcp-tokens.json` file.
+
+**Benefits:**
+- ✅ No need to access terminal
+- ✅ Works from any MCP client
+- ✅ Same file-based workflow as Method 2
+
+---
+
+#### Token File Location & Security
+
+**File Location:**
+- Path: `.ebay-mcp-tokens.json` (project root directory, same folder as `package.json`)
+- Script: `./scripts/create-token-template.sh`
+
+**Security:**
+- ✅ Already protected in `.gitignore` (line 17) - won't be committed to git
+- ⚠️ **Recommended:** Set file permissions to user-only (600):
+  ```bash
+  chmod 600 .ebay-mcp-tokens.json
+  ```
+- ⚠️ **Never commit actual tokens to version control**
+- ⚠️ **Rotate tokens regularly** (especially if exposed)
+
+---
 
 #### Authentication Priority
 
-1. **Manual Token File** - If `.ebay-mcp-tokens.json` exists, use these tokens
-2. **Tool-Set Tokens** - If file doesn't exist, use `ebay_set_user_tokens` tool
-3. **Client Credentials** - Fallback with lower rate limits (1,000 req/day)
+The server checks for tokens in this order:
+
+1. **Token File** (`.ebay-mcp-tokens.json`) - Highest priority
+   - If file exists with valid tokens, use these
+   - Loaded automatically on server startup
+
+2. **Runtime Token Setting** - Via `ebay_set_user_tokens` tool
+   - If no file exists or tokens expired
+   - Automatically creates/updates `.ebay-mcp-tokens.json`
+
+3. **Client Credentials** - Fallback (lowest priority)
+   - Only if no user tokens available
+   - Lower rate limits (1,000 requests/day vs 10,000-50,000)
+   - Limited API access
 
 ---
 
@@ -918,7 +1038,7 @@ Use this systematic checklist to diagnose issues:
   - [ ] `EBAY_CLIENT_SECRET` set?
   - [ ] `EBAY_ENVIRONMENT` correct (matches credentials)?
   - [ ] `EBAY_REDIRECT_URI` set (if using OAuth flow)?
-- [ ] Check token file: `cat ~/.ebay-mcp-tokens.json`
+- [ ] Check token file: `cat .ebay-mcp-tokens.json` (in project root)
   - [ ] File exists?
   - [ ] `accessToken` present?
   - [ ] `refreshToken` present?
@@ -948,8 +1068,10 @@ Re-authorize when:
 #### Check Token File Directly
 
 ```bash
-cat ~/.ebay-mcp-tokens.json
+cat .ebay-mcp-tokens.json
 ```
+
+(File is located in the project root directory)
 
 **Expected format**:
 ```json
@@ -1037,7 +1159,7 @@ If none of these solutions work:
 3. **Monitor Token Status** - Use `ebay_get_token_status` to check validity
 4. **Handle Refresh Gracefully** - Server auto-refreshes, but handle expiry in your app
 5. **Test in Sandbox First** - Always test scope changes in sandbox before production
-6. **Store Tokens Securely** - Protect `~/.ebay-mcp-tokens.json` file
+6. **Store Tokens Securely** - Protect `.ebay-mcp-tokens.json` file (in project root)
 7. **Rotate Tokens Regularly** - Re-authorize periodically for security
 
 ### Environment-Specific Best Practices
@@ -1169,7 +1291,7 @@ await use_mcp_tool("ebay_set_user_tokens", {
 });
 ```
 
-Tokens are persisted to `~/.ebay-mcp-tokens.json` and auto-refreshed.
+Tokens are persisted to `.ebay-mcp-tokens.json` (project root) and auto-refreshed.
 
 ### ebay_clear_tokens
 
