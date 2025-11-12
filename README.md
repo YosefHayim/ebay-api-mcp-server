@@ -13,7 +13,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-99%25%2B-brightgreen)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that provides AI assistants with full access to eBay's Sell APIs through 170+ tools for inventory management, order fulfillment, marketing campaigns, analytics, and more.
+A comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that provides AI assistants with full access to eBay's Sell APIs through 137 tools for inventory management, order fulfillment, marketing campaigns, analytics, and more.
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Configuration](#-configuration) • [OAuth Setup](#-oauth-setup) • [Documentation](#-documentation) • [Community](#-community) • [Contributing](#-contributing)
 
@@ -46,7 +46,7 @@ A comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io) 
 
 ### Core Capabilities
 
-- **170+ eBay API Tools** - Comprehensive coverage of eBay Sell APIs across 9 categories
+- **137 eBay API Tools** - Comprehensive coverage of eBay Sell APIs across 11 categories
 - **Dual Transport Modes** - STDIO (local) and HTTP with OAuth 2.1 (remote multi-user)
 - **OAuth 2.0 Support** - Full user token management with automatic refresh
 - **Token Persistence** - Secure file-based storage across sessions with `.ebay-mcp-tokens.json`
@@ -317,54 +317,54 @@ The server supports two authentication modes:
 
 ## 🛠️ Available Tools
 
-### Token Management
+**Total: 137 tools across 11 categories**
+
+For a comprehensive catalog of all 137 tools with detailed descriptions, see [`src/tools/README.md`](src/tools/README.md).
+
+### Quick Category Overview
+
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **OAuth & Authentication** | 6 | Token management, OAuth flow, authentication status |
+| **Account Management** | 8 | KYC, programs, subscriptions, user info |
+| **Inventory Management** | 15 | Items, locations, SKUs, bulk operations |
+| **Offers & Listings** | 13 | Create/update offers, publish, fees, migration |
+| **Order Management** | 14 | Fulfillment, shipping, refunds, quotes |
+| **Marketing & Promotions** | 8 | Campaigns, promotions, recommendations |
+| **Analytics & Reports** | 6 | Traffic reports, seller standards, metrics |
+| **Communication** | 7 | Messages, feedback, buyer interactions |
+| **Metadata & Policies** | 33 | Category policies, compatibility, taxes, regulations |
+| **Compliance & Legal** | 3 | Violations, infringement, suppression |
+| **Utilities** | 24 | Translations, recommendations, aspects, labels |
+
+### Popular Tools
+
+**OAuth & Authentication**
 - `ebay_get_oauth_url` - Generate OAuth authorization URL
-- `ebay_set_user_tokens` - Set user access and refresh tokens
 - `ebay_set_user_tokens_with_expiry` - Set tokens with custom expiry
 - `ebay_get_token_status` - Check current token status
-- `ebay_validate_token_expiry` - Validate token expiration
-- `ebay_clear_tokens` - Clear all stored tokens
-- `ebay_convert_date_to_timestamp` - Convert dates for token expiry
 
-### Account Management
-- `ebay_get_fulfillment_policies` - Get shipping policies
-- `ebay_get_payment_policies` - Get payment policies
-- `ebay_get_return_policies` - Get return policies
-- `ebay_create_fulfillment_policy` - Create shipping policy
-- `ebay_get_subscription` - Get seller subscription info
-- `ebay_get_kyc` - Get KYC verification status
-- ...and 22 more account tools
-
-### Inventory Management
+**Inventory Management**
 - `ebay_get_inventory_items` - List all inventory items
-- `ebay_get_inventory_item` - Get specific item by SKU
 - `ebay_create_inventory_item` - Create new inventory item
-- `ebay_get_offers` - Get all offers
-- `ebay_create_offer` - Create new offer
-- `ebay_publish_offer` - Publish offer to create listing
-- `ebay_bulk_create_inventory_item` - Bulk create items
-- ...and 23 more inventory tools
+- `ebay_bulk_create_or_replace_inventory_item` - Bulk create/update items
 
-### Order Fulfillment
+**Offers & Listings**
+- `ebay_create_offer` - Create new offer from inventory
+- `ebay_publish_offer` - Publish offer to create listing
+- `ebay_get_listing_fees` - Calculate listing fees
+
+**Order Management**
 - `ebay_get_orders` - Retrieve seller orders
-- `ebay_get_order` - Get specific order details
 - `ebay_create_shipping_fulfillment` - Mark order as shipped
 - `ebay_issue_refund` - Issue full or partial refund
 
-### Marketing & Promotions
+**Marketing & Analytics**
 - `ebay_get_campaigns` - Get marketing campaigns
-- `ebay_get_campaign` - Get campaign details
-- `ebay_pause_campaign` - Pause running campaign
-- `ebay_resume_campaign` - Resume paused campaign
-- `ebay_clone_campaign` - Clone campaign with new settings
-- ...and 4 more marketing tools
-
-### Analytics & Reporting
 - `ebay_get_traffic_report` - Get listing traffic data
-- `ebay_find_seller_standards_profiles` - Get seller standards
-- `ebay_get_customer_service_metric` - Get service metrics
+- `ebay_find_listing_recommendations` - Get listing optimization tips
 
-### Communication
+**Communication
 - `ebay_send_message` - Send message to buyer
 - `ebay_reply_to_message` - Reply to buyer message
 - `ebay_get_message` - Get message details
