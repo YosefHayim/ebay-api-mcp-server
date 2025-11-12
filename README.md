@@ -3,6 +3,9 @@
 <div align="center">
 
 [![npm version](https://img.shields.io/npm/v/ebay-api-mcp-server)](https://www.npmjs.com/package/ebay-api-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/ebay-api-mcp-server)](https://www.npmjs.com/package/ebay-api-mcp-server)
+[![npm bundle size](https://img.shields.io/bundlephobia/min/ebay-api-mcp-server)](https://bundlephobia.com/package/ebay-api-mcp-server)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/YosefHayim/ebay-api-mcp-server/ci.yml?branch=main&label=CI)](https://github.com/YosefHayim/ebay-api-mcp-server/actions)
 [![MCP](https://img.shields.io/badge/MCP-1.21.1-blue)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
