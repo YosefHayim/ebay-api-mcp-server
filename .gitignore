@@ -40,6 +40,10 @@ coverage/
 tmp/
 temp/
 
+# Cloudflare Workers
+.wrangler/
+wrangler.toml
+
 # General (excluding docs/CLAUDE.md which tracks development progress)
 /CLAUDE.md
 !docs/CLAUDE.md

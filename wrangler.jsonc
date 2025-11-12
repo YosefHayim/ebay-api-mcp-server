@@ -1,0 +1,34 @@
+{
+  "name": "ebay-api-mcp-server",
+  "main": "build/cloudflare-worker.js",
+  "compatibility_date": "2025-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Environment variables (non-secret values)
+  "vars": {
+    "MCP_HOST": "0.0.0.0",
+    "EBAY_ENVIRONMENT": "sandbox"
+  },
+
+  // KV namespace for OAuth session storage
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "e38e082fc63d46cfbe529c181ebd2120"
+    }
+  ],
+
+  // Secrets (set via: wrangler secret put <NAME>)
+  // - EBAY_CLIENT_ID
+  // - EBAY_CLIENT_SECRET
+  // - EBAY_REDIRECT_URI
+  // - EBAY_USER_REFRESH_TOKEN (optional)
+  // - OAUTH_CLIENT_ID (for MCP OAuth)
+  // - OAUTH_CLIENT_SECRET (for MCP OAuth)
+  // - OAUTH_AUTH_SERVER_URL
+  // - COOKIE_ENCRYPTION_KEY
+
+  "observability": {
+    "enabled": true
+  }
+}

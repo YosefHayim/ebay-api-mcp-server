@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": []
+    "types": ["@cloudflare/workers-types"]
   },
 	"include": ["src/**/*"],
 	"exclude": [
