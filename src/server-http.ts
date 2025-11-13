@@ -313,7 +313,7 @@ async function createApp(): Promise<express.Application> {
  */
 async function main() {
   try {
-    console.log('🚀 Starting eBay API MCP Server (HTTP + OAuth)...');
+    console.log('Starting eBay API MCP Server (HTTP + OAuth)...');
     console.log();
 
     // Validate environment configuration
@@ -321,7 +321,7 @@ async function main() {
 
     // Display warnings
     if (validation.warnings.length > 0) {
-      console.log('⚠️  Environment Configuration Warnings:');
+      console.log('Environment Configuration Warnings:');
       validation.warnings.forEach((warning) => {
         console.log(`  • ${warning}`);
       });
@@ -330,7 +330,7 @@ async function main() {
 
     // Display errors and exit if configuration is invalid
     if (!validation.isValid) {
-      console.error('❌ Environment Configuration Errors:');
+      console.error('Environment Configuration Errors:');
       validation.errors.forEach((error) => {
         console.error(`  • ${error}`);
       });
@@ -358,39 +358,39 @@ async function main() {
     const server = app.listen(CONFIG.port, CONFIG.host, () => {
       const serverUrl = `http://${CONFIG.host}:${CONFIG.port}`;
 
-      console.log('✓ Server is running!');
+      console.log('Server is running!');
       console.log();
-      console.log(`📡 MCP endpoint: ${serverUrl}/`);
+      console.log(`MCP endpoint: ${serverUrl}/`);
       console.log(
-        `🔐 Protected Resource Metadata: ${serverUrl}/.well-known/oauth-protected-resource`
+        `Protected Resource Metadata: ${serverUrl}/.well-known/oauth-protected-resource`
       );
-      console.log(`💚 Health check: ${serverUrl}/health`);
+      console.log(`Health check: ${serverUrl}/health`);
       console.log();
 
       if (CONFIG.authEnabled) {
-        console.log('🔒 Authorization is ENABLED');
+        console.log('Authorization is ENABLED');
         console.log('   Clients must provide valid Bearer tokens to access MCP endpoints');
       } else {
-        console.log('⚠️  Authorization is DISABLED');
+        console.log('Authorization is DISABLED');
         console.log('   Set OAUTH_ENABLED=true to enable OAuth protection');
       }
     });
 
     // Graceful shutdown
     process.on('SIGINT', () => {
-      console.log('\n🛑 Shutting down...');
+      console.log('\n Shutting down...');
       server.close(() => {
         console.log('✓ Server closed');
         process.exit(0);
       });
     });
   } catch (error) {
-    console.error('❌ Fatal error starting server:', error);
+    console.error('Fatal error starting server:', error);
     process.exit(1);
   }
 }
 
 // Start server if run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+  await main();
 }
