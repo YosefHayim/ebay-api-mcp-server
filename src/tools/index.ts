@@ -199,7 +199,7 @@ export async function executeTool(
       const accessToken = args.accessToken as string;
       const refreshToken = args.refreshToken as string;
 
-      if (accessToken ?? !refreshToken) {
+      if (!accessToken || !refreshToken) {
         throw new Error('Both accessToken and refreshToken are required');
       }
 
@@ -296,7 +296,7 @@ export async function executeTool(
       const refreshTokenExpiry = args.refreshTokenExpiry as string | number | undefined;
       const autoRefresh = (args.autoRefresh as boolean) ?? true;
 
-      if (accessToken ?? !refreshToken) {
+      if (!accessToken || !refreshToken) {
         throw new Error('Both accessToken and refreshToken are required');
       }
 
@@ -352,6 +352,119 @@ export async function executeTool(
       } catch (error) {
         throw new Error(
           `Failed to set user tokens: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    }
+
+    case 'ebay_display_credentials': {
+      // Get configuration from environment
+      const clientId = process.env.EBAY_CLIENT_ID ?? '';
+      const clientSecret = process.env.EBAY_CLIENT_SECRET ?? '';
+      const environment = process.env.EBAY_ENVIRONMENT ?? 'sandbox';
+      const redirectUri = process.env.EBAY_REDIRECT_URI ?? '';
+      const refreshToken = process.env.EBAY_USER_REFRESH_TOKEN ?? '';
+
+      // Get current token info from API
+      const tokenInfo = api.getTokenInfo();
+      const authClient = api.getAuthClient().getOAuthClient();
+
+      // Helper function to mask sensitive tokens
+      const maskToken = (token: string): string => {
+        if (!token || token.length < 12) return '***';
+        return `${token.substring(0, 6)}...${token.substring(token.length - 6)}`;
+      };
+
+      // Get internal token details from the auth client
+      const internalTokens = (authClient as any).userTokens;
+
+      return {
+        credentials: {
+          clientId: clientId ? maskToken(clientId) : 'Not set',
+          clientSecret: clientSecret ? '****** (set)' : 'Not set',
+          environment,
+          redirectUri: redirectUri || 'Not set',
+        },
+        tokens: {
+          refreshToken: refreshToken ? maskToken(refreshToken) : 'Not set (in .env)',
+          accessToken: internalTokens?.userAccessToken
+            ? maskToken(internalTokens.userAccessToken)
+            : 'Not available',
+          accessTokenExpiry: internalTokens?.userAccessTokenExpiry
+            ? {
+                timestamp: internalTokens.userAccessTokenExpiry,
+                date: new Date(internalTokens.userAccessTokenExpiry).toISOString(),
+                expired: Date.now() >= internalTokens.userAccessTokenExpiry,
+              }
+            : 'Not available',
+          refreshTokenExpiry: internalTokens?.userRefreshTokenExpiry
+            ? {
+                timestamp: internalTokens.userRefreshTokenExpiry,
+                date: new Date(internalTokens.userRefreshTokenExpiry).toISOString(),
+                expired: Date.now() >= internalTokens.userRefreshTokenExpiry,
+              }
+            : 'Not available',
+          appToken: (authClient as any).appAccessToken
+            ? maskToken((authClient as any).appAccessToken)
+            : 'Not cached',
+          appTokenExpiry: (authClient as any).appAccessTokenExpiry
+            ? {
+                timestamp: (authClient as any).appAccessTokenExpiry,
+                date: new Date((authClient as any).appAccessTokenExpiry).toISOString(),
+                expired: Date.now() >= (authClient as any).appAccessTokenExpiry,
+              }
+            : 'Not available',
+        },
+        status: {
+          hasUserToken: tokenInfo.hasUserToken,
+          hasAppAccessToken: tokenInfo.hasAppAccessToken,
+          authenticated: api.isAuthenticated(),
+          currentTokenType: tokenInfo.hasUserToken
+            ? 'user_token (10,000-50,000 req/day)'
+            : tokenInfo.hasAppAccessToken
+              ? 'app_access_token (1,000 req/day)'
+              : 'none',
+        },
+        scopes: internalTokens?.scope ? internalTokens.scope.split(' ') : [],
+      };
+    }
+
+    case 'ebay_refresh_access_token': {
+      const authClient = api.getAuthClient().getOAuthClient();
+
+      // Check if user tokens are available
+      if (!api.hasUserTokens()) {
+        throw new Error(
+          'No user tokens available. Please set user tokens first using ebay_set_user_tokens_with_expiry or add EBAY_USER_REFRESH_TOKEN to your .env file.'
+        );
+      }
+
+      try {
+        // Call the public refreshUserToken method
+        await authClient.refreshUserToken();
+
+        // Get updated token info
+        const internalTokens = (authClient as any).userTokens;
+
+        return {
+          success: true,
+          message: 'Access token refreshed successfully',
+          accessToken: internalTokens?.userAccessToken
+            ? `${internalTokens.userAccessToken.substring(0, 6)}...${internalTokens.userAccessToken.substring(internalTokens.userAccessToken.length - 6)}`
+            : 'Not available',
+          accessTokenExpiry: internalTokens?.userAccessTokenExpiry
+            ? {
+                timestamp: internalTokens.userAccessTokenExpiry,
+                date: new Date(internalTokens.userAccessTokenExpiry).toISOString(),
+                expiresInSeconds: Math.floor(
+                  (internalTokens.userAccessTokenExpiry - Date.now()) / 1000
+                ),
+              }
+            : 'Not available',
+          tokenInfo: api.getTokenInfo(),
+        };
+      } catch (error) {
+        throw new Error(
+          `Failed to refresh access token: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }

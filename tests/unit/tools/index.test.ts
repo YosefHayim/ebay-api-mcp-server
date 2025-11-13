@@ -245,7 +245,7 @@ describe('Tools Layer', () => {
       const toolNames = tools.map((t) => t.name);
 
       // Check for tools from each category
-      expect(toolNames).toContain('search'); // chatGptTools
+      expect(toolNames).toContain('ebay_get_oauth_url'); // tokenManagementTools
       expect(toolNames).toContain('ebay_get_custom_policies'); // accountTools
       expect(toolNames).toContain('ebay_get_inventory_items'); // inventoryTools
       expect(toolNames).toContain('ebay_get_orders'); // fulfillmentTools
@@ -380,6 +380,162 @@ describe('Tools Layer', () => {
 
       expect(mockClearTokens).toHaveBeenCalled();
       expect(result).toHaveProperty('success', true);
+    });
+
+    it('should display credentials and token information', async () => {
+      // Set up environment
+      process.env.EBAY_CLIENT_ID = 'test-client-id-123';
+      process.env.EBAY_CLIENT_SECRET = 'test-secret-456';
+      process.env.EBAY_ENVIRONMENT = 'sandbox';
+      process.env.EBAY_REDIRECT_URI = 'https://test.com/callback';
+      process.env.EBAY_USER_REFRESH_TOKEN = 'test-refresh-token-789';
+
+      // Mock the OAuth client with internal tokens
+      const mockOAuthClient = mockApi.getAuthClient().getOAuthClient();
+      (mockOAuthClient as any).userTokens = {
+        userAccessToken: 'test-access-token-abc123',
+        userRefreshToken: 'test-refresh-token-def456',
+        userAccessTokenExpiry: Date.now() + 3600000, // 1 hour from now
+        userRefreshTokenExpiry: Date.now() + 18 * 30 * 24 * 60 * 60 * 1000, // 18 months
+        scope: 'https://api.ebay.com/oauth/api_scope/sell.inventory',
+      };
+      (mockOAuthClient as any).appAccessToken = 'test-app-token-xyz';
+      (mockOAuthClient as any).appAccessTokenExpiry = Date.now() + 7200000; // 2 hours
+
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
+        hasUserToken: true,
+        hasAppAccessToken: true,
+        accessTokenExpired: false,
+        refreshTokenExpired: false,
+      });
+
+      const result = await executeTool(mockApi, 'ebay_display_credentials', {});
+
+      // Verify result structure
+      expect(result).toHaveProperty('credentials');
+      expect(result).toHaveProperty('tokens');
+      expect(result).toHaveProperty('status');
+      expect(result).toHaveProperty('scopes');
+
+      const resultObj = result as any;
+
+      // Check credentials are masked
+      expect(resultObj.credentials.clientId).toContain('...');
+      expect(resultObj.credentials.clientSecret).toBe('****** (set)');
+      expect(resultObj.credentials.environment).toBe('sandbox');
+      expect(resultObj.credentials.redirectUri).toBe('https://test.com/callback');
+
+      // Check tokens are masked
+      expect(resultObj.tokens.refreshToken).toContain('...');
+      expect(resultObj.tokens.accessToken).toContain('...');
+      expect(resultObj.tokens.appToken).toContain('...');
+
+      // Check expiry information exists
+      expect(resultObj.tokens.accessTokenExpiry).toHaveProperty('timestamp');
+      expect(resultObj.tokens.accessTokenExpiry).toHaveProperty('date');
+      expect(resultObj.tokens.accessTokenExpiry).toHaveProperty('expired');
+
+      // Check status
+      expect(resultObj.status.hasUserToken).toBe(true);
+      expect(resultObj.status.hasAppAccessToken).toBe(true);
+
+      // Check scopes
+      expect(resultObj.scopes).toEqual(['https://api.ebay.com/oauth/api_scope/sell.inventory']);
+    });
+
+    it('should display credentials when tokens are not set', async () => {
+      // Clear environment
+      delete process.env.EBAY_USER_REFRESH_TOKEN;
+
+      // Mock the OAuth client with no tokens
+      const mockOAuthClient = mockApi.getAuthClient().getOAuthClient();
+      (mockOAuthClient as any).userTokens = null;
+      (mockOAuthClient as any).appAccessToken = null;
+
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
+        hasUserToken: false,
+        hasAppAccessToken: false,
+        accessTokenExpired: true,
+        refreshTokenExpired: true,
+      });
+
+      const result = await executeTool(mockApi, 'ebay_display_credentials', {});
+
+      const resultObj = result as any;
+
+      // Check that missing tokens are indicated
+      expect(resultObj.tokens.refreshToken).toBe('Not set (in .env)');
+      expect(resultObj.tokens.accessToken).toBe('Not available');
+      expect(resultObj.tokens.appToken).toBe('Not cached');
+      expect(resultObj.status.currentTokenType).toBe('none');
+    });
+
+    it('should refresh access token successfully', async () => {
+      // Mock that user tokens exist
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(true);
+
+      const mockOAuthClient = mockApi.getAuthClient().getOAuthClient();
+      const mockRefreshToken = vi.fn().mockResolvedValue(undefined);
+      (mockOAuthClient as any).refreshUserToken = mockRefreshToken;
+
+      // Set up post-refresh token state
+      (mockOAuthClient as any).userTokens = {
+        userAccessToken: 'new-access-token-123456',
+        userRefreshToken: 'test-refresh-token-def456',
+        userAccessTokenExpiry: Date.now() + 7200000, // 2 hours
+        userRefreshTokenExpiry: Date.now() + 18 * 30 * 24 * 60 * 60 * 1000,
+      };
+
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
+        hasUserToken: true,
+        hasAppAccessToken: false,
+        accessTokenExpired: false,
+        refreshTokenExpired: false,
+      });
+
+      const result = await executeTool(mockApi, 'ebay_refresh_access_token', {});
+
+      // Verify refresh was called
+      expect(mockRefreshToken).toHaveBeenCalled();
+
+      // Verify result structure
+      expect(result).toHaveProperty('success', true);
+      expect(result).toHaveProperty('message', 'Access token refreshed successfully');
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('accessTokenExpiry');
+      expect(result).toHaveProperty('tokenInfo');
+
+      const resultObj = result as any;
+
+      // Check token is masked
+      expect(resultObj.accessToken).toContain('...');
+
+      // Check expiry info
+      expect(resultObj.accessTokenExpiry).toHaveProperty('timestamp');
+      expect(resultObj.accessTokenExpiry).toHaveProperty('date');
+      expect(resultObj.accessTokenExpiry).toHaveProperty('expiresInSeconds');
+    });
+
+    it('should throw error when refreshing without user tokens', async () => {
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(false);
+
+      await expect(executeTool(mockApi, 'ebay_refresh_access_token', {})).rejects.toThrow(
+        'No user tokens available'
+      );
+    });
+
+    it('should handle refresh token errors', async () => {
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(true);
+
+      const mockOAuthClient = mockApi.getAuthClient().getOAuthClient();
+      const mockRefreshToken = vi
+        .fn()
+        .mockRejectedValue(new Error('Refresh token expired or invalid'));
+      (mockOAuthClient as any).refreshUserToken = mockRefreshToken;
+
+      await expect(executeTool(mockApi, 'ebay_refresh_access_token', {})).rejects.toThrow(
+        'Failed to refresh access token: Refresh token expired or invalid'
+      );
     });
   });
 

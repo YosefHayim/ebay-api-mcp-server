@@ -2,18 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EbaySellerApi } from '@/api/index.js';
 import type { EbayConfig } from '@/types/ebay.js';
 
-// Mock TokenStorage
-const mockTokenStorage = vi.hoisted(() => ({
-  hasTokens: vi.fn(),
-  loadTokens: vi.fn(),
-  saveTokens: vi.fn(),
-  clearTokens: vi.fn(),
-  isUserAccessTokenExpired: vi.fn(),
-  isUserRefreshTokenExpired: vi.fn(),
+// Mock EbayOAuthClient
+const mockOAuthClient = vi.hoisted(() => ({
+  hasUserTokens: vi.fn(),
+  getAccessToken: vi.fn(),
+  setUserTokens: vi.fn(),
+  initialize: vi.fn(),
 }));
 
-vi.mock('@/auth/token-storage.js', () => ({
-  TokenStorage: mockTokenStorage,
+vi.mock('@/auth/oauth.js', () => ({
+  EbayOAuthClient: vi.fn().mockImplementation(() => mockOAuthClient),
 }));
 
 describe('EbaySellerApi', () => {
@@ -30,15 +28,9 @@ describe('EbaySellerApi', () => {
       redirectUri: 'https://localhost/callback',
     };
 
-    mockTokenStorage.hasTokens.mockResolvedValue(true);
-    mockTokenStorage.loadTokens.mockResolvedValue({
-      userAccessToken: 'test_access_token',
-      userRefreshToken: 'test_refresh_token',
-      tokenType: 'Bearer',
-      userAccessTokenExpiry: Date.now() + 7200000,
-      userRefreshTokenExpiry: Date.now() + 47304000000,
-    });
-    mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
+    mockOAuthClient.hasUserTokens.mockReturnValue(true);
+    mockOAuthClient.getAccessToken.mockResolvedValue('test_access_token');
+    mockOAuthClient.initialize.mockResolvedValue(undefined);
 
     api = new EbaySellerApi(config);
     await api.initialize();
@@ -79,7 +71,7 @@ describe('EbaySellerApi', () => {
     });
 
     it('should check if user tokens are available', () => {
-      mockTokenStorage.hasTokens.mockReturnValue(true);
+      mockOAuthClient.hasUserTokens.mockReturnValue(true);
       const hasTokens = api.hasUserTokens();
       expect(typeof hasTokens).toBe('boolean');
     });
@@ -92,12 +84,12 @@ describe('EbaySellerApi', () => {
 
       await api.setUserTokens(accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry);
 
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
+      expect(mockOAuthClient.setUserTokens).toHaveBeenCalled();
     });
 
     it('should set user tokens without expiry times', async () => {
       await api.setUserTokens('access_token', 'refresh_token');
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
+      expect(mockOAuthClient.setUserTokens).toHaveBeenCalled();
     });
 
     it('should get auth client', () => {

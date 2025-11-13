@@ -3,20 +3,17 @@ import { executeTool } from '../../../src/tools/index.js';
 import { EbaySellerApi } from '../../../src/api/index.js';
 import type { EbayConfig } from '../../../src/types/ebay.js';
 import { mockEbayApiEndpoint, mockEbayApiError, cleanupMocks } from '../../helpers/mock-http.js';
-import { createMockTokens } from '../../helpers/mock-token-storage.js';
 
-// Mock TokenStorage - use vi.hoisted to ensure mock is available when hoisted
-const mockTokenStorage = vi.hoisted(() => ({
-  hasTokens: vi.fn(),
-  loadTokens: vi.fn(),
-  saveTokens: vi.fn(),
-  clearTokens: vi.fn(),
-  isUserAccessTokenExpired: vi.fn(),
-  isUserRefreshTokenExpired: vi.fn(),
+// Mock EbayOAuthClient
+const mockOAuthClient = vi.hoisted(() => ({
+  hasUserTokens: vi.fn(),
+  getAccessToken: vi.fn(),
+  setUserTokens: vi.fn(),
+  initialize: vi.fn(),
 }));
 
-vi.mock('../../../src/auth/token-storage.js', () => ({
-  TokenStorage: mockTokenStorage,
+vi.mock('../../../src/auth/oauth.js', () => ({
+  EbayOAuthClient: vi.fn().mockImplementation(() => mockOAuthClient),
 }));
 
 describe('Inventory Tools Integration Tests', () => {
@@ -34,11 +31,10 @@ describe('Inventory Tools Integration Tests', () => {
       redirectUri: 'https://localhost/callback',
     };
 
-    // Setup mock tokens
-    const mockTokens = createMockTokens();
-    mockTokenStorage.hasTokens.mockResolvedValue(true);
-    mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-    mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
+    // Setup mock OAuth client
+    mockOAuthClient.hasUserTokens.mockReturnValue(true);
+    mockOAuthClient.getAccessToken.mockResolvedValue('mock_access_token');
+    mockOAuthClient.initialize.mockResolvedValue(undefined);
 
     api = new EbaySellerApi(config);
     await api.initialize();

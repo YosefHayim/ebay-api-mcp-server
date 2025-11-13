@@ -905,12 +905,10 @@ describe('Comprehensive Tools Coverage', () => {
       vi.mocked(mockApi.message.searchMessages).mockResolvedValue(mockResponse);
       await executeTool(mockApi, 'ebay_search_messages', {
         conversation_type: 'FROM_MEMBERS',
+        limit: '25',
+        offset: '0',
       });
-      expect(mockApi.message.searchMessages).toHaveBeenCalledWith(
-        { conversation_type: 'FROM_MEMBERS' },
-        undefined,
-        undefined
-      );
+      expect(mockApi.message.searchMessages).toHaveBeenCalledWith(undefined, 25, 0);
     });
 
     it('ebay_get_message', async () => {

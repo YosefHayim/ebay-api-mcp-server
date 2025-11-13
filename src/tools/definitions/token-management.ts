@@ -115,4 +115,16 @@ export const tokenManagementTools: ToolDefinition[] = [
         ),
     },
   },
+  {
+    name: 'ebay_display_credentials',
+    description:
+      'Display all eBay API credentials and current token information. Shows client ID, client secret (masked), environment (production/sandbox), redirect URI, and current token status including access token (masked), refresh token (masked), app token (masked), and their expiry times. Useful for debugging authentication issues and verifying configuration.',
+    inputSchema: {},
+  },
+  {
+    name: 'ebay_refresh_access_token',
+    description:
+      'Manually refresh the user access token using the stored refresh token. This is useful when you want to proactively refresh an access token before it expires, or when recovering from authentication errors. Requires that user tokens are already set (either via EBAY_USER_REFRESH_TOKEN in .env or via ebay_set_user_tokens_with_expiry). Returns the new access token and expiry time.',
+    inputSchema: {},
+  },
 ];

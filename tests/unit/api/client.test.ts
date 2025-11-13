@@ -2,20 +2,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import nock from 'nock';
 import { EbayApiClient } from '@/api/client.js';
 import type { EbayConfig } from '@/types/ebay.js';
-import { createMockTokens } from '../../helpers/mock-token-storage.js';
 
-// Mock TokenStorage
-const mockTokenStorage = vi.hoisted(() => ({
-  hasTokens: vi.fn(),
-  loadTokens: vi.fn(),
-  saveTokens: vi.fn(),
-  clearTokens: vi.fn(),
-  isUserAccessTokenExpired: vi.fn(),
-  isUserRefreshTokenExpired: vi.fn(),
+// Mock EbayOAuthClient
+const mockOAuthClient = vi.hoisted(() => ({
+  hasUserTokens: vi.fn(),
+  getAccessToken: vi.fn(),
+  setUserTokens: vi.fn(),
+  initialize: vi.fn(),
 }));
 
-vi.mock('@/auth/token-storage.js', () => ({
-  TokenStorage: mockTokenStorage,
+vi.mock('@/auth/oauth.js', () => ({
+  EbayOAuthClient: vi.fn().mockImplementation(() => mockOAuthClient),
 }));
 
 describe('EbayApiClient Unit Tests', () => {
@@ -33,10 +30,10 @@ describe('EbayApiClient Unit Tests', () => {
       redirectUri: 'https://localhost/callback',
     };
 
-    const mockTokens = createMockTokens();
-    mockTokenStorage.hasTokens.mockResolvedValue(true);
-    mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-    mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
+    // Setup mock OAuth client
+    mockOAuthClient.hasUserTokens.mockReturnValue(true);
+    mockOAuthClient.getAccessToken.mockResolvedValue('mock_access_token');
+    mockOAuthClient.initialize.mockResolvedValue(undefined);
 
     apiClient = new EbayApiClient(config);
     await apiClient.initialize();
@@ -235,7 +232,7 @@ describe('EbayApiClient Unit Tests', () => {
     });
 
     it('should return hasUserTokens status', () => {
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
+      mockOAuthClient.hasUserTokens.mockReturnValue(true);
       const hasTokens = apiClient.hasUserTokens();
       expect(typeof hasTokens).toBe('boolean');
     });
@@ -248,7 +245,7 @@ describe('EbayApiClient Unit Tests', () => {
         Date.now() + 47304000000
       );
 
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
+      expect(mockOAuthClient.setUserTokens).toHaveBeenCalled();
     });
 
     it('should return token info', () => {
