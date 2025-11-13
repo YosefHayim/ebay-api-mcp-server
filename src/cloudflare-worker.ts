@@ -57,6 +57,28 @@ const CORS_HEADERS = {
 const transports = new Map<string, StreamableHTTPServerTransport>();
 
 /**
+ * Verify OAuth Bearer token
+ */
+async function verifyOAuthToken(request: Request, env: Env): Promise<boolean> {
+  // If OAuth is disabled, allow all requests
+  if (!env.OAUTH_AUTH_SERVER_URL || env.OAUTH_ENABLED === 'false') {
+    return true;
+  }
+
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const token = authHeader.substring(7); // Remove "Bearer " prefix
+
+  // For now, accept any non-empty token
+  // In production, validate token against OAuth server or stored session
+  // TODO: Implement proper token validation using OAUTH_KV storage
+  return token.length > 0;
+}
+
+/**
  * Create MCP server instance
  */
 function createMcpServer(env: Env): McpServer {
@@ -126,6 +148,29 @@ function createMcpServer(env: Env): McpServer {
  * Handle MCP POST endpoint
  */
 async function handleMcpPost(request: Request, env: Env): Promise<Response> {
+  // Verify OAuth token if OAuth is enabled
+  const isAuthorized = await verifyOAuthToken(request, env);
+  if (!isAuthorized) {
+    return new Response(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized: Invalid or missing OAuth token',
+        },
+        id: null,
+      }),
+      {
+        status: 401,
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type': 'application/json',
+          'WWW-Authenticate': 'Bearer realm="MCP Server", scope="mcp:tools"',
+        },
+      }
+    );
+  }
+
   const sessionId = request.headers.get('mcp-session-id');
   const body = await request.json();
 
@@ -211,7 +256,26 @@ async function handleMcpPost(request: Request, env: Env): Promise<Response> {
 /**
  * Handle MCP session request (GET/DELETE)
  */
-async function handleSessionRequest(request: Request): Promise<Response> {
+async function handleSessionRequest(request: Request, env: Env): Promise<Response> {
+  // Verify OAuth token if OAuth is enabled
+  const isAuthorized = await verifyOAuthToken(request, env);
+  if (!isAuthorized) {
+    return new Response(
+      JSON.stringify({
+        error: 'unauthorized',
+        error_description: 'Invalid or missing OAuth token',
+      }),
+      {
+        status: 401,
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type': 'application/json',
+          'WWW-Authenticate': 'Bearer realm="MCP Server", scope="mcp:tools"',
+        },
+      }
+    );
+  }
+
   const sessionId = request.headers.get('mcp-session-id');
   if (!sessionId || !transports.has(sessionId)) {
     return new Response(
@@ -290,11 +354,18 @@ function handleHealth(env: Env): Response {
 
 /**
  * Handle OAuth metadata endpoint
- * Currently disabled - uncomment when OAuth is configured
  */
-/* function handleOAuthMetadata(request: Request, env: Env): Response {
+function handleOAuthMetadata(request: Request, env: Env): Response {
   const url = new URL(request.url);
   const baseUrl = `${url.protocol}//${url.host}`;
+
+  // Only advertise OAuth if properly configured
+  if (!env.OAUTH_AUTH_SERVER_URL || env.OAUTH_ENABLED === 'false') {
+    return new Response('Not Found', {
+      status: 404,
+      headers: CORS_HEADERS,
+    });
+  }
 
   const metadata = {
     resource: baseUrl,
@@ -313,7 +384,7 @@ function handleHealth(env: Env): Response {
       'Content-Type': 'application/json',
     },
   });
-} */
+}
 
 /**
  * Main request handler
@@ -335,16 +406,15 @@ export default {
       case '/health':
         return handleHealth(env);
 
-      // OAuth metadata endpoint disabled - uncomment when OAuth is configured
-      // case '/.well-known/oauth-protected-resource':
-      //   return handleOAuthMetadata(request, env);
+      case '/.well-known/oauth-protected-resource':
+        return handleOAuthMetadata(request, env);
 
       case '/':
         // MCP endpoints
         if (request.method === 'POST') {
           return await handleMcpPost(request, env);
         } else if (request.method === 'GET' || request.method === 'DELETE') {
-          return await handleSessionRequest(request);
+          return await handleSessionRequest(request, env);
         }
         return new Response('Method Not Allowed', {
           status: 405,
