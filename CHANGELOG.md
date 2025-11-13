@@ -102,15 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2025-01-12
 
-### Added
-- **Cloudflare Workers Deployment Support**
-  - Added HTTP transport with OAuth 2.1 for remote multi-user scenarios
-  - Cloudflare KV namespace integration for distributed token storage
-  - Production-ready Wrangler configuration (`wrangler.toml`)
-  - OAuth 2.1 metadata endpoint (`/.well-known/oauth-authorization-server`)
-  - Comprehensive deployment guide (`docs/CLOUDFLARE.md`)
-  - NPM scripts for Cloudflare deployment (`cf:create-kv`, `cf:deploy`, `cf:tail`)
-
 ### Changed
 - **Token Management Refactoring** (BREAKING CHANGE)
   - Migrated from file-based (`.ebay-mcp-tokens.json`) to environment-only (`.env`) token storage
@@ -121,15 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Documentation Enhancements**
   - Updated all README files to reflect `.env-only` token management
-  - Added comprehensive OAuth 2.1 setup guide for Cloudflare Workers
-  - Enhanced CLAUDE.md with Cloudflare deployment workflow
   - Clarified token management benefits and migration path
-
-### Fixed
-- **Cloudflare Worker Compatibility**
-  - Fixed `response.end()` handling for optional chunk parameter
-  - Disabled OAuth metadata endpoint to prevent conflicts with MCP protocol
-  - Resolved response mocking issues in HTTP transport layer
 
 ### Migration Guide (v1.1.x → v1.2.0)
 

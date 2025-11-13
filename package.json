@@ -77,7 +77,6 @@
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
 		"@types/cors": "^2.8.19",
-		"@types/eslint__js": "^9.14.0",
 		"@types/express": "^5.0.5",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^22.10.2",
