@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-01-13
+
+### Fixed
+- **CI/CD Pipeline**: Fixed YAML syntax error in `.github/workflows/ci.yml`
+  - Corrected indentation on line 66 (`version: 10` now properly aligned with 2 spaces)
+  - Ensures GitHub Actions workflows execute without validation errors
+  - All workflows validated and confirmed working
+
+### Quality Improvements
+- Improved CI/CD reliability with proper YAML formatting
+- All GitHub Actions workflows now pass validation
+
+## [1.2.0] - 2025-01-12
+
+### Added
+- **Cloudflare Workers Deployment Support**
+  - Added HTTP transport with OAuth 2.1 for remote multi-user scenarios
+  - Cloudflare KV namespace integration for distributed token storage
+  - Production-ready Wrangler configuration (`wrangler.toml`)
+  - OAuth 2.1 metadata endpoint (`/.well-known/oauth-authorization-server`)
+  - Comprehensive deployment guide (`docs/CLOUDFLARE.md`)
+  - NPM scripts for Cloudflare deployment (`cf:create-kv`, `cf:deploy`, `cf:tail`)
+
+### Changed
+- **Token Management Refactoring** (BREAKING CHANGE)
+  - Migrated from file-based (`.ebay-mcp-tokens.json`) to environment-only (`.env`) token storage
+  - Tokens now loaded exclusively from `EBAY_USER_REFRESH_TOKEN` environment variable
+  - Automatic token refresh on server initialization
+  - Memory-only token storage during runtime (no file persistence)
+  - Simplified deployment and improved security (tokens never committed)
+
+- **Documentation Enhancements**
+  - Updated all README files to reflect `.env-only` token management
+  - Added comprehensive OAuth 2.1 setup guide for Cloudflare Workers
+  - Enhanced CLAUDE.md with Cloudflare deployment workflow
+  - Clarified token management benefits and migration path
+
+### Fixed
+- **Cloudflare Worker Compatibility**
+  - Fixed `response.end()` handling for optional chunk parameter
+  - Disabled OAuth metadata endpoint to prevent conflicts with MCP protocol
+  - Resolved response mocking issues in HTTP transport layer
+
+### Migration Guide (v1.1.x → v1.2.0)
+
+**BREAKING CHANGE**: Token storage moved from `.ebay-mcp-tokens.json` to `.env` file.
+
+**Steps to Migrate:**
+1. Add `EBAY_USER_REFRESH_TOKEN=v^1.1#...` to your `.env` file
+2. Remove any existing `.ebay-mcp-tokens.json` files
+3. Restart your MCP server
+4. Tokens will automatically refresh on startup
+
+**Benefits:**
+- Simpler deployment (no file management)
+- Better security (tokens in `.env`, not committed to git)
+- Automatic refresh ensures valid tokens
+
 ## [1.1.8] - 2025-01-12
 
 ### Added
@@ -287,6 +345,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Commits | Key Changes                                    |
 |---------|------------|---------|------------------------------------------------|
+| 1.2.1   | 2025-01-13 | 176     | CI/CD YAML syntax fix                          |
+| 1.2.0   | 2025-01-12 | 167+    | Cloudflare Workers, .env-only token management |
+| 1.1.8   | 2025-01-12 | 167     | Critical documentation suite (2000+ lines)     |
 | 1.1.4   | 2025-01-12 | 167     | Comprehensive enum type system, 870 tests      |
 | 1.1.3   | 2025-11-12 | 141+    | Marketing test fixes, automated setup          |
 | 1.1.2   | 2025-11-11 | 141     | Package optimization (-46% size)               |
