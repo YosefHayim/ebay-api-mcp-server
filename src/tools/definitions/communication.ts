@@ -126,6 +126,14 @@ export const communicationTools: ToolDefinition[] = [
     },
   },
   {
+    name: 'ebay_get_notification_destinations',
+    description: 'Get all notification destinations (paginated)',
+    inputSchema: {
+      limit: z.number().optional().describe('Maximum number of destinations to return (10-100, default: 20)'),
+      continuationToken: z.string().optional().describe('Token to retrieve next page of results'),
+    },
+  },
+  {
     name: 'ebay_create_notification_destination',
     description: 'Create a notification destination',
     inputSchema: {

@@ -60,6 +60,24 @@ export class NotificationApi {
   }
 
   /**
+   * Get all destinations (paginated)
+   * @throws Error if the request fails
+   */
+  async getDestinations(limit?: number, continuationToken?: string) {
+    const params: Record<string, string> = {};
+    if (limit !== undefined) params.limit = String(limit);
+    if (continuationToken) params.continuation_token = continuationToken;
+
+    try {
+      return await this.client.get(`${this.basePath}/destination`, params);
+    } catch (error) {
+      throw new Error(
+        `Failed to get destinations: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
    * Get destination
    * @throws Error if required parameters are missing or invalid
    */
