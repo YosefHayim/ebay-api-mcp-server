@@ -19,10 +19,12 @@ const getUrlsFromReadme = (content: string): string[] => {
   return urls;
 };
 
-const getSpecUrlFromHtml = (html: string): string | null => {
-  const linkRegex = /<a[^>]*?class="spec-parent"[^>]*?href="([^"]+)"[^>]*?>/g;
-  const match = linkRegex.exec(html);
-  return match ? match[1] : null;
+const getSpecUrlsFromHtml = (html: string): string[] => {
+  const linkRegex = /<a[^>]*?class="[^"]*\bspec-parent\b[^"]*"[^>]*?href="([^"]+)"/g;
+  const matches = [...html.matchAll(linkRegex)];
+  const urls = matches.map(match => match[1]);
+  // Filter out duplicates
+  return [...new Set(urls)];
 };
 
 const getFolderName = (specUrl: string): string => {
@@ -73,24 +75,23 @@ const main = async () => {
       try {
         const response = await axios.get(url);
         const html = response.data;
-        fs.writeFileSync('debug.html', html);
-        console.log('HTML content saved to debug.html');
-        const specUrl = getSpecUrlFromHtml(html);
+        const specUrls = getSpecUrlsFromHtml(html);
 
-        if (specUrl) {
-          console.log(`Found spec URL: ${specUrl}`);
-          const fullSpecUrl = new URL(specUrl, url).href;
-          const fileName = path.basename(specUrl);
-          const folderName = getFolderName(specUrl);
-          const folderPath = path.join(DOCS_DIR, folderName);
-          await downloadFile(fullSpecUrl, folderPath, fileName);
+        if (specUrls.length > 0) {
+          for (const specUrl of specUrls) {
+            console.log(`Found spec URL: ${specUrl}`);
+            const fullSpecUrl = new URL(specUrl, 'https://developer.ebay.com').href;
+            const fileName = path.basename(specUrl);
+            const folderName = getFolderName(specUrl);
+            const folderPath = path.join(DOCS_DIR, folderName);
+            await downloadFile(fullSpecUrl, folderPath, fileName);
+          }
         } else {
           console.log(`No spec URL found for: ${url}`);
         }
       } catch (error) {
         console.error(`Failed to process ${url}:`, error);
       }
-      return; // Exit after first URL for debugging
     }
   } catch (error) {
     console.error('Failed to read README.md:', error);
