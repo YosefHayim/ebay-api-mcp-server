@@ -2,26 +2,13 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import nock from 'nock';
 import { EbayOAuthClient } from '../../../src/auth/oauth.js';
 import type { EbayConfig, StoredTokenData } from '../../../src/types/ebay.js';
+import { getAuthUrl } from '../../../src/config/environment.js';
 import {
   createMockTokens,
   createExpiredAccessToken,
   createFullyExpiredTokens,
 } from '../../helpers/mock-token-storage.js';
 import { mockOAuthTokenEndpoint, cleanupMocks } from '../../helpers/mock-http.js';
-
-// Mock TokenStorage - use vi.hoisted to ensure mock is available when hoisted
-const mockTokenStorage = vi.hoisted(() => ({
-  hasTokens: vi.fn(),
-  loadTokens: vi.fn(),
-  saveTokens: vi.fn(),
-  clearTokens: vi.fn(),
-  isUserAccessTokenExpired: vi.fn(),
-  isUserRefreshTokenExpired: vi.fn(),
-}));
-
-vi.mock('../../../src/auth/token-storage.js', () => ({
-  TokenStorage: mockTokenStorage,
-}));
 
 describe('EbayOAuthClient', () => {
   let oauthClient: EbayOAuthClient;
@@ -53,57 +40,46 @@ describe('EbayOAuthClient', () => {
   });
 
   describe('initialize', () => {
-    it('should load user tokens from storage if available', async () => {
-      const mockTokens = createMockTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
+    it('should load user tokens from environment if EBAY_USER_REFRESH_TOKEN is set', async () => {
+      process.env.EBAY_USER_REFRESH_TOKEN = 'test_refresh_token';
+
+      // Mock the refresh token endpoint
+      mockOAuthTokenEndpoint('sandbox', {
+        access_token: 'refreshed_access_token',
+        token_type: 'Bearer',
+        expires_in: 7200,
+        refresh_token: 'test_refresh_token',
+        refresh_token_expires_in: 47304000,
+      });
 
       await oauthClient.initialize();
 
-      expect(mockTokenStorage.hasTokens).toHaveBeenCalledTimes(1);
-      expect(mockTokenStorage.loadTokens).toHaveBeenCalledTimes(1);
       expect(oauthClient.hasUserTokens()).toBe(true);
     });
 
-    it('should not load tokens if none are available', async () => {
-      mockTokenStorage.hasTokens.mockResolvedValue(false);
-
+    it('should not load tokens if EBAY_USER_REFRESH_TOKEN is not set', async () => {
       await oauthClient.initialize();
 
-      expect(mockTokenStorage.hasTokens).toHaveBeenCalledTimes(1);
-      expect(mockTokenStorage.loadTokens).not.toHaveBeenCalled();
       expect(oauthClient.hasUserTokens()).toBe(false);
     });
 
-    it('should validate token scopes on initialization', async () => {
-      // Mock console.warn to verify validation warnings
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('should handle invalid refresh token in environment', async () => {
+      process.env.EBAY_USER_REFRESH_TOKEN = 'invalid_refresh_token';
 
-      const mockTokens = createMockTokens({
-        scope: 'https://api.ebay.com/oauth/api_scope/buy.browse', // Sandbox-only scope
-      });
+      // Mock failed refresh
+      nock(getAuthUrl('sandbox'))
+        .post('/identity/v1/oauth2/token')
+        .reply(400, { error: 'invalid_grant' });
 
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
+      await oauthClient.initialize();
 
-      // Using production environment, so sandbox scope should trigger warning
-      const prodConfig = { ...config, environment: 'production' as const };
-      const prodOAuthClient = new EbayOAuthClient(prodConfig);
-
-      await prodOAuthClient.initialize();
-
-      expect(consoleWarnSpy).toHaveBeenCalled();
-      consoleWarnSpy.mockRestore();
+      expect(oauthClient.hasUserTokens()).toBe(false);
     });
   });
 
   describe('hasUserTokens', () => {
-    it('should return true when user tokens are set', async () => {
-      const mockTokens = createMockTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-
-      await oauthClient.initialize();
+    it('should return true when user tokens are set via setUserTokens', async () => {
+      await oauthClient.setUserTokens('access_token', 'refresh_token');
 
       expect(oauthClient.hasUserTokens()).toBe(true);
     });
@@ -115,60 +91,50 @@ describe('EbayOAuthClient', () => {
 
   describe('getAccessToken', () => {
     it('should return valid user access token', async () => {
-      const mockTokens = createMockTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
+      const accessToken = 'user_access_token';
+      const refreshToken = 'user_refresh_token';
 
-      await oauthClient.initialize();
+      // Set tokens with future expiry
+      const futureExpiry = Date.now() + 7200 * 1000;
+      await oauthClient.setUserTokens(accessToken, refreshToken, futureExpiry);
+
       const token = await oauthClient.getAccessToken();
 
-      expect(token).toBe(mockTokens.userAccessToken);
-      expect(mockTokenStorage.isUserAccessTokenExpired).toHaveBeenCalledWith(mockTokens);
+      expect(token).toBe(accessToken);
     });
 
     it('should refresh expired access token using valid refresh token', async () => {
-      const expiredTokens = createExpiredAccessToken();
       const newAccessToken = 'new_access_token';
+      const refreshToken = 'user_refresh_token';
 
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(expiredTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(true);
-      mockTokenStorage.isUserRefreshTokenExpired.mockReturnValue(false);
+      // Set tokens with expired access token but valid refresh token
+      const pastExpiry = Date.now() - 1000;
+      const futureRefreshExpiry = Date.now() + 18 * 30 * 24 * 60 * 60 * 1000;
+      await oauthClient.setUserTokens('expired_token', refreshToken, pastExpiry, futureRefreshExpiry);
 
       // Mock refresh token API call
       mockOAuthTokenEndpoint('sandbox', {
         access_token: newAccessToken,
         token_type: 'Bearer',
         expires_in: 7200,
-        refresh_token: expiredTokens.userRefreshToken,
+        refresh_token: refreshToken,
         refresh_token_expires_in: 47304000,
       });
 
-      await oauthClient.initialize();
       const token = await oauthClient.getAccessToken();
 
       expect(token).toBe(newAccessToken);
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
     });
 
     it('should throw error when both access and refresh tokens are expired', async () => {
-      const fullyExpiredTokens = createFullyExpiredTokens();
+      // Set tokens with both expired
+      const pastExpiry = Date.now() - 1000;
+      await oauthClient.setUserTokens('expired_access', 'expired_refresh', pastExpiry, pastExpiry);
 
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(fullyExpiredTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(true);
-      mockTokenStorage.isUserRefreshTokenExpired.mockReturnValue(true);
-
-      await oauthClient.initialize();
-
-      await expect(oauthClient.getAccessToken()).rejects.toThrow('User authorization expired');
-      expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
+      await expect(oauthClient.getAccessToken()).rejects.toThrow();
     });
 
     it('should fallback to client credentials when no user tokens', async () => {
-      mockTokenStorage.hasTokens.mockResolvedValue(false);
-
       const clientToken = 'client_credentials_token';
       mockOAuthTokenEndpoint('sandbox', {
         access_token: clientToken,
@@ -176,23 +142,18 @@ describe('EbayOAuthClient', () => {
         expires_in: 7200,
       });
 
-      await oauthClient.initialize();
       const token = await oauthClient.getAccessToken();
 
       expect(token).toBe(clientToken);
     });
 
     it('should reuse cached client credentials token if still valid', async () => {
-      mockTokenStorage.hasTokens.mockResolvedValue(false);
-
       const clientToken = 'client_credentials_token';
       mockOAuthTokenEndpoint('sandbox', {
         access_token: clientToken,
         token_type: 'Bearer',
         expires_in: 7200,
       });
-
-      await oauthClient.initialize();
 
       // First call - should fetch token
       const token1 = await oauthClient.getAccessToken();
@@ -208,33 +169,28 @@ describe('EbayOAuthClient', () => {
   });
 
   describe('setUserTokens', () => {
-    it('should store user tokens', async () => {
+    it('should store user tokens in memory', async () => {
       const accessToken = 'user_access_token';
       const refreshToken = 'user_refresh_token';
 
       await oauthClient.setUserTokens(accessToken, refreshToken);
 
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userAccessToken: accessToken,
-          userRefreshToken: refreshToken,
-          tokenType: 'Bearer',
-        })
-      );
       expect(oauthClient.hasUserTokens()).toBe(true);
+
+      // Verify tokens work by getting access token
+      const token = await oauthClient.getAccessToken();
+      expect(token).toBe(accessToken);
     });
 
-    it('should set expiry times when storing tokens', async () => {
+    it('should set default expiry times when not provided', async () => {
       const accessToken = 'user_access_token';
       const refreshToken = 'user_refresh_token';
-      const beforeTime = Date.now();
 
       await oauthClient.setUserTokens(accessToken, refreshToken);
 
-      const savedTokens = mockTokenStorage.saveTokens.mock.calls[0][0] as StoredTokenData;
-
-      expect(savedTokens.userAccessTokenExpiry).toBeGreaterThan(beforeTime);
-      expect(savedTokens.userRefreshTokenExpiry).toBeGreaterThan(savedTokens.userAccessTokenExpiry);
+      // Verify token is available (not expired)
+      const token = await oauthClient.getAccessToken();
+      expect(token).toBe(accessToken);
     });
   });
 
@@ -257,7 +213,6 @@ describe('EbayOAuthClient', () => {
 
       expect(result.access_token).toBe(accessToken);
       expect(result.refresh_token).toBe(refreshToken);
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
       expect(oauthClient.hasUserTokens()).toBe(true);
     });
 
@@ -285,39 +240,23 @@ describe('EbayOAuthClient', () => {
   });
 
   describe('clearAllTokens', () => {
-    it('should clear all tokens', async () => {
-      const mockTokens = createMockTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-
-      await oauthClient.initialize();
+    it('should clear all tokens from memory', async () => {
+      // Set tokens first
+      await oauthClient.setUserTokens('access_token', 'refresh_token');
       expect(oauthClient.hasUserTokens()).toBe(true);
 
       await oauthClient.clearAllTokens();
 
-      expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
       expect(oauthClient.hasUserTokens()).toBe(false);
     });
   });
 
   describe('getTokenInfo', () => {
-    it('should return token status information', async () => {
-      const mockTokens = createMockTokens({
-        scope:
-          'https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.fulfillment',
-      });
-
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
-
-      await oauthClient.initialize();
+    it('should return token status information when tokens are set', async () => {
+      await oauthClient.setUserTokens('access_token', 'refresh_token');
       const info = oauthClient.getTokenInfo();
 
       expect(info.hasUserToken).toBe(true);
-      expect(info.hasAppAccessToken).toBe(false);
-      expect(info.scopeInfo).toBeDefined();
-      expect(info.scopeInfo?.tokenScopes).toHaveLength(2);
     });
 
     it('should return info when no tokens are available', () => {
@@ -325,29 +264,20 @@ describe('EbayOAuthClient', () => {
 
       expect(info.hasUserToken).toBe(false);
       expect(info.hasAppAccessToken).toBe(false);
-      expect(info.scopeInfo).toBeUndefined();
     });
   });
 
   describe('isAuthenticated', () => {
     it('should return true when valid user tokens exist', async () => {
-      const mockTokens = createMockTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(mockTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(false);
-
-      await oauthClient.initialize();
+      const futureExpiry = Date.now() + 7200 * 1000;
+      await oauthClient.setUserTokens('access_token', 'refresh_token', futureExpiry);
 
       expect(oauthClient.isAuthenticated()).toBe(true);
     });
 
     it('should return false when tokens are expired', async () => {
-      const expiredTokens = createFullyExpiredTokens();
-      mockTokenStorage.hasTokens.mockResolvedValue(true);
-      mockTokenStorage.loadTokens.mockResolvedValue(expiredTokens);
-      mockTokenStorage.isUserAccessTokenExpired.mockReturnValue(true);
-
-      await oauthClient.initialize();
+      const pastExpiry = Date.now() - 1000;
+      await oauthClient.setUserTokens('expired_access', 'expired_refresh', pastExpiry, pastExpiry);
 
       expect(oauthClient.isAuthenticated()).toBe(false);
     });

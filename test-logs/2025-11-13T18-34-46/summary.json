@@ -1,0 +1,214 @@
+{
+  "totalTests": 48,
+  "passed": 29,
+  "failed": 17,
+  "skipped": 2,
+  "duration": 64728,
+  "timestamp": "2025-11-13T18:35:53.064Z",
+  "failures": [
+    {
+      "category": "Account Management",
+      "endpoint": "getOptedInPrograms",
+      "method": "GET /sell/account/v1/program/get_opted_in_programs",
+      "error": "eBay API Error: resource not found",
+      "duration": 309,
+      "status": "skipped"
+    },
+    {
+      "category": "Account Management",
+      "endpoint": "getRateTables",
+      "method": "GET /sell/account/v1/rate_table",
+      "error": "eBay API Error: System error.",
+      "duration": 8213,
+      "status": "error"
+    },
+    {
+      "category": "Account Management",
+      "endpoint": "getSalesTaxes",
+      "method": "GET /sell/account/v1/sales_tax",
+      "error": "eBay API Error: Tax table not supported for countryCode.",
+      "duration": 474,
+      "params": {
+        "country_code": "US"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Account Management",
+      "endpoint": "getSalesTax",
+      "method": "GET /sell/account/v1/sales_tax/{countryCode}/{jurisdictionId}",
+      "error": "eBay API Error: Tax table not supported for countryCode.",
+      "duration": 5157,
+      "params": {
+        "country_code": "US",
+        "jurisdiction_id": "CA"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Account Management",
+      "endpoint": "getSubscription",
+      "method": "GET /sell/account/v1/subscription",
+      "error": "eBay API Error: System error.",
+      "duration": 8626,
+      "status": "error"
+    },
+    {
+      "category": "Inventory",
+      "endpoint": "getProductCompatibility",
+      "method": "GET /sell/inventory/v1/inventory_item/{sku}/product_compatibility",
+      "error": "Failed to get product compatibility: eBay API Error: We didn't find the resource/entity you are requesting. Please verify the request",
+      "duration": 303,
+      "params": {
+        "sku": "X8258ol6"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Inventory",
+      "endpoint": "getOffers",
+      "method": "GET /sell/inventory/v1/offer",
+      "error": "Failed to get offers: eBay API Error: This is an invalid value for a SKU. Only alphanumeric characters can be used for SKUs, and their length must not exceed 50 characters",
+      "duration": 250,
+      "params": {
+        "marketplaceId": "EBAY_US",
+        "limit": 5
+      },
+      "status": "error"
+    },
+    {
+      "category": "Inventory",
+      "endpoint": "getListings",
+      "method": "GET /sell/inventory/v1/listing",
+      "error": "this.api.inventory.getListings is not a function",
+      "duration": 0,
+      "params": {
+        "limit": 5,
+        "offset": 0
+      },
+      "status": "error"
+    },
+    {
+      "category": "Fulfillment",
+      "endpoint": "getPaymentDisputeSummaries",
+      "method": "GET /sell/fulfillment/v1/payment_dispute_summary",
+      "error": "this.api.fulfillment.getPaymentDisputeSummaries is not a function",
+      "duration": 0,
+      "params": {
+        "limit": 5
+      },
+      "status": "error"
+    },
+    {
+      "category": "Fulfillment",
+      "endpoint": "getShippingQuote",
+      "method": "POST /sell/fulfillment/v1/shipping_quote",
+      "error": "this.api.fulfillment.getShippingQuote is not a function",
+      "duration": 0,
+      "params": {
+        "rateTableId": "test"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Marketing",
+      "endpoint": "getPromotions",
+      "method": "GET /sell/marketing/v1/promotion",
+      "error": "eBay API Error: There was a problem with an eBay internal system or process. Contact eBay developer support for assistance",
+      "duration": 9871,
+      "params": {
+        "marketplace_id": "EBAY_US",
+        "limit": 5
+      },
+      "status": "error"
+    },
+    {
+      "category": "Marketing",
+      "endpoint": "getPromotionSummary",
+      "method": "GET /sell/marketing/v1/promotion_summary",
+      "error": "this.api.marketing.getPromotionSummary is not a function",
+      "duration": 0,
+      "params": {
+        "marketplace_id": "EBAY_US"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Marketing",
+      "endpoint": "getPromotionReports",
+      "method": "GET /sell/marketing/v1/promotion_report",
+      "error": "this.api.marketing.getPromotionReports is not a function",
+      "duration": 0,
+      "params": {
+        "marketplace_id": "EBAY_US"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Analytics",
+      "endpoint": "getTrafficReport",
+      "method": "GET /sell/analytics/v1/traffic_report",
+      "error": "Failed to get traffic report: Request failed with status code 404",
+      "duration": 231,
+      "params": {
+        "dimension": "LISTING_ID",
+        "filter": "filter",
+        "metric": "CLICK_THROUGH_RATE"
+      },
+      "status": "skipped"
+    },
+    {
+      "category": "Analytics",
+      "endpoint": "getSellerStandardsProfile",
+      "method": "GET /sell/analytics/v1/seller_standards_profile",
+      "error": "Failed to get seller standards profile: eBay API Error: Invalid program LATE_SHIPMENT_RATE",
+      "duration": 1272,
+      "status": "error"
+    },
+    {
+      "category": "Metadata",
+      "endpoint": "getProductCompliancePolicies",
+      "method": "GET /sell/metadata/v1/marketplace/{marketplace_id}/product_compliance_policy",
+      "error": "this.api.metadata.getProductCompliancePolicies is not a function",
+      "duration": 0,
+      "params": {
+        "marketplace_id": "EBAY_US"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Taxonomy",
+      "endpoint": "getItemAspectsForCategory",
+      "method": "GET /commerce/taxonomy/v1/category_tree/{category_tree_id}/get_item_aspects_for_category",
+      "error": "eBay API Error: A resource (URI) associated with the request could not be resolved.",
+      "duration": 238,
+      "params": {
+        "category_tree_id": "0",
+        "category_id": "1"
+      },
+      "status": "error"
+    },
+    {
+      "category": "Other",
+      "endpoint": "getOffersForListing",
+      "method": "GET /sell/negotiation/v1/offer",
+      "error": "this.api.negotiation.getOffersForListing is not a function",
+      "duration": 0,
+      "params": {
+        "limit": 5
+      },
+      "status": "error"
+    },
+    {
+      "category": "Other",
+      "endpoint": "getComplianceSnapshot",
+      "method": "GET /sell/compliance/v1/listing_violations",
+      "error": "this.api.compliance.getComplianceSnapshot is not a function",
+      "duration": 0,
+      "params": {
+        "limit": 5
+      },
+      "status": "error"
+    }
+  ]
+}

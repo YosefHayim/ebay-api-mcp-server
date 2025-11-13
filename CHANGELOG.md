@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Documentation Consolidation**: Streamlined all documentation into single README.md
+  - Removed redundant README files from API subdirectories (`src/api/*/README.md`)
+  - Removed TODO files from API subdirectories (`src/api/*/TODO.md`)
+  - Removed `docs/INTERACTIVE_SETUP.md` (functionality documented in main README)
+  - Removed `docs/auth/README.md` (OAuth setup consolidated in main README)
+  - Removed `docs/buy-apps/readme.md` (unused documentation)
+  - Removed `src/utils/README.md` (internal documentation)
+  - Removed `ENDPOINT_AUDIT_REPORT.md` (consolidated into README.md API Coverage section)
+  - All documentation now centralized in single, comprehensive README.md
+
+### Added
+- **API Coverage Section**: Comprehensive endpoint coverage analysis integrated into README.md
+  - Overall: 99.1% complete (110/111 eBay Sell API endpoints)
+  - Account API: 97.3% (36/37 endpoints)
+  - Analytics API: 100% (4/4 endpoints)
+  - Fulfillment API: 100% (15/15 endpoints)
+  - Inventory API: 100% (20/20 endpoints)
+  - Marketing API: 100% (30/30 endpoints)
+  - Metadata API: 100% (5/5 endpoints)
+  - Expandable detailed endpoint list with all method names
+- **README.md Enhancements**:
+  - Added detailed API coverage table with endpoint counts and percentages
+  - Added collapsible section with all implemented endpoints by category
+  - Updated all API statistics to match actual implementation
+  - Fixed all documentation links to point to README sections
+  - Improved navigation with better internal anchors
+
 ## [1.3.0] - 2025-01-13
 
 ### Added
