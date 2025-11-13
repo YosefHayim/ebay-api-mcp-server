@@ -290,8 +290,9 @@ function handleHealth(env: Env): Response {
 
 /**
  * Handle OAuth metadata endpoint
+ * Currently disabled - uncomment when OAuth is configured
  */
-function handleOAuthMetadata(request: Request, env: Env): Response {
+/* function handleOAuthMetadata(request: Request, env: Env): Response {
   const url = new URL(request.url);
   const baseUrl = `${url.protocol}//${url.host}`;
 
@@ -312,7 +313,7 @@ function handleOAuthMetadata(request: Request, env: Env): Response {
       'Content-Type': 'application/json',
     },
   });
-}
+} */
 
 /**
  * Main request handler
@@ -334,8 +335,9 @@ export default {
       case '/health':
         return handleHealth(env);
 
-      case '/.well-known/oauth-protected-resource':
-        return handleOAuthMetadata(request, env);
+      // OAuth metadata endpoint disabled - uncomment when OAuth is configured
+      // case '/.well-known/oauth-protected-resource':
+      //   return handleOAuthMetadata(request, env);
 
       case '/':
         // MCP endpoints
