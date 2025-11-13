@@ -424,17 +424,15 @@ This server has been tested and verified with the following MCP clients:
 ### ✅ Fully Supported & Verified
 
 | Client | Status | Version Tested | Notes |
-|--------|--------|----------------|-------|
+| :----- | :----- | :------------- | :---- |
 | **[Gemini CLI](https://gemini.google.com/)** | ✅ **Working** | Latest | Fully functional with all 140 tools |
 | **[Claude Code](https://claude.ai/code)** | ✅ **Working** | Latest | Complete integration, all features supported |
 | **[Codex](https://github.com/openai/codex)** | ✅ **Working** | Latest | Tested and verified |
 
 ### 🚧 In Development
 
-| Client | Status | Progress | ETA |
-|--------|--------|----------|-----|
-| **[Claude Desktop](https://claude.ai/download)** | 🚧 **In Progress** | 85% | Coming Soon |
-| **[ChatGPT Desktop](https://chatgpt.com/)** | 🚧 **In Progress** | 70% | Q2 2025 |
+<table width="100%"><thead><tr><th width="25%">Client</th><th width="15%">Status</th><th width="15%">Progress</th><th width="45%">ETA</th></tr></thead><tbody><tr><td><strong><a href="https://claude.ai/download">Claude Desktop</a></strong></td><td>🚧 <strong>In Progress</strong></td><td>85%</td><td>Coming Soon</td></tr><tr><td><strong><a href="https://chatgpt.com/">ChatGPT Desktop</a></strong></td><td>🚧 <strong>In Progress</strong></td><td>70%</td><td>Q2 2025</td></tr></tbody>
+</table>
 
 ### Setup Instructions
 
