@@ -890,7 +890,7 @@ For detailed guidelines, code examples, and testing requirements, see [CONTRIBUT
 
 ---
 
-## 📄 License
+## 📄 License (Apache 2.0)
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -901,6 +901,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [eBay Developers Program](https://developer.ebay.com/) - API access and documentation
 - [Model Context Protocol](https://modelcontextprotocol.io/) - MCP specification and SDK
 - [Anthropic](https://anthropic.com/) - Claude and MCP support
+- [eBay Open Source](https://opensource.ebay.com/) - Learn more about eBay's open source initiatives
 
 ---
 

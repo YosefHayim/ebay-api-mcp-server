@@ -10,7 +10,7 @@
  */
 
 import express from 'express';
-// import helmet from 'helmet';
+import helmet from 'helmet';
 import cors from 'cors';
 import { randomUUID } from 'crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -36,7 +36,7 @@ const CONFIG = {
   // OAuth settings
   oauth: {
     // Authorization server metadata URL or custom metadata
-    authServerUrl: process.env.OAUTH_AUTH_SERVER_URL || 'http://localhost:8080/realms/master',
+    authServerUrl: process.env.OAUTH_AUTH_SERVER_URL ?? 'http://localhost:8080/realms/master',
 
     // Client credentials for token introspection
     clientId: process.env.OAUTH_CLIENT_ID,
@@ -93,7 +93,7 @@ async function createApp(): Promise<express.Application> {
   app.use(express.json());
 
   // Add security best practices (disable X-Powered-By header)
-  // app.use(helmet({ xPoweredBy: false }));
+  app.use(helmet({ xPoweredBy: false }));
 
   // Request logging
   app.use((req, res, next) => {
@@ -151,7 +151,7 @@ async function createApp(): Promise<express.Application> {
 
     try {
       await tokenVerifier.initialize();
-      console.log('✓ Token verifier initialized');
+      console.log('Token verifier initialized');
 
       authMiddleware = createBearerAuthMiddleware({
         verifier: tokenVerifier,
@@ -163,7 +163,7 @@ async function createApp(): Promise<express.Application> {
       throw error;
     }
   } else {
-    console.log('⚠️  OAuth is disabled. Server running in unauthenticated mode.');
+    console.error('OAuth is disabled. Server running in unauthenticated mode.');
   }
 
   // MCP session storage
@@ -179,13 +179,37 @@ async function createApp(): Promise<express.Application> {
     const server = new McpServer(
       {
         name: 'ebay-api-mcp-server',
-        version: '0.1.0',
+        version: '1.4.0',
+        title: 'eBay API MCP Server',
+        description: 'eBay API MCP Server',
+        icons: [
+          {
+            src: './icons/512x512.png',
+            mimeType: 'image/png',
+            sizes: ['48x48'],
+          },
+          {
+            src: './icons/128x128.png',
+            mimeType: 'image/png',
+            sizes: ['128x128'],
+          },
+          {
+            src: './icons/256x256.png',
+            mimeType: 'image/png',
+            sizes: ['256x256'],
+          },
+          {
+            src: './icons/512x512.png',
+            mimeType: 'image/png',
+            sizes: ['512x512'],
+          },
+          {
+            src: './icons/1024x1024.png',
+            mimeType: 'image/png',
+            sizes: ['1024x1024'],
+          }
+        ],
       },
-      {
-        capabilities: {
-          tools: {},
-        },
-      }
     );
 
     // Register tools
@@ -245,14 +269,14 @@ async function createApp(): Promise<express.Application> {
         sessionIdGenerator: () => randomUUID(),
         onsessioninitialized: (sessionId) => {
           transports.set(sessionId, transport);
-          console.log(`✓ New MCP session initialized: ${sessionId}`);
+          console.log(`New MCP session initialized: ${sessionId}`);
         },
       });
 
       transport.onclose = () => {
         if (transport.sessionId) {
           transports.delete(transport.sessionId);
-          console.log(`✓ MCP session closed: ${transport.sessionId}`);
+          console.log(`MCP session closed: ${transport.sessionId}`);
         }
       };
 
@@ -339,19 +363,16 @@ async function main() {
     }
 
     console.log('Configuration:');
-    console.log(`  Host: ${CONFIG.host}`);
-    console.log(`  Port: ${CONFIG.port}`);
-    console.log(`  OAuth Enabled: ${CONFIG.authEnabled}`);
+    console.log(`Host: ${CONFIG.host}`);
+    console.log(`Port: ${CONFIG.port}`);
+    console.log(`OAuth Enabled: ${CONFIG.authEnabled}`);
 
     if (CONFIG.authEnabled) {
-      console.log(`  Auth Server: ${CONFIG.oauth.authServerUrl}`);
-      console.log(`  Required Scopes: ${CONFIG.oauth.requiredScopes.join(', ')}`);
-      console.log(
-        `  Verification Method: ${CONFIG.oauth.useIntrospection ? 'Introspection' : 'JWT'}`
+      console.log(`Auth Server: ${CONFIG.oauth.authServerUrl}`);
+      console.log(`Required Scopes: ${CONFIG.oauth.requiredScopes.join(', ')}`);
+      console.log(`Verification Method: ${CONFIG.oauth.useIntrospection ? 'Introspection' : 'JWT'}`
       );
     }
-
-    console.log();
 
     const app = await createApp();
 
@@ -369,10 +390,10 @@ async function main() {
 
       if (CONFIG.authEnabled) {
         console.log('Authorization is ENABLED');
-        console.log('   Clients must provide valid Bearer tokens to access MCP endpoints');
+        console.log('Clients must provide valid Bearer tokens to access MCP endpoints');
       } else {
         console.log('Authorization is DISABLED');
-        console.log('   Set OAUTH_ENABLED=true to enable OAuth protection');
+        console.log('Set OAUTH_ENABLED=true to enable OAuth protection');
       }
     });
 
