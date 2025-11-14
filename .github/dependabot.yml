@@ -3,10 +3,12 @@
 
 version: 2
 updates:
+
   # npm dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
+      target-branch: "dev"
       interval: "weekly"
       day: "monday"
       time: "09:00"
@@ -33,10 +35,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    # Ignore major updates for stability (review manually)
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
