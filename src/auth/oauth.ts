@@ -176,6 +176,8 @@ export class EbayOAuthClient {
   setUserTokens(
     accessToken: string,
     refreshToken: string,
+    accessTokenExpiry?: number,
+    refreshTokenExpiry?: number,
   ): void {
     // Store tokens in memory with default expiry
     // Access tokens typically expire in 2 hours (7200 seconds)
@@ -188,8 +190,8 @@ export class EbayOAuthClient {
       userAccessToken: accessToken,
       userRefreshToken: refreshToken,
       tokenType: 'Bearer',
-      userAccessTokenExpiry: now + 7200 * 1000, // Default 2 hours
-      userRefreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // Default 18 months
+      userAccessTokenExpiry: accessTokenExpiry ?? (now + 7200 * 1000), // Default 2 hours
+      userRefreshTokenExpiry: refreshTokenExpiry ?? (now + 18 * 30 * 24 * 60 * 60 * 1000), // Default 18 months
     };
 
     // Update .env file with new tokens
@@ -263,14 +265,14 @@ export class EbayOAuthClient {
       throw new Error('Redirect URI is required for authorization code exchange');
     }
 
-    const authUrl = getAuthUrl(this.config.clientId, this.config.redirectUri, this.config.environment, this.config.locale, 'login', 'code');
+    const tokenUrl = `${getBaseUrl(this.config.environment)}/identity/v1/oauth2/token`;
     const credentials = Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString(
       'base64'
     );
 
     try {
       const response = await axios.post(
-        authUrl,
+        tokenUrl,
         new URLSearchParams({
           grant_type: 'authorization_code',
           code,

@@ -87,7 +87,7 @@ describe('InventoryApi', () => {
         inventoryItem,
         {
           headers: {
-            'Content-Language': 'en_US',
+            'Content-Language': 'en-US',
           },
         }
       );
@@ -167,7 +167,7 @@ describe('InventoryApi', () => {
 
       expect(client.post).toHaveBeenCalledWith('/sell/inventory/v1/offer', offer, {
         headers: {
-          'Content-Language': 'en_US',
+          'Content-Language': 'en-US',
         },
       });
     });
@@ -321,7 +321,7 @@ describe('InventoryApi', () => {
         requests,
         {
           headers: {
-            'Content-Language': 'en_US',
+            'Content-Language': 'en-US',
           },
         }
       );
@@ -390,7 +390,7 @@ describe('InventoryApi', () => {
 
       expect(client.put).toHaveBeenCalledWith('/sell/inventory/v1/offer/OFFER-123', mockOffer, {
         headers: {
-          'Content-Language': 'en_US',
+          'Content-Language': 'en-US',
         },
       });
     });
@@ -415,7 +415,7 @@ describe('InventoryApi', () => {
 
       expect(client.post).toHaveBeenCalledWith('/sell/inventory/v1/bulk_create_offer', requests, {
         headers: {
-          'Content-Language': 'en_US',
+          'Content-Language': 'en-US',
         },
       });
     });
@@ -502,7 +502,7 @@ describe('InventoryApi', () => {
         compatibility,
         {
           headers: {
-            'Content-Language': 'en_US',
+            'Content-Language': 'en-US',
           },
         }
       );
@@ -567,7 +567,7 @@ describe('InventoryApi', () => {
         group,
         {
           headers: {
-            'Content-Language': 'en_US',
+            'Content-Language': 'en-US',
           },
         }
       );
@@ -690,7 +690,7 @@ describe('InventoryApi', () => {
         requests,
         {
           headers: {
-            'Content-Language': 'en_US',
+            'Content-Language': 'en-US',
           },
         }
       );

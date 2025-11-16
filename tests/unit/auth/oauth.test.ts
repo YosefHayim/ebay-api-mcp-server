@@ -61,6 +61,13 @@ describe('EbayOAuthClient', () => {
         refresh_token_expires_in: 47304000,
       });
 
+      // Mock the app access token endpoint (called after user token refresh)
+      mockOAuthTokenEndpoint('sandbox', {
+        access_token: 'app_access_token',
+        token_type: 'Bearer',
+        expires_in: 7200,
+      });
+
       await oauthClient.initialize();
 
       expect(oauthClient.hasUserTokens()).toBe(true);
@@ -76,7 +83,7 @@ describe('EbayOAuthClient', () => {
       process.env.EBAY_USER_REFRESH_TOKEN = 'invalid_refresh_token';
 
       // Mock failed refresh
-      nock(getAuthUrl('sandbox'))
+      nock('https://api.sandbox.ebay.com')
         .post('/identity/v1/oauth2/token')
         .reply(400, { error: 'invalid_grant' });
 

@@ -115,13 +115,15 @@ describe('Environment Configuration', () => {
 
   describe('getAuthUrl', () => {
     it('should return production auth URL for production environment', () => {
-      const url = getAuthUrl('production');
-      expect(url).toBe('https://api.ebay.com/identity/v1/oauth2/token');
+      const url = getAuthUrl('test_client_id', 'https://localhost/callback', 'production');
+      expect(url).toContain('https://auth.ebay.com/oauth2/authorize');
+      expect(url).toContain('client_id=test_client_id');
     });
 
     it('should return sandbox auth URL for sandbox environment', () => {
-      const url = getAuthUrl('sandbox');
-      expect(url).toBe('https://api.sandbox.ebay.com/identity/v1/oauth2/token');
+      const url = getAuthUrl('test_client_id', 'https://localhost/callback', 'sandbox');
+      expect(url).toContain('https://auth.sandbox.ebay.com/oauth2/authorize');
+      expect(url).toContain('client_id=test_client_id');
     });
   });
 

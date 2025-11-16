@@ -121,7 +121,8 @@ describe('Other APIs', () => {
       await api.getItemAspectsForCategory('0', '123');
 
       expect(client.get).toHaveBeenCalledWith(
-        '/commerce/taxonomy/v1/category_tree/0/get_item_aspects_for_category/123'
+        '/commerce/taxonomy/v1/category_tree/0/get_item_aspects_for_category',
+        { category_id: '123' }
       );
     });
 
