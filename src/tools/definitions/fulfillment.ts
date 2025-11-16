@@ -1,5 +1,14 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { shippingFulfillmentSchema } from '../schemas.js';
+import {
+  getOrdersOutputSchema,
+  getOrderOutputSchema,
+  createShippingFulfillmentOutputSchema,
+  getShippingFulfillmentsOutputSchema,
+  issueRefundOutputSchema,
+  getPaymentDisputesOutputSchema,
+} from '@/schemas/fulfillment/orders.js';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -39,6 +48,10 @@ export const fulfillmentTools: ToolDefinition[] = [
       limit: z.number().optional().describe('Number of orders to return'),
       offset: z.number().optional().describe('Number of orders to skip'),
     },
+    outputSchema: zodToJsonSchema(getOrdersOutputSchema, {
+      name: 'GetOrdersResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_order',
@@ -47,6 +60,10 @@ export const fulfillmentTools: ToolDefinition[] = [
     inputSchema: {
       orderId: z.string().describe('The unique order ID'),
     },
+    outputSchema: zodToJsonSchema(getOrderOutputSchema, {
+      name: 'GetOrderResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_shipping_fulfillment',
@@ -58,6 +75,10 @@ export const fulfillmentTools: ToolDefinition[] = [
         'Shipping fulfillment details including tracking number'
       ),
     },
+    outputSchema: zodToJsonSchema(createShippingFulfillmentOutputSchema, {
+      name: 'CreateShippingFulfillmentResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_shipping_fulfillments',
@@ -66,6 +87,10 @@ export const fulfillmentTools: ToolDefinition[] = [
     inputSchema: {
       orderId: z.string().describe('The order ID to get fulfillments for'),
     },
+    outputSchema: zodToJsonSchema(getShippingFulfillmentsOutputSchema, {
+      name: 'GetShippingFulfillmentsResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_shipping_fulfillment',
@@ -75,6 +100,10 @@ export const fulfillmentTools: ToolDefinition[] = [
       orderId: z.string().describe('The order ID'),
       fulfillmentId: z.string().describe('The fulfillment ID'),
     },
+    outputSchema: zodToJsonSchema(createShippingFulfillmentOutputSchema, {
+      name: 'GetShippingFulfillmentResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_issue_refund',
@@ -137,6 +166,10 @@ export const fulfillmentTools: ToolDefinition[] = [
           'Refund details including amount, reason, and optional comment. Must include reasonForRefund (required), and either refundItems (for line item refunds) OR orderLevelRefundAmount (for full order refunds).'
         ),
     },
+    outputSchema: zodToJsonSchema(issueRefundOutputSchema, {
+      name: 'IssueRefundResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Payment Dispute Tools
   {
@@ -159,6 +192,10 @@ export const fulfillmentTools: ToolDefinition[] = [
       limit: z.number().optional().describe('Maximum number of disputes to return (default: 200)'),
       offset: z.number().optional().describe('Number of disputes to skip for pagination'),
     },
+    outputSchema: zodToJsonSchema(getPaymentDisputesOutputSchema, {
+      name: 'GetPaymentDisputeSummariesResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_payment_dispute',
@@ -167,6 +204,17 @@ export const fulfillmentTools: ToolDefinition[] = [
     inputSchema: {
       paymentDisputeId: z.string().describe('The unique payment dispute ID'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        paymentDisputeId: { type: 'string' },
+        orderId: { type: 'string' },
+        status: { type: 'string' },
+        reason: { type: 'string' },
+        amount: { type: 'object' },
+      },
+      description: 'Payment dispute details',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_payment_dispute_activities',
@@ -175,6 +223,13 @@ export const fulfillmentTools: ToolDefinition[] = [
     inputSchema: {
       paymentDisputeId: z.string().describe('The payment dispute ID'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        activity: { type: 'array' },
+      },
+      description: 'Payment dispute activity history',
+    } as OutputArgs,
   },
   {
     name: 'ebay_accept_payment_dispute',
@@ -200,6 +255,11 @@ export const fulfillmentTools: ToolDefinition[] = [
         .optional()
         .describe('Dispute revision number for optimistic locking'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful acceptance (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_contest_payment_dispute',
@@ -220,6 +280,11 @@ export const fulfillmentTools: ToolDefinition[] = [
         .describe('Return address for item returns (if applicable)'),
       revisionNumber: z.number().optional().describe('Dispute revision number'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful contest (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_add_payment_dispute_evidence',
@@ -253,6 +318,11 @@ export const fulfillmentTools: ToolDefinition[] = [
         .optional()
         .describe('Line items this evidence applies to'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful evidence addition (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_update_payment_dispute_evidence',
@@ -280,6 +350,11 @@ export const fulfillmentTools: ToolDefinition[] = [
         .optional()
         .describe('Updated line items'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful evidence update (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_upload_payment_dispute_evidence_file',
@@ -294,6 +369,13 @@ export const fulfillmentTools: ToolDefinition[] = [
         })
         .describe('File to upload'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        fileId: { type: 'string' },
+      },
+      description: 'File upload response with file ID',
+    } as OutputArgs,
   },
   {
     name: 'ebay_fetch_payment_dispute_evidence_content',
@@ -304,5 +386,13 @@ export const fulfillmentTools: ToolDefinition[] = [
       evidenceId: z.string().describe('The evidence ID'),
       fileId: z.string().describe('The file ID to download'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string' },
+        contentType: { type: 'string' },
+      },
+      description: 'File content and content type',
+    } as OutputArgs,
   },
 ];

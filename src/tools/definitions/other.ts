@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { shippingQuoteRequestSchema, veroReportDataSchema } from '../schemas.js';
 
 export interface OutputArgs {
@@ -318,6 +319,11 @@ export const otherApiTools: ToolDefinition[] = [
     inputSchema: {
       complaintRequest: z.record(z.unknown()).describe('Complaint request data'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Success response',
+    } as OutputArgs,
   },
 ];
 
@@ -329,5 +335,10 @@ export const claudeTools: ToolDefinition[] = [
     inputSchema: {
       query: z.string().describe('A query to search the content with.'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Success response',
+    } as OutputArgs,
   },
 ];

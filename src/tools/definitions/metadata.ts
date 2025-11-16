@@ -1,5 +1,6 @@
 import { MarketplaceId } from '@/types/ebay-enums.js';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { compatibilityDataSchema, compatibilitySpecificationSchema } from '../schemas.js';
 
 export interface OutputArgs {
@@ -214,5 +215,10 @@ export const metadataTools: ToolDefinition[] = [
     inputSchema: {
       countryCode: z.string().describe('Country code (e.g., US)'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Success response',
+    } as OutputArgs,
   },
 ];

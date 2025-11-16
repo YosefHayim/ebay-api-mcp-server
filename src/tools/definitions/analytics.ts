@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -35,11 +36,26 @@ export const analyticsTools: ToolDefinition[] = [
       metric: z.string().describe('Metrics to retrieve (e.g., CLICK_THROUGH_RATE, IMPRESSION)'),
       sort: z.string().optional().describe('Sort order'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        records: { type: 'array' },
+        warnings: { type: 'array' },
+      },
+      description: 'Traffic report data',
+    } as OutputArgs,
   },
   {
     name: 'ebay_find_seller_standards_profiles',
     description: 'Find all seller standards profiles',
     inputSchema: {},
+    outputSchema: {
+      type: 'object',
+      properties: {
+        standards: { type: 'array' },
+      },
+      description: 'Seller standards profiles',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_seller_standards_profile',
@@ -48,6 +64,15 @@ export const analyticsTools: ToolDefinition[] = [
       program: z.string().describe('The program (e.g., CUSTOMER_SERVICE)'),
       cycle: z.string().describe('The cycle (e.g., CURRENT)'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        program: { type: 'string' },
+        cycle: { type: 'object' },
+        metrics: { type: 'array' },
+      },
+      description: 'Seller standards profile data',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_customer_service_metric',
@@ -57,5 +82,12 @@ export const analyticsTools: ToolDefinition[] = [
       evaluationType: z.string().describe('Evaluation type'),
       evaluationMarketplaceId: z.string().describe('Marketplace ID for evaluation'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        metrics: { type: 'array' },
+      },
+      description: 'Customer service metric data',
+    } as OutputArgs,
   },
 ];

@@ -1,5 +1,17 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MarketplaceId } from '@/types/ebay-enums.js';
+import {
+  campaignPagedCollectionResponseSchema,
+  campaignSchema,
+  adGroupPagedCollectionResponseSchema,
+  adPagedCollectionResponseSchema,
+  createAdsByInventoryReferenceResponseSchema,
+  bulkCreateAdsByInventoryReferenceResponseSchema,
+  bulkAdResponseSchema,
+  adResponseSchema,
+  baseResponseSchema,
+} from '@/schemas/marketing/marketing.js';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -36,6 +48,12 @@ const negativeKeywordIdSchema = z.string().describe('Negative Keyword ID');
 const promotionIdSchema = z.string().describe('Promotion ID');
 const reportIdSchema = z.string().describe('Report ID');
 const reportTaskIdSchema = z.string().describe('Report Task ID');
+
+// Generic success response for operations without specific output schemas
+const genericSuccessSchema = zodToJsonSchema(baseResponseSchema, {
+  name: 'GenericSuccessResponse',
+  $refStrategy: 'none',
+}) as OutputArgs;
 const limitSchema = z.number().optional().describe('Maximum number of results to return');
 const offsetSchema = z.number().optional().describe('Number of results to skip');
 
@@ -56,6 +74,10 @@ export const marketingTools: ToolDefinition[] = [
       limit: limitSchema,
       offset: offsetSchema,
     },
+    outputSchema: zodToJsonSchema(campaignPagedCollectionResponseSchema, {
+      name: 'CampaignPagedCollectionResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_campaign',
@@ -64,6 +86,10 @@ export const marketingTools: ToolDefinition[] = [
     inputSchema: {
       campaignId: campaignIdSchema,
     },
+    outputSchema: zodToJsonSchema(campaignSchema, {
+      name: 'CampaignResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_campaign_by_name',
@@ -72,6 +98,10 @@ export const marketingTools: ToolDefinition[] = [
     inputSchema: {
       campaignName: z.string().describe('Campaign name to search for'),
     },
+    outputSchema: zodToJsonSchema(campaignSchema, {
+      name: 'CampaignResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_campaign',
@@ -98,6 +128,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Campaign configuration'),
     },
+    outputSchema: zodToJsonSchema(campaignSchema, {
+      name: 'CampaignResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_clone_campaign',
@@ -119,6 +153,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('New campaign settings'),
     },
+    outputSchema: zodToJsonSchema(campaignSchema, {
+      name: 'CampaignResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_pause_campaign',
@@ -126,6 +164,7 @@ export const marketingTools: ToolDefinition[] = [
     inputSchema: {
       campaignId: campaignIdSchema,
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_resume_campaign',
@@ -133,6 +172,7 @@ export const marketingTools: ToolDefinition[] = [
     inputSchema: {
       campaignId: campaignIdSchema,
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_end_campaign',
@@ -140,6 +180,7 @@ export const marketingTools: ToolDefinition[] = [
     inputSchema: {
       campaignId: campaignIdSchema,
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_update_campaign_identification',
@@ -152,6 +193,7 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Campaign identification data to update'),
     },
+    outputSchema: genericSuccessSchema,
   },
 
   // ========================================
@@ -182,6 +224,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk ad creation request'),
     },
+    outputSchema: zodToJsonSchema(bulkCreateAdsByInventoryReferenceResponseSchema, {
+      name: 'BulkCreateAdsByInventoryReferenceResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_create_ads_by_listing_id',
@@ -203,6 +249,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk ad creation request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_delete_ads_by_inventory_reference',
@@ -224,6 +274,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk ad deletion request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_delete_ads_by_listing_id',
@@ -236,6 +290,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk ad deletion request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_update_ads_bid_by_inventory_reference',
@@ -259,6 +317,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk bid update request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_update_ads_bid_by_listing_id',
@@ -278,6 +340,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk bid update request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_update_ads_status',
@@ -297,6 +363,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk status update request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_update_ads_status_by_listing_id',
@@ -317,6 +387,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Bulk status update request'),
     },
+    outputSchema: zodToJsonSchema(bulkAdResponseSchema, {
+      name: 'BulkAdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
 
   // ========================================
@@ -338,6 +412,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Ad configuration'),
     },
+    outputSchema: zodToJsonSchema(adResponseSchema, {
+      name: 'AdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_ads_by_inventory_reference',
@@ -360,6 +438,10 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Ad creation request'),
     },
+    outputSchema: zodToJsonSchema(createAdsByInventoryReferenceResponseSchema, {
+      name: 'CreateAdsByInventoryReferenceResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_ad',
@@ -368,6 +450,10 @@ export const marketingTools: ToolDefinition[] = [
       campaignId: campaignIdSchema,
       adId: adIdSchema,
     },
+    outputSchema: zodToJsonSchema(adResponseSchema, {
+      name: 'AdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_ads',
@@ -380,6 +466,10 @@ export const marketingTools: ToolDefinition[] = [
       listingIds: z.string().optional().describe('Comma-separated listing IDs to filter by'),
       offset: offsetSchema,
     },
+    outputSchema: zodToJsonSchema(adPagedCollectionResponseSchema, {
+      name: 'AdPagedCollectionResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_ads_by_inventory_reference',
@@ -392,6 +482,10 @@ export const marketingTools: ToolDefinition[] = [
         .enum(['INVENTORY_ITEM', 'INVENTORY_ITEM_GROUP'])
         .describe('Reference type'),
     },
+    outputSchema: zodToJsonSchema(adPagedCollectionResponseSchema, {
+      name: 'AdPagedCollectionResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_ads_by_listing_id',
@@ -408,6 +502,7 @@ export const marketingTools: ToolDefinition[] = [
       campaignId: campaignIdSchema,
       adId: adIdSchema,
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_clone_ad',
@@ -425,6 +520,10 @@ export const marketingTools: ToolDefinition[] = [
       adId: adIdSchema,
       bidPercentage: z.string().describe('New bid percentage (e.g., "10.5")'),
     },
+    outputSchema: zodToJsonSchema(adResponseSchema, {
+      name: 'AdResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
 
   // ========================================
@@ -449,6 +548,7 @@ export const marketingTools: ToolDefinition[] = [
         })
         .describe('Ad group configuration'),
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_get_ad_group',
@@ -457,6 +557,7 @@ export const marketingTools: ToolDefinition[] = [
       campaignId: campaignIdSchema,
       adGroupId: adGroupIdSchema,
     },
+    outputSchema: genericSuccessSchema,
   },
   {
     name: 'ebay_get_ad_groups',
@@ -466,6 +567,10 @@ export const marketingTools: ToolDefinition[] = [
       limit: limitSchema,
       offset: offsetSchema,
     },
+    outputSchema: zodToJsonSchema(adGroupPagedCollectionResponseSchema, {
+      name: 'AdGroupPagedCollectionResponseResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_clone_ad_group',

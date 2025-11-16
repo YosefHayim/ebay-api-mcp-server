@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -32,6 +33,14 @@ export const taxonomyTools: ToolDefinition[] = [
     inputSchema: {
       marketplaceId: z.string().describe('Marketplace ID (e.g., EBAY_US)'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        categoryTreeId: { type: 'string' },
+        categoryTreeVersion: { type: 'string' },
+      },
+      description: 'Default category tree ID response',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_category_tree',
@@ -39,6 +48,15 @@ export const taxonomyTools: ToolDefinition[] = [
     inputSchema: {
       categoryTreeId: z.string().describe('Category tree ID'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        categoryTreeId: { type: 'string' },
+        categoryTreeVersion: { type: 'string' },
+        rootCategoryNode: { type: 'object' },
+      },
+      description: 'Category tree details',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_category_suggestions',
@@ -47,6 +65,13 @@ export const taxonomyTools: ToolDefinition[] = [
       categoryTreeId: z.string().describe('Category tree ID'),
       query: z.string().describe('Search query for category suggestions'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        categorySuggestions: { type: 'array' },
+      },
+      description: 'Category suggestions response',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_item_aspects_for_category',
@@ -55,5 +80,12 @@ export const taxonomyTools: ToolDefinition[] = [
       categoryTreeId: z.string().describe('Category tree ID'),
       categoryId: z.string().describe('Category ID'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        aspects: { type: 'array' },
+      },
+      description: 'Item aspects for category',
+    } as OutputArgs,
   },
 ];
