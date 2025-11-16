@@ -20,19 +20,26 @@
 		"postinstall": "npm run auto-setup --if-present || true",
 		"setup": "tsx src/scripts/interactive-setup.ts",
 		"auto-setup": "node build/scripts/auto-setup.js",
+		"diagnose": "tsx src/scripts/diagnostics.ts",
+		"diagnose:export": "tsx src/scripts/diagnostics.ts --export",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
-		"download:specs":"tsx src/scripts/download-specs.ts",
+		"download:specs": "tsx src/scripts/download-specs.ts",
 		"test:endpoints": "tsx src/scripts/test-endpoints.ts",
 		"generate:types": "bash src/scripts/generate-types.sh",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"src/**/*.{ts,js,json,md}\" \"tests/**/*.{ts,js,json}\"",
 		"format:check": "prettier --check \"src/**/*.{ts,js,json,md}\" \"tests/**/*.{ts,js,json}\"",
-		"check": "npm run typecheck && npm run lint && npm run format:check"
+		"check": "npm run typecheck && npm run lint && npm run format:check",
+		"docker:build": "docker-compose build",
+		"docker:up": "docker-compose up -d",
+		"docker:down": "docker-compose down",
+		"docker:logs": "docker-compose logs -f",
+		"docker:restart": "docker-compose restart"
 	},
 	"keywords": [
 		"mcp",
@@ -74,7 +81,8 @@
 		"jose": "^6.1.1",
 		"jsonwebtoken": "^9.0.2",
 		"prompts": "^2.4.2",
-		"zod": "3"
+		"zod": "3",
+		"zod-to-json-schema": "^3.24.6"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",

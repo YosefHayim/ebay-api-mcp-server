@@ -218,8 +218,12 @@ describe('Tools Layer', () => {
       isAuthenticated: vi.fn().mockReturnValue(true),
       getAuthClient: vi.fn().mockReturnValue({
         getOAuthClient: vi.fn().mockReturnValue({
+          getUserTokens: vi.fn().mockReturnValue(null),
+          getCachedAppAccessToken: vi.fn().mockReturnValue(null),
+          getCachedAppAccessTokenExpiry: vi.fn().mockReturnValue(null),
           clearAllTokens: vi.fn(),
           getAccessToken: vi.fn(),
+          refreshUserToken: vi.fn(),
         }),
       }),
     } as unknown as EbaySellerApi;
@@ -266,11 +270,11 @@ describe('Tools Layer', () => {
           { product: { title: 'Another Product' } },
         ],
       };
-      vi.mocked(mockApi.inventory.getInventoryItems()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.inventory.getInventoryItems).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'search', { limit: 10 });
 
-      expect(mockApi.inventory.getInventoryItems()).toHaveBeenCalledWith(10);
+      expect(mockApi.inventory.getInventoryItems).toHaveBeenCalledWith(10);
       expect(result).toHaveProperty('content');
       expect(Array.isArray((result as any).content)).toBe(true);
     });
@@ -284,11 +288,11 @@ describe('Tools Layer', () => {
         },
         condition: 'NEW',
       };
-      vi.mocked(mockApi.inventory.getInventoryItem()).mockResolvedValue(mockItem);
+      vi.mocked(mockApi.inventory.getInventoryItem).mockResolvedValue(mockItem);
 
       const result = await executeTool(mockApi, 'fetch', { id: 'TEST-SKU' });
 
-      expect(mockApi.inventory.getInventoryItem()).toHaveBeenCalledWith('TEST-SKU');
+      expect(mockApi.inventory.getInventoryItem).toHaveBeenCalledWith('TEST-SKU');
       expect(result).toHaveProperty('content');
     });
   });
@@ -337,8 +341,8 @@ describe('Tools Layer', () => {
     });
 
     it('should set user tokens', async () => {
-      vi.mocked(mockApi.setUserTokens('test-access-token', 'test-refresh-token'))
-      vi.mocked(mockApi.getTokenInfo()).mockReturnValue({
+      vi.mocked(mockApi.setUserTokens).mockReturnValue(undefined);
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
         hasUserToken: true,
         hasAppAccessToken: false,
         accessTokenExpired: false,
@@ -350,7 +354,7 @@ describe('Tools Layer', () => {
         refreshToken: 'test-refresh-token',
       });
 
-      expect(mockApi.setUserTokens('test-access-token', 'test-refresh-token')).toHaveBeenCalledWith('test-access-token', 'test-refresh-token');
+      expect(mockApi.setUserTokens).toHaveBeenCalledWith('test-access-token', 'test-refresh-token');
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('message');
     });
@@ -391,18 +395,18 @@ describe('Tools Layer', () => {
       process.env.EBAY_USER_REFRESH_TOKEN = 'test-refresh-token-789';
 
       // Mock the OAuth client with internal tokens
-      const mockAuthClient = mockApi.getAuthClient();
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
       vi.mocked(mockAuthClient.getUserTokens).mockReturnValue({
         userAccessToken: 'test-access-token-abc123',
         refreshToken: 'test-refresh-token-def456',
         userAccessTokenExpiry: Date.now() + 3600000, // 1 hour from now
         userRefreshTokenExpiry: Date.now() + 18 * 30 * 24 * 60 * 60 * 1000, // 18 months
         scope: 'https://api.ebay.com/oauth/api_scope/sell.inventory',
-      })
-      mockAuthClient.appAccessToken = 'test-app-token-xyz';
-      mockAuthClient.appAccessTokenExpiry = Date.now() + 7200000; // 2 hours
+      });
+      vi.mocked(mockAuthClient.getCachedAppAccessToken).mockReturnValue('test-app-token-xyz');
+      vi.mocked(mockAuthClient.getCachedAppAccessTokenExpiry).mockReturnValue(Date.now() + 7200000); // 2 hours
 
-      vi.mocked(mockApi.getTokenInfo()).mockReturnValue({
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
         hasUserToken: true,
         hasAppAccessToken: true,
         accessTokenExpired: false,
@@ -448,11 +452,11 @@ describe('Tools Layer', () => {
       delete process.env.EBAY_USER_REFRESH_TOKEN;
 
       // Mock the OAuth client with no tokens
-      const mockAuthClient = mockApi.getAuthClient();
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
       vi.mocked(mockAuthClient.getUserTokens).mockReturnValue(null);
       vi.mocked(mockAuthClient.getCachedAppAccessToken).mockReturnValue(null);
 
-      vi.mocked(mockApi.getTokenInfo()).mockReturnValue({
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
         hasUserToken: false,
         hasAppAccessToken: false,
         accessTokenExpired: true,
@@ -472,11 +476,11 @@ describe('Tools Layer', () => {
 
     it('should refresh access token successfully', async () => {
       // Mock that user tokens exist
-      vi.mocked(mockApi.hasUserTokens()).mockReturnValue(true);
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(true);
 
-      const mockAuthClient = mockApi.getAuthClient();
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
       const mockRefreshToken = vi.fn().mockResolvedValue(undefined);
-      vi.mocked(mockAuthClient.getOAuthClient().refreshUserToken).mockImplementation(mockRefreshToken);
+      vi.mocked(mockAuthClient.refreshUserToken).mockImplementation(mockRefreshToken);
 
       // Set up post-refresh token state
       vi.mocked(mockAuthClient.getUserTokens).mockReturnValue({
@@ -484,9 +488,9 @@ describe('Tools Layer', () => {
         refreshToken: 'test-refresh-token-def456',
         userAccessTokenExpiry: Date.now() + 7200000, // 2 hours
         userRefreshTokenExpiry: Date.now() + 18 * 30 * 24 * 60 * 60 * 1000,
-      })
+      });
 
-      vi.mocked(mockApi.getTokenInfo()).mockReturnValue({
+      vi.mocked(mockApi.getTokenInfo).mockReturnValue({
         hasUserToken: true,
         hasAppAccessToken: false,
         accessTokenExpired: false,
@@ -517,7 +521,7 @@ describe('Tools Layer', () => {
     });
 
     it('should throw error when refreshing without user tokens', async () => {
-      vi.mocked(mockApi.hasUserTokens()).mockReturnValue(false);
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(false);
 
       await expect(executeTool(mockApi, 'ebay_refresh_access_token', {})).rejects.toThrow(
         'No user tokens available'
@@ -525,13 +529,13 @@ describe('Tools Layer', () => {
     });
 
     it('should handle refresh token errors', async () => {
-      vi.mocked(mockApi.hasUserTokens()).mockReturnValue(true);
+      vi.mocked(mockApi.hasUserTokens).mockReturnValue(true);
 
-      const mockAuthClient = mockApi.getAuthClient();
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
       const mockRefreshToken = vi
         .fn()
         .mockRejectedValue(new Error('Refresh token expired or invalid'));
-      vi.mocked(mockAuthClient.getOAuthClient().refreshUserToken).mockImplementation(mockRefreshToken);
+      vi.mocked(mockAuthClient.refreshUserToken).mockImplementation(mockRefreshToken);
 
       await expect(executeTool(mockApi, 'ebay_refresh_access_token', {})).rejects.toThrow(
         'Failed to refresh access token: Refresh token expired or invalid'
@@ -542,88 +546,88 @@ describe('Tools Layer', () => {
   describe('executeTool - Account Management', () => {
     it('should get custom policies', async () => {
       const mockResponse = { policies: [] };
-      vi.mocked(mockApi.account.getCustomPolicies()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.account.getCustomPolicies).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_custom_policies', {
         policyTypes: 'RETURN_POLICY',
       });
 
-      expect(mockApi.account.getCustomPolicies()).toHaveBeenCalledWith('RETURN_POLICY');
+      expect(mockApi.account.getCustomPolicies).toHaveBeenCalledWith('RETURN_POLICY');
       expect(result).toBe(mockResponse);
     });
 
     it('should get fulfillment policies', async () => {
       const mockResponse = { fulfillmentPolicies: [] };
-      vi.mocked(mockApi.account.getFulfillmentPolicies()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.account.getFulfillmentPolicies).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_fulfillment_policies', {
         marketplaceId: 'EBAY_US',
       });
 
-      expect(mockApi.account.getFulfillmentPolicies()).toHaveBeenCalledWith('EBAY_US');
+      expect(mockApi.account.getFulfillmentPolicies).toHaveBeenCalledWith('EBAY_US');
       expect(result).toBe(mockResponse);
     });
 
     it('should create fulfillment policy', async () => {
       const mockPolicy = { name: 'Test Policy' };
       const mockResponse = { policyId: 'POL123' };
-      vi.mocked(mockApi.account.createFulfillmentPolicy()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.account.createFulfillmentPolicy).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_create_fulfillment_policy', {
         policy: mockPolicy,
       });
 
-      expect(mockApi.account.createFulfillmentPolicy()).toHaveBeenCalledWith(mockPolicy);
+      expect(mockApi.account.createFulfillmentPolicy).toHaveBeenCalledWith(mockPolicy);
       expect(result).toBe(mockResponse);
     });
 
     it('should delete fulfillment policy', async () => {
-      vi.mocked(mockApi.account.deleteFulfillmentPolicy()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.account.deleteFulfillmentPolicy).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_delete_fulfillment_policy', {
         fulfillmentPolicyId: 'POL123',
       });
 
-      expect(mockApi.account.deleteFulfillmentPolicy()).toHaveBeenCalledWith('POL123');
+      expect(mockApi.account.deleteFulfillmentPolicy).toHaveBeenCalledWith('POL123');
     });
   });
 
   describe('executeTool - Inventory Management', () => {
     it('should get inventory items', async () => {
       const mockResponse = { inventoryItems: [] };
-      vi.mocked(mockApi.inventory.getInventoryItems()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.inventory.getInventoryItems).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_inventory_items', {
         limit: 10,
         offset: 5,
       });
 
-      expect(mockApi.inventory.getInventoryItems()).toHaveBeenCalledWith(10, 5);
+      expect(mockApi.inventory.getInventoryItems).toHaveBeenCalledWith(10, 5);
       expect(result).toBe(mockResponse);
     });
 
     it('should get inventory item', async () => {
       const mockItem = { sku: 'TEST-SKU' };
-      vi.mocked(mockApi.inventory.getInventoryItem()).mockResolvedValue(mockItem);
+      vi.mocked(mockApi.inventory.getInventoryItem).mockResolvedValue(mockItem);
 
       const result = await executeTool(mockApi, 'ebay_get_inventory_item', {
         sku: 'TEST-SKU',
       });
 
-      expect(mockApi.inventory.getInventoryItem()).toHaveBeenCalledWith('TEST-SKU');
+      expect(mockApi.inventory.getInventoryItem).toHaveBeenCalledWith('TEST-SKU');
       expect(result).toBe(mockItem);
     });
 
     it('should create inventory item', async () => {
       const mockInventoryItem = { product: { title: 'Test' } };
-      vi.mocked(mockApi.inventory.createOrReplaceInventoryItem()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.inventory.createOrReplaceInventoryItem).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_create_inventory_item', {
         sku: 'TEST-SKU',
         inventoryItem: mockInventoryItem,
       });
 
-      expect(mockApi.inventory.createOrReplaceInventoryItem()).toHaveBeenCalledWith(
+      expect(mockApi.inventory.createOrReplaceInventoryItem).toHaveBeenCalledWith(
         'TEST-SKU',
         mockInventoryItem
       );
@@ -631,13 +635,13 @@ describe('Tools Layer', () => {
 
     it('should publish offer', async () => {
       const mockResponse = { listingId: 'LISTING123' };
-      vi.mocked(mockApi.inventory.publishOffer()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.inventory.publishOffer).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_publish_offer', {
         offerId: 'OFFER123',
       });
 
-      expect(mockApi.inventory.publishOffer()).toHaveBeenCalledWith('OFFER123');
+      expect(mockApi.inventory.publishOffer).toHaveBeenCalledWith('OFFER123');
       expect(result).toBe(mockResponse);
     });
   });
@@ -645,7 +649,7 @@ describe('Tools Layer', () => {
   describe('executeTool - Order Management', () => {
     it('should get orders', async () => {
       const mockResponse = { orders: [] };
-      vi.mocked(mockApi.fulfillment.getOrders()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.fulfillment.getOrders).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_orders', {
         filter: 'orderfulfillmentstatus:{NOT_STARTED}',
@@ -653,7 +657,7 @@ describe('Tools Layer', () => {
         offset: 0,
       });
 
-      expect(mockApi.fulfillment.getOrders()).toHaveBeenCalledWith(
+      expect(mockApi.fulfillment.getOrders).toHaveBeenCalledWith(
         'orderfulfillmentstatus:{NOT_STARTED}',
         10,
         0
@@ -663,26 +667,26 @@ describe('Tools Layer', () => {
 
     it('should get order', async () => {
       const mockOrder = { orderId: 'ORDER123' };
-      vi.mocked(mockApi.fulfillment.getOrder()).mockResolvedValue(mockOrder);
+      vi.mocked(mockApi.fulfillment.getOrder).mockResolvedValue(mockOrder);
 
       const result = await executeTool(mockApi, 'ebay_get_order', {
         orderId: 'ORDER123',
       });
 
-      expect(mockApi.fulfillment.getOrder()).toHaveBeenCalledWith('ORDER123');
+      expect(mockApi.fulfillment.getOrder).toHaveBeenCalledWith('ORDER123');
       expect(result).toBe(mockOrder);
     });
 
     it('should create shipping fulfillment', async () => {
       const mockFulfillment = { lineItems: [] };
-      vi.mocked(mockApi.fulfillment.createShippingFulfillment()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.fulfillment.createShippingFulfillment).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_create_shipping_fulfillment', {
         orderId: 'ORDER123',
         fulfillment: mockFulfillment,
       });
 
-      expect(mockApi.fulfillment.createShippingFulfillment()).toHaveBeenCalledWith(
+      expect(mockApi.fulfillment.createShippingFulfillment).toHaveBeenCalledWith(
         'ORDER123',
         mockFulfillment
       );
@@ -690,21 +694,21 @@ describe('Tools Layer', () => {
 
     it('should issue refund', async () => {
       const mockRefundData = { reasonForRefund: 'BUYER_CANCEL' };
-      vi.mocked(mockApi.fulfillment.issueRefund()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.fulfillment.issueRefund).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_issue_refund', {
         orderId: 'ORDER123',
         refundData: mockRefundData,
       });
 
-      expect(mockApi.fulfillment.issueRefund()).toHaveBeenCalledWith('ORDER123', mockRefundData);
+      expect(mockApi.fulfillment.issueRefund).toHaveBeenCalledWith('ORDER123', mockRefundData);
     });
   });
 
   describe('executeTool - Marketing', () => {
     it('should get campaigns', async () => {
       const mockResponse = { campaigns: [] };
-      vi.mocked(mockApi.marketing.getCampaigns()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.marketing.getCampaigns).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_campaigns', {
         campaignStatus: 'RUNNING',
@@ -712,37 +716,37 @@ describe('Tools Layer', () => {
         limit: 10,
       });
 
-      expect(mockApi.marketing.getCampaigns()).toHaveBeenCalledWith('RUNNING', 'EBAY_US', 10);
+      expect(mockApi.marketing.getCampaigns).toHaveBeenCalledWith('RUNNING', 'EBAY_US', 10);
       expect(result).toBe(mockResponse);
     });
 
     it('should pause campaign', async () => {
-      vi.mocked(mockApi.marketing.pauseCampaign()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.marketing.pauseCampaign).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_pause_campaign', {
         campaignId: 'CAMP123',
       });
 
-      expect(mockApi.marketing.pauseCampaign()).toHaveBeenCalledWith('CAMP123');
+      expect(mockApi.marketing.pauseCampaign).toHaveBeenCalledWith('CAMP123');
     });
 
     it('should clone campaign', async () => {
       const mockCloneData = { campaignName: 'Cloned Campaign' };
-      vi.mocked(mockApi.marketing.cloneCampaign()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.marketing.cloneCampaign).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_clone_campaign', {
         campaignId: 'CAMP123',
         cloneData: mockCloneData,
       });
 
-      expect(mockApi.marketing.cloneCampaign()).toHaveBeenCalledWith('CAMP123', mockCloneData);
+      expect(mockApi.marketing.cloneCampaign).toHaveBeenCalledWith('CAMP123', mockCloneData);
     });
   });
 
   describe('executeTool - Analytics', () => {
     it('should get traffic report', async () => {
       const mockResponse = { reports: [] };
-      vi.mocked(mockApi.analytics.getTrafficReport()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.analytics.getTrafficReport).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_traffic_report', {
         dimension: 'LISTING',
@@ -751,7 +755,7 @@ describe('Tools Layer', () => {
         sort: '-date',
       });
 
-      expect(mockApi.analytics.getTrafficReport()).toHaveBeenCalledWith(
+      expect(mockApi.analytics.getTrafficReport).toHaveBeenCalledWith(
         'LISTING',
         'listingIds:{123}',
         'CLICK_THROUGH_RATE',
@@ -762,14 +766,14 @@ describe('Tools Layer', () => {
 
     it('should get seller standards profile', async () => {
       const mockResponse = { profile: {} };
-      vi.mocked(mockApi.analytics.getSellerStandardsProfile()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.analytics.getSellerStandardsProfile).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_seller_standards_profile', {
         program: 'CUSTOMER_SERVICE',
         cycle: 'CURRENT',
       });
 
-      expect(mockApi.analytics.getSellerStandardsProfile()).toHaveBeenCalledWith(
+      expect(mockApi.analytics.getSellerStandardsProfile).toHaveBeenCalledWith(
         'CUSTOMER_SERVICE',
         'CURRENT'
       );
@@ -780,26 +784,26 @@ describe('Tools Layer', () => {
   describe('executeTool - Taxonomy', () => {
     it('should get default category tree ID', async () => {
       const mockResponse = { categoryTreeId: '0' };
-      vi.mocked(mockApi.taxonomy.getDefaultCategoryTreeId()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.taxonomy.getDefaultCategoryTreeId).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_default_category_tree_id', {
         marketplaceId: 'EBAY_US',
       });
 
-      expect(mockApi.taxonomy.getDefaultCategoryTreeId()).toHaveBeenCalledWith('EBAY_US');
+      expect(mockApi.taxonomy.getDefaultCategoryTreeId).toHaveBeenCalledWith('EBAY_US');
       expect(result).toBe(mockResponse);
     });
 
     it('should get category suggestions', async () => {
       const mockResponse = { categorySuggestions: [] };
-      vi.mocked(mockApi.taxonomy.getCategorySuggestions()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.taxonomy.getCategorySuggestions).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_category_suggestions', {
         categoryTreeId: '0',
         query: 'iPhone',
       });
 
-      expect(mockApi.taxonomy.getCategorySuggestions()).toHaveBeenCalledWith('0', 'iPhone');
+      expect(mockApi.taxonomy.getCategorySuggestions).toHaveBeenCalledWith('0', 'iPhone');
       expect(result).toBe(mockResponse);
     });
   });
@@ -807,17 +811,17 @@ describe('Tools Layer', () => {
   describe('executeTool - Other APIs', () => {
     it('should get user', async () => {
       const mockResponse = { userId: 'USER123' };
-      vi.mocked(mockApi.identity.getUser()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.identity.getUser).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_get_user', {});
 
-      expect(mockApi.identity.getUser()).toHaveBeenCalled();
+      expect(mockApi.identity.getUser).toHaveBeenCalled();
       expect(result).toBe(mockResponse);
     });
 
     it('should translate text', async () => {
       const mockResponse = { translations: [] };
-      vi.mocked(mockApi.translation.translate()).mockResolvedValue(mockResponse);
+      vi.mocked(mockApi.translation.translate).mockResolvedValue(mockResponse);
 
       const result = await executeTool(mockApi, 'ebay_translate', {
         from: 'en',
@@ -826,20 +830,20 @@ describe('Tools Layer', () => {
         text: ['Hello'],
       });
 
-      expect(mockApi.translation.translate()).toHaveBeenCalledWith('en', 'es', 'ITEM_TITLE', [
+      expect(mockApi.translation.translate).toHaveBeenCalledWith('en', 'es', 'ITEM_TITLE', [
         'Hello',
       ]);
       expect(result).toBe(mockResponse);
     });
 
     it('should suppress violation', async () => {
-      vi.mocked(mockApi.compliance.suppressViolation()).mockResolvedValue(undefined);
+      vi.mocked(mockApi.compliance.suppressViolation).mockResolvedValue(undefined);
 
       await executeTool(mockApi, 'ebay_suppress_violation', {
         listingViolationId: 'VIO123',
       });
 
-      expect(mockApi.compliance.suppressViolation()).toHaveBeenCalledWith('VIO123');
+      expect(mockApi.compliance.suppressViolation).toHaveBeenCalledWith('VIO123');
     });
   });
 

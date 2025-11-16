@@ -200,6 +200,35 @@ export enum Condition {
   PRE_OWNED_FAIR = 'PRE_OWNED_FAIR',
 }
 
+/** Listing locales (language/region) */
+export enum LocaleEnum {
+  en_US = "en-US",
+  en_CA = "en-CA",
+  fr_CA = "fr-CA",
+  en_GB = "en-GB",
+  en_AU = "en-AU",
+  en_IN = "en-IN",
+  de_AT = "de-AT",
+  fr_BE = "fr-BE",
+  fr_FR = "fr-FR",
+  de_DE = "de-DE",
+  it_IT = "it-IT",
+  nl_BE = "nl-BE",
+  nl_NL = "nl-NL",
+  es_ES = "es-ES",
+  de_CH = "de-CH",
+  fi_FI = "fi-FI",
+  zh_HK = "zh-HK",
+  hu_HU = "hu-HU",
+  en_PH = "en-PH",
+  pl_PL = "pl-PL",
+  pt_PT = "pt-PT",
+  ru_RU = "ru-RU",
+  en_SG = "en-SG",
+  en_IE = "en-IE",
+  en_MY = "en-MY",
+}
+
 /**
  * Listing Format Types
  *
@@ -651,6 +680,18 @@ export enum LanguageCode {
 
   /** German (generic) */
   DE = 'de', // Keep generic 'de' for broader compatibility if needed
+
+  /** French (generic) */
+  FR = 'fr', // Keep generic 'fr' for broader compatibility if needed
+
+  /** Spanish (generic) */
+  ES = 'es', // Keep generic 'es' for broader compatibility if needed
+
+  /** Italian (generic) */
+  IT = 'it', // Keep generic 'it' for broader compatibility if needed
+
+  /** Dutch (generic) */
+  NL = 'nl', // Keep generic 'nl' for broader compatibility if needed
 
   /** Chinese (Simplified) (generic) */
   ZH_CN = 'zh-CN',

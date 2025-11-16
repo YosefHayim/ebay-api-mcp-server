@@ -56,7 +56,7 @@ describe('Environment Configuration', () => {
 
       expect(config.clientId).toBe('');
       expect(config.clientSecret).toBe('');
-      expect(config.environment).toBe('production');
+      expect(config.environment).toBe('sandbox');
       expect(consoleErrorSpy).toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
