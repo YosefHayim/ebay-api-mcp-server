@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -146,5 +147,10 @@ export const tokenManagementTools: ToolDefinition[] = [
     description:
       'Manually refresh the user access token using the stored refresh token. This is useful when you want to proactively refresh an access token before it expires, or when recovering from authentication errors. Requires that user tokens are already set (either via EBAY_USER_REFRESH_TOKEN in .env or via ebay_set_user_tokens_with_expiry). Returns the new access token and expiry time.',
     inputSchema: {},
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Success response',
+    } as OutputArgs,
   },
 ];

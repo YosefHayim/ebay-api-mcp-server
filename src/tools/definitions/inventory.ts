@@ -1,5 +1,6 @@
 import { MarketplaceId } from '@/types/ebay-enums.js';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   bulkInventoryItemRequestSchema,
   bulkMigrateRequestSchema,
@@ -13,6 +14,22 @@ import {
   offerSchema,
   productCompatibilitySchema,
 } from '../schemas.js';
+import {
+  getInventoryItemsOutputSchema,
+  getInventoryItemOutputSchema,
+  createInventoryItemOutputSchema,
+  getOffersOutputSchema,
+  createOfferOutputSchema,
+  publishOfferOutputSchema,
+  offerResponseSchema,
+  getInventoryLocationsOutputSchema,
+  createInventoryLocationOutputSchema,
+  getProductCompatibilityOutputSchema,
+  getInventoryItemGroupOutputSchema,
+  bulkInventoryItemResponseSchema,
+  bulkOfferResponseSchema,
+  bulkPublishResponseSchema,
+} from '@/schemas/inventory-management/inventory.js';
 
 export interface OutputArgs {
   [x: string]: unknown;
@@ -48,6 +65,10 @@ export const inventoryTools: ToolDefinition[] = [
       limit: z.number().optional().describe('Number of items to return (max 100)'),
       offset: z.number().optional().describe('Number of items to skip'),
     },
+    outputSchema: zodToJsonSchema(getInventoryItemsOutputSchema, {
+      name: 'GetInventoryItemsResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_inventory_item',
@@ -56,6 +77,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       sku: z.string().describe('The seller-defined SKU'),
     },
+    outputSchema: zodToJsonSchema(getInventoryItemOutputSchema, {
+      name: 'GetInventoryItemResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_inventory_item',
@@ -65,6 +90,10 @@ export const inventoryTools: ToolDefinition[] = [
       sku: z.string().describe('The seller-defined SKU'),
       inventoryItem: inventoryItemSchema.describe('Inventory item details'),
     },
+    outputSchema: zodToJsonSchema(createInventoryItemOutputSchema, {
+      name: 'CreateInventoryItemResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_delete_inventory_item',
@@ -73,6 +102,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       sku: z.string().describe('The seller-defined SKU to delete'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful deletion (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_get_offers',
@@ -82,6 +116,10 @@ export const inventoryTools: ToolDefinition[] = [
       marketplaceId: z.nativeEnum(MarketplaceId).optional().describe('Filter by marketplace ID'),
       limit: z.number().optional().describe('Number of offers to return'),
     },
+    outputSchema: zodToJsonSchema(getOffersOutputSchema, {
+      name: 'GetOffersResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_offer',
@@ -91,6 +129,10 @@ export const inventoryTools: ToolDefinition[] = [
         'Offer details including SKU, marketplace, pricing, and policies'
       ),
     },
+    outputSchema: zodToJsonSchema(createOfferOutputSchema, {
+      name: 'CreateOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_publish_offer',
@@ -98,6 +140,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       offerId: z.string().describe('The offer ID to publish'),
     },
+    outputSchema: zodToJsonSchema(publishOfferOutputSchema, {
+      name: 'PublishOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Bulk Operations
   {
@@ -106,6 +152,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       requests: bulkInventoryItemRequestSchema.describe('Bulk inventory item requests'),
     },
+    outputSchema: zodToJsonSchema(bulkInventoryItemResponseSchema, {
+      name: 'BulkInventoryItemResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_get_inventory_item',
@@ -124,6 +174,10 @@ export const inventoryTools: ToolDefinition[] = [
         .passthrough()
         .describe('Bulk inventory item get requests with SKU list'),
     },
+    outputSchema: zodToJsonSchema(bulkInventoryItemResponseSchema, {
+      name: 'BulkGetInventoryItemResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_update_price_quantity',
@@ -131,6 +185,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       requests: bulkPriceQuantityRequestSchema.describe('Bulk price and quantity update requests'),
     },
+    outputSchema: zodToJsonSchema(bulkOfferResponseSchema, {
+      name: 'BulkUpdatePriceQuantityResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Product Compatibility
   {
@@ -139,6 +197,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       sku: z.string().describe('The seller-defined SKU'),
     },
+    outputSchema: zodToJsonSchema(getProductCompatibilityOutputSchema, {
+      name: 'GetProductCompatibilityResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_or_replace_product_compatibility',
@@ -147,6 +209,10 @@ export const inventoryTools: ToolDefinition[] = [
       sku: z.string().describe('The seller-defined SKU'),
       compatibility: productCompatibilitySchema.describe('Product compatibility details'),
     },
+    outputSchema: zodToJsonSchema(createInventoryItemOutputSchema, {
+      name: 'CreateProductCompatibilityResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_delete_product_compatibility',
@@ -154,6 +220,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       sku: z.string().describe('The seller-defined SKU'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful deletion (HTTP 204)',
+    } as OutputArgs,
   },
   // Inventory Item Groups
   {
@@ -162,6 +233,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       inventoryItemGroupKey: z.string().describe('The inventory item group key'),
     },
+    outputSchema: zodToJsonSchema(getInventoryItemGroupOutputSchema, {
+      name: 'GetInventoryItemGroupResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_or_replace_inventory_item_group',
@@ -170,6 +245,10 @@ export const inventoryTools: ToolDefinition[] = [
       inventoryItemGroupKey: z.string().describe('The inventory item group key'),
       inventoryItemGroup: inventoryItemGroupSchema.describe('Inventory item group details'),
     },
+    outputSchema: zodToJsonSchema(createInventoryItemOutputSchema, {
+      name: 'CreateInventoryItemGroupResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_delete_inventory_item_group',
@@ -177,6 +256,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       inventoryItemGroupKey: z.string().describe('The inventory item group key'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful deletion (HTTP 204)',
+    } as OutputArgs,
   },
   // Location Management
   {
@@ -186,6 +270,10 @@ export const inventoryTools: ToolDefinition[] = [
       limit: z.number().optional().describe('Number of locations to return'),
       offset: z.number().optional().describe('Number of locations to skip'),
     },
+    outputSchema: zodToJsonSchema(getInventoryLocationsOutputSchema, {
+      name: 'GetInventoryLocationsResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_inventory_location',
@@ -193,6 +281,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       merchantLocationKey: z.string().describe('The merchant location key'),
     },
+    outputSchema: zodToJsonSchema(createInventoryLocationOutputSchema, {
+      name: 'GetInventoryLocationResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_create_or_replace_inventory_location',
@@ -201,6 +293,10 @@ export const inventoryTools: ToolDefinition[] = [
       merchantLocationKey: z.string().describe('The merchant location key'),
       location: locationSchema.describe('Location details'),
     },
+    outputSchema: zodToJsonSchema(createInventoryLocationOutputSchema, {
+      name: 'CreateInventoryLocationResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_delete_inventory_location',
@@ -208,6 +304,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       merchantLocationKey: z.string().describe('The merchant location key'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful deletion (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_disable_inventory_location',
@@ -215,6 +316,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       merchantLocationKey: z.string().describe('The merchant location key'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful operation (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_enable_inventory_location',
@@ -222,6 +328,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       merchantLocationKey: z.string().describe('The merchant location key'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful operation (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_update_location_details',
@@ -230,6 +341,10 @@ export const inventoryTools: ToolDefinition[] = [
       merchantLocationKey: z.string().describe('The merchant location key'),
       locationDetails: locationSchema.describe('Location detail updates'),
     },
+    outputSchema: zodToJsonSchema(createInventoryLocationOutputSchema, {
+      name: 'UpdateLocationDetailsResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Offer Management
   {
@@ -238,6 +353,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       offerId: z.string().describe('The offer ID'),
     },
+    outputSchema: zodToJsonSchema(offerResponseSchema, {
+      name: 'GetOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_update_offer',
@@ -246,6 +365,10 @@ export const inventoryTools: ToolDefinition[] = [
       offerId: z.string().describe('The offer ID'),
       offer: offerSchema.describe('Updated offer details'),
     },
+    outputSchema: zodToJsonSchema(offerResponseSchema, {
+      name: 'UpdateOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_delete_offer',
@@ -253,6 +376,11 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       offerId: z.string().describe('The offer ID to delete'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful deletion (HTTP 204)',
+    } as OutputArgs,
   },
   {
     name: 'ebay_withdraw_offer',
@@ -260,6 +388,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       offerId: z.string().describe('The offer ID to withdraw'),
     },
+    outputSchema: zodToJsonSchema(publishOfferOutputSchema, {
+      name: 'WithdrawOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_create_offer',
@@ -267,6 +399,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       requests: bulkOfferRequestSchema.describe('Bulk offer creation requests'),
     },
+    outputSchema: zodToJsonSchema(bulkOfferResponseSchema, {
+      name: 'BulkCreateOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_bulk_publish_offer',
@@ -274,6 +410,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       requests: bulkPublishRequestSchema.describe('Bulk offer publish requests'),
     },
+    outputSchema: zodToJsonSchema(bulkPublishResponseSchema, {
+      name: 'BulkPublishOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_get_listing_fees',
@@ -281,6 +421,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       offers: listingFeesRequestSchema.describe('Offers to calculate listing fees for'),
     },
+    outputSchema: zodToJsonSchema(bulkOfferResponseSchema, {
+      name: 'GetListingFeesResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Listing Migration
   {
@@ -289,6 +433,10 @@ export const inventoryTools: ToolDefinition[] = [
     inputSchema: {
       requests: bulkMigrateRequestSchema.describe('Bulk listing migration requests'),
     },
+    outputSchema: zodToJsonSchema(bulkOfferResponseSchema, {
+      name: 'BulkMigrateListingResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Listing Locations
   {
@@ -299,6 +447,10 @@ export const inventoryTools: ToolDefinition[] = [
       listingId: z.string().describe('The listing ID'),
       sku: z.string().describe('The seller-defined SKU'),
     },
+    outputSchema: zodToJsonSchema(getInventoryLocationsOutputSchema, {
+      name: 'GetListingLocationsResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   // Inventory Item Group Publishing
   {
@@ -314,6 +466,10 @@ export const inventoryTools: ToolDefinition[] = [
         .passthrough()
         .describe('Publish request with inventory item group key and marketplace ID'),
     },
+    outputSchema: zodToJsonSchema(publishOfferOutputSchema, {
+      name: 'PublishOfferByInventoryItemGroupResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
   },
   {
     name: 'ebay_withdraw_offer_by_inventory_item_group',
@@ -328,5 +484,10 @@ export const inventoryTools: ToolDefinition[] = [
         .passthrough()
         .describe('Withdraw request with inventory item group key and marketplace ID'),
     },
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Empty response on successful withdrawal (HTTP 204)',
+    } as OutputArgs,
   },
 ];

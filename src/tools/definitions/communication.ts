@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   feedbackDataSchema,
   notificationConfigSchema,
@@ -186,5 +187,10 @@ export const communicationTools: ToolDefinition[] = [
     name: 'ebay_get_feedback_summary',
     description: 'Get feedback summary for the seller',
     inputSchema: {},
+    outputSchema: {
+      type: 'object',
+      properties: {},
+      description: 'Success response',
+    } as OutputArgs,
   },
 ];
