@@ -652,6 +652,18 @@ export enum LanguageCode {
   /** German (generic) */
   DE = 'de', // Keep generic 'de' for broader compatibility if needed
 
+  /** French (generic) */
+  FR = 'fr', // Keep generic 'fr' for broader compatibility if needed
+
+  /** Spanish (generic) */
+  ES = 'es', // Keep generic 'es' for broader compatibility if needed
+
+  /** Italian (generic) */
+  IT = 'it', // Keep generic 'it' for broader compatibility if needed
+
+  /** Dutch (generic) */
+  NL = 'nl', // Keep generic 'nl' for broader compatibility if needed
+
   /** Chinese (Simplified) (generic) */
   ZH_CN = 'zh-CN',
 

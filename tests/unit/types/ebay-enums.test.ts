@@ -202,7 +202,7 @@ describe('eBay Enums', () => {
     it('should have compliance type values', () => {
       expect(ComplianceType.PRODUCT_ADOPTION).toBe('PRODUCT_ADOPTION');
       expect(ComplianceType.PRODUCT_SAFETY).toBe('PRODUCT_SAFETY');
-      expect(ComplianceType.PRODUCT_ASPECTS_ADOPTION).toBe('PRODUCT_ASPECTS_ADOPTION');
+      expect(ComplianceType.ASPECTS_ADOPTION).toBe('ASPECTS_ADOPTION');
       expect(ComplianceType.REGULATORY).toBe('REGULATORY');
       expect(ComplianceType.RETURNS_POLICY).toBe('RETURNS_POLICY');
     });
@@ -256,9 +256,9 @@ describe('eBay Enums', () => {
       expect(LanguageCode.ZH_CN).toBe('zh-CN');
     });
 
-    it('should contain 13 language codes', () => {
+    it('should contain 35 language codes', () => {
       const values = Object.values(LanguageCode);
-      expect(values).toHaveLength(13);
+      expect(values).toHaveLength(35);
     });
   });
 
@@ -272,9 +272,9 @@ describe('eBay Enums', () => {
       expect(CurrencyCode.JPY).toBe('JPY');
     });
 
-    it('should contain 14 currency codes', () => {
+    it('should contain 155 currency codes', () => {
       const values = Object.values(CurrencyCode);
-      expect(values).toHaveLength(14);
+      expect(values).toHaveLength(155);
     });
   });
 
