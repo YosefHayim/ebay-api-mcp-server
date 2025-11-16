@@ -7,6 +7,39 @@ import type {
   StoredTokenData,
 } from '@/types/ebay.js';
 import { LocaleEnum } from '@/types/ebay-enums.js';
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
+/**
+ * Update .env file with new token values
+ */
+function updateEnvFile(updates: { [key: string]: string }): void {
+  try {
+    const envPath = join(process.cwd(), '.env');
+    let envContent = readFileSync(envPath, 'utf-8');
+
+    // Update each key-value pair
+    for (const [key, value] of Object.entries(updates)) {
+      // Match the key with or without value, handling comments
+      const regex = new RegExp(`^(#\\s*)?${key}=.*$`, 'gm');
+      const newLine = `${key}=${value}`;
+
+      if (regex.test(envContent)) {
+        // Update existing key (uncomment if needed)
+        envContent = envContent.replace(regex, newLine);
+      } else {
+        // Add new key at the end
+        envContent += `\n${newLine}`;
+      }
+    }
+
+    writeFileSync(envPath, envContent, 'utf-8');
+    console.log('✅ Updated .env file with new tokens');
+  } catch (error) {
+    console.error('⚠️  Failed to update .env file:', error instanceof Error ? error.message : error);
+    console.error('   Please manually update your .env file with the new tokens');
+  }
+}
 
 /**
  * Manages eBay OAuth 2.0 authentication
@@ -137,9 +170,8 @@ export class EbayOAuthClient {
   }
 
   /**
-   * Set user access token and refresh token in memory
-   * Note: Tokens are loaded from .env and stored in memory only
-   * To persist tokens, update the .env file with EBAY_USER_REFRESH_TOKEN
+   * Set user access token and refresh token
+   * Stores tokens in memory and updates .env file for persistence
    */
   setUserTokens(
     accessToken: string,
@@ -159,6 +191,12 @@ export class EbayOAuthClient {
       userAccessTokenExpiry: now + 7200 * 1000, // Default 2 hours
       userRefreshTokenExpiry: now + 18 * 30 * 24 * 60 * 60 * 1000, // Default 18 months
     };
+
+    // Update .env file with new tokens
+    updateEnvFile({
+      EBAY_USER_ACCESS_TOKEN: accessToken,
+      EBAY_USER_REFRESH_TOKEN: refreshToken,
+    });
   }
 
   /**
@@ -199,6 +237,11 @@ export class EbayOAuthClient {
       this.appAccessToken = response.data.access_token;
       // Set expiry with 60 second buffer
       this.appAccessTokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
+
+      // Update .env file with app access token
+      updateEnvFile({
+        EBAY_APP_ACCESS_TOKEN: this.appAccessToken,
+      });
 
       return this.appAccessToken;
     } catch (error) {
@@ -323,15 +366,19 @@ export class EbayOAuthClient {
         scope: tokenData.scope || this.userTokens.scope,
       };
 
-      // If eBay provided a new refresh token, inform user to update .env
-      if (
-        tokenData.refresh_token &&
-        tokenData.refresh_token !== process.env.EBAY_USER_REFRESH_TOKEN
-      ) {
-        console.error('\neBay issued a new refresh token!');
-        console.error('Please update your .env file with:');
-        console.error(`EBAY_USER_REFRESH_TOKEN="${tokenData.refresh_token}"\n`);
+      // Update .env file with new tokens
+      const envUpdates: { [key: string]: string } = {
+        EBAY_USER_ACCESS_TOKEN: tokenData.access_token,
+      };
+
+      // If eBay provided a new refresh token, update it too
+      if (tokenData.refresh_token && tokenData.refresh_token !== process.env.EBAY_USER_REFRESH_TOKEN) {
+        envUpdates.EBAY_USER_REFRESH_TOKEN = tokenData.refresh_token;
+        console.log('\n🔄 eBay issued a new refresh token - updating .env file');
       }
+
+      // Write updates to .env file
+      updateEnvFile(envUpdates);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(

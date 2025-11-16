@@ -165,6 +165,7 @@ if (clientId === '' || clientSecret === '') {
 - ✅ `EBAY_USER_ACCESS_TOKEN` and `EBAY_APP_ACCESS_TOKEN` are now optional
 - ✅ Token refresh is automatically triggered during initialization
 - ✅ No more false "Missing credentials" errors
+- ✅ **BONUS:** Tokens are automatically written to `.env` file after successful refresh
 
 **Recommended .env Setup:**
 ```bash
@@ -176,10 +177,16 @@ EBAY_ENVIRONMENT=sandbox
 # Optional - only need refresh token
 EBAY_USER_REFRESH_TOKEN=v^1.1#...
 
-# These are auto-generated, no need to set manually:
-# EBAY_USER_ACCESS_TOKEN (generated from refresh token)
-# EBAY_APP_ACCESS_TOKEN (generated from client credentials)
+# These are auto-generated and automatically updated in .env:
+# EBAY_USER_ACCESS_TOKEN (auto-generated from refresh token)
+# EBAY_APP_ACCESS_TOKEN (auto-generated from client credentials)
 ```
+
+**Auto-Update Feature:**
+The package now automatically updates the `.env` file with fresh tokens after:
+- Token refresh (`refreshUserToken()`) - Updates `EBAY_USER_ACCESS_TOKEN` and `EBAY_USER_REFRESH_TOKEN` (if eBay issues a new one)
+- Setting tokens (`setUserTokens()`) - Updates both tokens
+- App token generation (`getOrRefreshAppAccessToken()`) - Updates `EBAY_APP_ACCESS_TOKEN`
 
 ---
 
