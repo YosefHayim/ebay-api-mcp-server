@@ -246,28 +246,8 @@ async function verifyUserIdentity(config: Record<string, string>): Promise<void>
     console.log(chalk.green('✓ Successfully authenticated!\n'));
     console.log(chalk.bold.white('📋 Your eBay Account Information:\n'));
 
-    if (userInfo && typeof userInfo === 'object') {
-      const user = userInfo as Record<string, unknown>;
-
-      if (user.username) {
-        console.log(`  ${chalk.cyan('Username:')} ${chalk.white(user.username)}`);
-      }
-      if (user.userId) {
-        console.log(`  ${chalk.cyan('User ID:')} ${chalk.white(user.userId)}`);
-      }
-      if (user.email) {
-        console.log(`  ${chalk.cyan('Email:')} ${chalk.white(user.email)}`);
-      }
-      if (user.registrationMarketplaceId) {
-        console.log(
-          `  ${chalk.cyan('Marketplace:')} ${chalk.white(user.registrationMarketplaceId)}`
-        );
-      }
-      if (user.accountType) {
-        console.log(`  ${chalk.cyan('Account Type:')} ${chalk.white(user.accountType)}`);
-      }
-
-      console.log('');
+    if (userInfo) {
+      console.log(userInfo)
       console.log(chalk.green('✨ Your eBay API credentials are working correctly!\n'));
     } else {
       console.log(chalk.yellow('  ⚠️  Received unexpected response format\n'));
