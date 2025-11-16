@@ -25,7 +25,7 @@
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
-		"download:specs":"tsx src/scripts/download-specs.ts",
+		"download:specs": "tsx src/scripts/download-specs.ts",
 		"test:endpoints": "tsx src/scripts/test-endpoints.ts",
 		"generate:types": "bash src/scripts/generate-types.sh",
 		"lint": "eslint .",
@@ -74,7 +74,8 @@
 		"jose": "^6.1.1",
 		"jsonwebtoken": "^9.0.2",
 		"prompts": "^2.4.2",
-		"zod": "3"
+		"zod": "3",
+		"zod-to-json-schema": "^3.24.6"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
