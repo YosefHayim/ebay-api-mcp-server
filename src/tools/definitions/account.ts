@@ -14,6 +14,7 @@ export interface ToolDefinition {
   name: string;
   description: string;
   inputSchema: Record<string, z.ZodTypeAny>;
+  outputSchema?: z.ZodTypeAny;
 }
 export const accountTools: ToolDefinition[] = [
   {
