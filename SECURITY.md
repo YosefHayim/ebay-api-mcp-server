@@ -17,8 +17,9 @@ We take the security of ebay-mcp seriously. If you discover a security vulnerabi
 ### Reporting Process
 
 1. **DO NOT** open a public GitHub issue for security vulnerabilities
-2. Email security reports to: **security@yourdomain.com** (update with actual contact)
-3. Include the following information:
+2. Report via GitHub Security Advisory: https://github.com/YosefHayim/ebay-mcp/security/advisories/new
+3. Or email security reports to: **yosefhayim.sabag@gmail.com**
+4. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce
    - Potential impact
