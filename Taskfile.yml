@@ -1,0 +1,75 @@
+version: '3'
+
+vars:
+  SERVER_NAME: ebay-mcp
+  DOCKER_IMAGE: "{{.SERVER_NAME}}"
+  DOCKER_TAG: latest
+
+tasks:
+  validate:
+    desc: Validate the MCP server configuration and dependencies
+    cmds:
+      - echo "Validating {{.CLI_ARGS}}..."
+      - echo "Checking MCP server implementation..."
+      - npm run typecheck
+      - echo "Running tests..."
+      - npm test
+      - echo "Validating Dockerfile..."
+      - docker build --target builder -t {{.DOCKER_IMAGE}}:builder-test .
+      - echo "Validation completed successfully for {{.CLI_ARGS}}"
+
+  build:
+    desc: Build the MCP server Docker image
+    cmds:
+      - echo "Building Docker image for {{.CLI_ARGS}}..."
+      - docker build -t {{.DOCKER_IMAGE}}:{{.DOCKER_TAG}} .
+      - echo "Testing Docker image..."
+      - docker run --rm {{.DOCKER_IMAGE}}:{{.DOCKER_TAG}} node -v
+      - echo "Build completed successfully for {{.CLI_ARGS}}"
+
+  test:
+    desc: Run all tests
+    cmds:
+      - npm test
+
+  lint:
+    desc: Lint the code
+    cmds:
+      - npm run lint
+
+  typecheck:
+    desc: Run TypeScript type checking
+    cmds:
+      - npm run typecheck
+
+  docker:build:
+    desc: Build Docker image locally
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}}:{{.DOCKER_TAG}} .
+
+  docker:run:
+    desc: Run Docker container locally
+    cmds:
+      - docker run --rm --env-file .env {{.DOCKER_IMAGE}}:{{.DOCKER_TAG}}
+
+  docker:test:
+    desc: Test Docker image
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}}:test .
+      - docker run --rm {{.DOCKER_IMAGE}}:test node -e "console.log('Docker image test successful')"
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - npm run clean
+      - rm -rf node_modules
+
+  install:
+    desc: Install dependencies
+    cmds:
+      - npm install
+
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
