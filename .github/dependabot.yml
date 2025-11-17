@@ -7,8 +7,8 @@ updates:
   # npm dependencies
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "dev"
     schedule:
-      target-branch: "dev"
       interval: "weekly"
       day: "monday"
       time: "09:00"
@@ -40,8 +40,8 @@ updates:
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "dev"
     schedule:
-      target-branch: "dev"
       interval: "weekly"
       day: "monday"
       time: "09:00"
