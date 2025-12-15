@@ -39,11 +39,11 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
       zod:
-        specifier: '3'
-        version: 3.25.76
+        specifier: '4'
+        version: 4.2.0
       zod-to-json-schema:
         specifier: ^3.25.0
-        version: 3.25.0(zod@3.25.76)
+        version: 3.25.0(zod@4.2.0)
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
@@ -1997,6 +1997,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.2.0:
+    resolution: {integrity: sha512-Bd5fw9wlIhtqCCxotZgdTOMwGm1a0u75wARVEY9HMs1X17trvA/lMi4+MGK5EUfYkXVTbX8UDiDKW4OgzHVUZw==}
+
 snapshots:
 
   '@babel/code-frame@7.27.1':
@@ -3875,4 +3878,10 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
+  zod-to-json-schema@3.25.0(zod@4.2.0):
+    dependencies:
+      zod: 4.2.0
+
   zod@3.25.76: {}
+
+  zod@4.2.0: {}
