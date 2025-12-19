@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { executeTool, getToolDefinitions } from '../../../src/tools/index.js';
+
 import type { EbaySellerApi } from '../../../src/api/index.js';
 
 describe('Tools Layer', () => {
@@ -540,6 +541,99 @@ describe('Tools Layer', () => {
       await expect(executeTool(mockApi, 'ebay_refresh_access_token', {})).rejects.toThrow(
         'Failed to refresh access token: Refresh token expired or invalid'
       );
+    });
+
+    it('should exchange authorization code for tokens successfully', async () => {
+      const mockTokenData = {
+        access_token: 'v^1.1#i^1#p^3#r^1#I^3#f^0#t^Ul4xMF8xOkFBQUFBQUFBQUFBPT0',
+        refresh_token: 'v^1.1#i^1#p^3#r^1#I^3#f^0#t^Ul4xMF8xOkFBQUFBQUFBQUFBPT0=REFRESH',
+        expires_in: 7200,
+        refresh_token_expires_in: 47304000,
+        token_type: 'User Access Token',
+        scope: 'https://api.ebay.com/oauth/api_scope/sell.inventory',
+      };
+
+      const mockExchangeCode = vi.fn().mockResolvedValue(mockTokenData);
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
+      vi.mocked(mockAuthClient).exchangeCodeForToken = mockExchangeCode;
+
+      const result = await executeTool(mockApi, 'ebay_exchange_authorization_code', {
+        code: 'v^1.1#i^1#p^3#r^1#f^0#I^3#t^H4sIAAAAAA',
+      });
+
+      expect(mockExchangeCode).toHaveBeenCalledWith('v^1.1#i^1#p^3#r^1#f^0#I^3#t^H4sIAAAAAA');
+      expect(result).toHaveProperty('success', true);
+      expect(result).toHaveProperty('message');
+      expect(result).toHaveProperty('tokenData');
+      expect(result).toHaveProperty('note');
+
+      const resultObj = result as Record<string, unknown>;
+      const tokenData = resultObj.tokenData as Record<string, unknown>;
+      expect(tokenData.accessToken).toContain('...');
+      expect(tokenData.refreshToken).toContain('...');
+      expect(tokenData.expiresIn).toBe(7200);
+      expect(tokenData.refreshTokenExpiresIn).toBe(47304000);
+      expect(tokenData.tokenType).toBe('User Access Token');
+    });
+
+    it('should throw error when authorization code is missing', async () => {
+      await expect(executeTool(mockApi, 'ebay_exchange_authorization_code', {})).rejects.toThrow(
+        'Authorization code is required'
+      );
+
+      await expect(
+        executeTool(mockApi, 'ebay_exchange_authorization_code', { code: '' })
+      ).rejects.toThrow('Authorization code is required');
+    });
+
+    it('should URL-decode authorization code when it contains encoded characters', async () => {
+      const mockTokenData = {
+        access_token: 'v^1.1#i^1#p^3#r^1#I^3#f^0#t^Ul4xMF8xOkFBQUFBQUFBQUFBPT0',
+        refresh_token: 'v^1.1#i^1#p^3#r^1#I^3#f^0#t^Ul4xMF8xOkFBQUFBQUFBQUFBPT0=REFRESH',
+        expires_in: 7200,
+        refresh_token_expires_in: 47304000,
+        token_type: 'User Access Token',
+        scope: 'https://api.ebay.com/oauth/api_scope/sell.inventory',
+      };
+
+      const mockExchangeCode = vi.fn().mockResolvedValue(mockTokenData);
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
+      vi.mocked(mockAuthClient).exchangeCodeForToken = mockExchangeCode;
+
+      // URL-encoded code (contains %5E for ^)
+      const urlEncodedCode = 'v%5E1.1%23i%5E1%23p%5E3%23r%5E1';
+      const decodedCode = 'v^1.1#i^1#p^3#r^1';
+
+      await executeTool(mockApi, 'ebay_exchange_authorization_code', {
+        code: urlEncodedCode,
+      });
+
+      // Should be called with decoded code
+      expect(mockExchangeCode).toHaveBeenCalledWith(decodedCode);
+    });
+
+    it('should handle exchange code errors', async () => {
+      const mockExchangeCode = vi.fn().mockRejectedValue(new Error('Invalid authorization code'));
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
+      vi.mocked(mockAuthClient).exchangeCodeForToken = mockExchangeCode;
+
+      await expect(
+        executeTool(mockApi, 'ebay_exchange_authorization_code', {
+          code: 'invalid-code',
+        })
+      ).rejects.toThrow('Failed to exchange authorization code: Invalid authorization code');
+    });
+
+    it('should handle non-Error objects in exchange code errors', async () => {
+      const mockExchangeCode = vi.fn().mockRejectedValue('String error message');
+      const mockAuthClient = mockApi.getAuthClient().getOAuthClient();
+      vi.mocked(mockAuthClient).exchangeCodeForToken = mockExchangeCode;
+
+      await expect(
+        executeTool(mockApi, 'ebay_exchange_authorization_code', {
+          code: 'some-code',
+        })
+      ).rejects.toThrow('Failed to exchange authorization code: String error message');
     });
   });
 
